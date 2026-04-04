@@ -7,13 +7,15 @@
 </head>
 <body>
 <p> {{ menu|join:" | " }}</p>
-<p> {{ float|divisibleby:"2" }}</p>
-<p> {{ lst|length }}</p>
-<p> {{ set }}</p>
-<p> {{ dict }}</p>
-<p> {{ obj.a }}</p>
-<p> {{ "Main Title"|slugify }}</p>
-<p> {{ url }}</p>
 <h1> {{ title|capfirst|cut:" " }}</h1>
+<ul>
+    {% for p in posts %}
+    <li>
+        <h2> {{ p.title }} </h2>
+        <p> {{ p.content }} </p>
+        <hr>
+    </li>
+    {% endfor %}
+</ul>
 </body>
 </html>
