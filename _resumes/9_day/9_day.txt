@@ -1,0 +1,122 @@
+﻿9 day = 2.1 Введение в шаблоны (Django Template Language, DTL)
+
+MTV (models, templates, views)
+
+
+# sitewomen/women/views
+...
+def index(request):
+    return HttpResponse("""<!DOCTYPE html>
+<html>
+<head> <title></title>
+</head>
+<body>
+
+</body>
+</html>
+""")
+...
+
+После запуска страницы на ней ничего не будет, но можно будет открыть код страницы и увидеть код.
+
+docs.djangoproject.com/en/4.2/topics/templates/
+
+# sitewomen/women/views
+...
+from django.template.loader import render_to_string
+...
+def index(request):
+    t = render_to_string("")
+    return HttpResponse(t)
+...
+
+Потом была создана папка sitewomen/women/templates
+Потом был создан файл sitewomen/women/templates/index.html
+
+<!DOCTYPE html>
+<!-- sitewomen/women/templates/index.html -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Главная страница</title>
+</head>
+<body>
+<h1>страница</h1>
+</body>
+</html>
+
+# sitewomen/women/views
+...
+def index(request):
+    t = render_to_string('index.html')
+    return HttpResponse(t)
+...
+
+Но если приложений несколько, то могут возникнуть ошибки. другие приложения смогут использовать файд index и
+это зависит от расположения приложений в алфавитном порядке. Это можно исправить.
+
+Был перемещён файл index.html в папку sitewomen/women/templates/women/
+
+# sitewomen/women/views
+...
+def index(request):
+    t = render_to_string('women/index.html')
+    return HttpResponse(t)
+...
+
+Было написано покороче и всё сработало также
+
+# sitewomen/women/views
+...
+def index(request):
+    return HttpResponse(render_to_string('women/index.html'))
+...
+
+Было это написано подругому
+
+...
+def index(request):
+    return render(request, "women/index.html")
+...
+
+Была создана и добавлена на сайт новая страница
+
+<!DOCTYPE html>
+<!-- sitewomen/women/templates/women/about.html -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>О сайте</title>
+</head>
+<body>
+<h1>О сайте</h1>
+</body>
+</html>
+
+# sitewomen/women/views
+...
+def about(request):
+    return render(request, 'women/about.html')
+...
+
+# sitewomen/women/urls.py
+...
+urlpatterns = [
+    ...
+    path('about/', views.about, name='about'),
+    ...
+]
+
+Путь к страницам можно изменить
+
+# sitewomen/sitewomen/settings.py
+...
+TEMPLATES = [
+    {                                                                
+    ...
+        'DIRS': [
+            BASE_DIR / 'women' / 'templates'
+        ],
+    ...
+]
+...

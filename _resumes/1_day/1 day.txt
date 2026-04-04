@@ -1,0 +1,6 @@
+﻿1 day = 1.1 Что такое Django. Инструментальные средства.
+
+Django это python framework
+
+WSGI = Web Server Gateway Interface или стандарт взаимодействия меж Python-программой, выполняющейся на стороне
+сервера и самим веб-сервером

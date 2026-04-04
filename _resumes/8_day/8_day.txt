@@ -1,0 +1,72 @@
+﻿8 day = 1.8 Перенаправления (redirect), функция reverse.
+
+301 = страница перемещена на другой постоянный URL-адресс
+302 = страница перемещена временно на другой URL-адресс
+
+django.shortcuts.redirect
+
+При ошибке будет выведена не страница not found, а выведена главная страница с кодом 302
+# sitewomen/women/views
+def archive(request, year):
+    if year > 2023:
+        return redirect("/")
+
+При ошибке будет выведена главная страница с кодом 301
+# sitewomen/women/views
+def archive(request, year):
+    if year > 2023:
+        return redirect("/", permanent=True)
+
+По введённому адрессу будет отображаться главная страница, потому что возвращаться будет функция представления
+# sitewomen/women/views
+def archive(request, year):
+    if year > 2023:
+        return redirect(index)
+
+Можно прописать имя для главное страницы, вместо адресса, что очень рекомендуется
+
+# sitewomen/women/views
+...
+def archive(request, year):
+    if year > 2023:
+        return redirect("home")
+        # raise Http404()
+    return HttpResponse(f"<h1> Архив по годам </h1> <p> <h2> год: {year} </h2> </p>")
+...
+
+# sitewomen/women/urls.py
+...
+urlpatterns = [
+    path('', views.index, name='home'),
+    path('cats/<int:cat_id>/', views.categories, name='cats_id'),
+    path('cats/<slug:cat_slug>/', views.categories_by_slug, name='cats'),
+    path(r"archive/<year4:year>/", views.archive, name='archive')
+]
+
+Можно осуществить перенаправление на страницу по имени с параметром
+
+# sitewomen/women/views
+...
+def archive(request, year):
+    if year > 2023:
+        return redirect("cats", "music")
+...
+
+Вычисление URL-адресса и перенаправление можно разделить на две функции reverse и redirect
+
+# sitewomen/women/views
+...
+from django.urls import reverse
+...
+def archive(request, year):
+    if year > 2023:
+        uri = reverse('cats', args=('music',))
+        return redirect(uri)
+        # raise Http404()
+    return HttpResponse(f"<h1> Архив по годам </h1> <p> <h2> год: {year} </h2> </p>")
+...
+
+HttpResponseRedirect = для редиректа с кодом 302
+HttpResponsePermanentRedirect = для редиректа с кодом 301
+
+Эти функции пишутся вместо функции redirect при необходимости, но более гибкой считается redirect

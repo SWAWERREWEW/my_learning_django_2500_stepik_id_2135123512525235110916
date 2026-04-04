@@ -1,0 +1,105 @@
+﻿4 day = 1.4 Маршрутизация и функция представления
+ = условное обозначение означающее выделение красным или то место, которое было отредактированно или добавленно
+
+# sitewomen/women/views.py
+from django.http import HttpResponse
+from django.shortcuts import render
+
+
+def index(request):
+    return HttpResponse("Страница приложения women")
+
+# sitewomen/sitewomen/urls.py
+
+from django.contrib import admin
+from django.urls import path
+ from women.views import index
+	
+urlpatterns = [
+    path('admin/', admin.site.urls),
+   path('women/', index)
+]
+
+Теперь по адрессу http://127.0.0.1:8000/women/ будет выведено "Страница приложения women"
+
+Дальше можем добавить страницу категории
+
+# sitewomen/women/views
+from django.http import HttpResponse
+from django.shortcuts import render
+
+
+def index(request):
+    return HttpResponse("Страница приложения women!")
+
+
+def categories(request):
+   return HttpResponse("♦ Страница приложения women под названием категории! ♦")
+
+# sitewomen/sitewomen/urls
+from django.contrib import admin
+from django.urls import path
+from women.views import index, categories
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('women/', index),
+   path('cat/', categories)
+]
+
+Теперь главная страница недоступна
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', index),
+    path('cat/', categories)
+]
+
+А теперь снова доступна
+
+Другая проблема, слеш в конце адресса имеет значение. Страница со слешем в конце и без это разные страницы.
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+   path('admin', admin.site.urls),
+    path('', views.index),
+    path('cats/', views.categories),
+]
+
+Дальше был создан файл urls.py в папке women
+
+# sitewomen/women/urls.py
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('', views.index),
+    path('cats/', views.categories)
+]
+
+А ещё изменён файл
+
+# sitewomen/sitewomen/urls
+from django.contrib import admin
+from django.urls import path, include
+
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('women/', include("women.urls"))
+]
+
+Важно. Сайт может не работать если у последнего элемента списка стоит запятая
+urlpatterns = [
+    path('', views.index),
+    path('cats/', views.categories), ← запятая не позволяет запустить сайт
+]
+
+Дальше автор решил сделать приложение women видимо основным, исключая его адресс и делая корневым
+
+# sitewomen/sitewomen/urls
+...
+urlpatterns = [
+    path('admin/', admin.site.urls),
+   path('', include('women.urls'))
+]

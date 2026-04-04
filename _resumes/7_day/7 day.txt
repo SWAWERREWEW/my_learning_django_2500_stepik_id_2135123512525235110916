@@ -1,0 +1,91 @@
+﻿7 day = 1.7 GET и POST-запросы. Обработчик исключений запросов.
+
+http://127.0.0.1:8000/cats/music/?name=Gagarina&type=pop
+
+После знака вопроса идёт перечисление параметров, где вместо запятой или точки с запятой стоит знак &
+
+# sitewomen/women/views
+...
+def categories_by_slug(request, cat_slug):
+    print("request =", request.GET)
+    return HttpResponse(f"<h1> Статьи по категориям </h1> <p> <h2> slug: {cat_slug} </h2> </p>")
+...
+
+После запуска страницы http://127.0.0.1:8000/cats/music/?name=Gagarina&type=pop в консоли в PyCharm появилась
+строка:
+request = <QueryDict: {}>
+request = <QueryDict: {'name': ['Gagarina'], 'type': ['pop']}>
+[17/Mar/2026 17:56:03] "GET /cats/music/?name=Gagarina&type=pop HTTP/1.1" 200 81
+
+Можем сделать так, чтобы ничего не изменилось
+
+# sitewomen/women/views
+...
+def categories_by_slug(request, cat_slug):
+    if request.GET:
+        print("request =", request.GET)
+    return HttpResponse(f"<h1> Статьи по категориям </h1> <p> <h2> slug: {cat_slug} </h2> </p>")
+...
+
+
+Обычно используется POST
+Это связано с передачей данных из форм
+Это данные в формате ключ значение 
+
+# sitewomen/women/views
+...
+def categories_by_slug(request, cat_slug):
+    if request.POST:
+        print("request =", request.POST)
+    return HttpResponse(f"<h1> Статьи по категориям </h1> <p> <h2> slug: {cat_slug} </h2> </p>")
+...
+
+Если найти на сайте страницу, которой нет, появится окно с ошибкой, поэтому есть изменения для отображения
+другой страницы при таком случае
+
+# sitewomen/sitewomen/settings.py
+...
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = False
+
+ALLOWED_HOSTS = ['127.0.0.1']
+...
+
+Можно определить страницу, которая будет отображаться вместо несуществующей, но этот код не работает, как
+минимум в новой версии PyCharm иза ошибок с импортацией функции page_not_found, даже если она создана заново
+
+# sitewomen/women/views
+from django.http import HttpResponse, HttpResponseNotFound
+...
+def page_not_found(request, exception):
+    return HttpResponseNotFound("<h1> Страница не найдена </h1>")
+
+# sitewomen/sitewomen/urls
+from women.views import custom_page_not_found
+...
+handler400 = page_not_found()
+
+
+Если написать в поисковой строке .../archive/4044 то будет выведена страница Server Error (500) потому что
+стоит условие, при котором год должен быть меньше 2023
+
+# sitewomen/women/views
+...
+def archive(request, year):
+    if year > 2023:
+        return Http404()
+    return HttpResponse(f"<h1> Архив по годам </h1> <p> <h2> год: {year} </h2> </p>")
+...
+
+Но будет отображаться, что страница не найдена если написать
+
+# sitewomen/women/views
+...
+def archive(request, year):
+    if year > 2023:
+        raise Http404()
+    return HttpResponse(f"<h1> Архив по годам </h1> <p> <h2> год: {year} </h2> </p>")
+...
+
+
+http://docs.djangoproject.com/en/4.2/ref/urls

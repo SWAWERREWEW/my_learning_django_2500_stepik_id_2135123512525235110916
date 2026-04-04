@@ -1,0 +1,23 @@
+﻿2 day = 1.2 Установка Django. Создание проекта.
+
+в командной строке можно написать эту команду, чтобы узнать версию Python
+python -v
+
+pip list
+
+d:
+
+cd some_folder
+
+python -m venv name_some_venv
+
+activate
+
+deactivate
+
+Теперь можно открыть папку с виртуальным окружением в PyCharm и во вкладке три полоски слева вверху во вкладке
+settings → project: → add interpreter → add local interpreter → select existing → python path → ok
+
+pip install django==4
+
+и там дальше зависло опять

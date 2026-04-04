@@ -1,0 +1,142 @@
+﻿6 day = 1.6 Динамические URL. Пользовательские конверты.
+
+Добавляем индес в пути (я не знаю как иначе выразиться)
+
+# sitewomen/women/views
+...
+def categories(request, cat_id):
+    return HttpResponse(f"<h1> Статьи по категориям </h1> <p> id: {cat_id} </p>")
+
+
+# sitewomen/women/urls.py
+...
+urlpatterns = [
+    path('', views.index),
+    path('cats/<int:cat_id>/', views.categories)
+]
+
+
+Можно сделать строку вместо числа
+
+# sitewomen/women/urls.py
+...
+urlpatterns = [
+    path('', views.index),
+    path('cats/<str:cat_id>/', views.categories)
+]
+
+Сайт с документацией
+https://docs.djangoproject.com/en/4.2/topics/http/urls/
+
+# sitewomen/women/urls.py
+...
+urlpatterns = [                                  
+    ...
+    path('cats/<slug:cat_slug>/', views.categories_by_slug)
+]
+
+# sitewomen/women/views
+...
+def categories_by_slug(request, cat_slug):
+    return HttpResponse(f"<h1> Статьи по категориям </h1> <p> <h2> slug: {cat_slug} </h2> </p>")
+
+
+Теперь у нас в файле # sitewomen/women/urls.py записаны маршруты
+('', views.index),
+('cats/<int:cat_id>/', views.categories),
+('cats/<slug:cat_slug>/', views.categories_by_slug)
+
+Если в браузере прописать путь и например http://127.0.0.1:8000/cats/1/
+то откроется страница с id
+А если прописать путь например http://127.0.0.1:8000/cats/1gerjgoprjgirejgeeeee/
+то отобразится страница со slug
+
+Потом что программа ищет в файле # sitewomen/women/urls.py первый подходящий маршрут
+
+# sitewomen/women/urls.py
+...
+urlpatterns = [
+    ...
+    re_path(r"^archive/(?P<year>[0-9]{4})", views.archive)
+]
+# Теперь нужны 4 цифры обязательно после archive
+
+# sitewomen/women/views
+...
+def archive(request, year):
+    return HttpResponse(f"<h1> Архив по годам </h1> <p> <h2> год: {year} </h2> </p>")
+
+Дальше создаём новый файл # sitewomen/women/converters
+
+Копируем класс FourDigitYearConverter из сайта https://docs.djangoproject.com/en/4.2/topics/http/urls
+
+# sitewomen/women/converters
+class FourDigitYearConverter:
+    # Регулярное выражение
+    regex = "[0-9]{4}"
+
+    # Преобразовывает фрагмент url в требуемый тип данных
+    def to_python(self, value):
+        return int(value)
+
+    # Наоборот преобразуем данные в нужный формат для создания URL
+    def to_url(self, value):
+        return "%04d" % value
+
+# sitewomen/women/urls.py
+from django.urls import path, register_converter
+...
+from . import converters
+
+register_converter(converters.FourDigitYearConverter, "year4")
+
+urlpatterns = [
+    ...
+    path(r"archive/<year4:year>/", views.archive)
+]
+
+Чтобы отображались значения переменных во время debugger нужно просто перезагрузить страницу в браузере
+
+
+Крайне сложный вопрос был. Всё перепутал.
+
+Подвиг 6. Имеется следующий фрагмент программы:
+
+class ABConvertor:
+    regex = "[a-zA-Z]{1,10}"
+
+    def to_python(self, value):
+        return str(value)
+
+    def to_url(self, value):
+        return str(value)
+
+
+register_converter(ABConvertor, "abc10")
+
+urlpatterns = [
+    path('docs/<abc10:slug_doc>/', views.doc_detail, name='docs'),
+]
+
+                  
+Выберите все верные утверждения для этого фрагмента.
+ 
+
+Выберите все подходящие ответы из списка
+Верно решили 2 106 учащихся
+Из всех попыток 37% верных
+ Всё правильно.
+
+метод to_url() класса ABConvertor формирует и возвращает значение URL-параметра для функции представления
+
+функция register_converter() регистрирует класс ABConvertor как конвертор с именем abc10
+
+функция register_converter() записана неверно, сначала нужно указывать имя, а затем класс
+
+метод to_url() класса ABConvertor формирует и возвращает значение для URL-адреса
+
+метод to_python() класса ABConvertor формирует и возвращает значение URL-параметра для функции представления
+
+класс ABConvertor определяет пользовательский конвертор для маршрутов с проверкой наличия только символов латинского алфавита длиной от 1 до 10
+
+метод to_python() класса ABConvertor формирует и возвращает значение для URL-адреса

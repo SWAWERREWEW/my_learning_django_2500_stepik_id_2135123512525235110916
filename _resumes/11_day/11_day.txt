@@ -1,0 +1,186 @@
+﻿11 day = 2.3 Стаднартные шаблонные фильтры
+
+
+Данные в шаблонах можно преобразовывать используя фильтры
+
+docs.djangoproject.com/en/4.2/ref/templates/builtins/
+
+Фильтр add позволяет добавлять число к числу
+
+<!DOCTYPE html>
+<!-- sitewomen/women/templates/index.html -->
+...
+<body>
+...
+<p> {{ float|add:"50" }}</p>
+...
+</body>
+</html>
+
+На странице будет отображено число увеличеное на 50, но если изначальное число было не целым, оно сначала 
+станет целым, а потом увеличится.
+
+Следующий фильтр capfirst преобразовывает первую букву в заглавную, даже если текст изначально начинался с 
+маленькой буквы. В том месте, где стоит фильтр текст будет начинаться с заглавной буквы, а в заголовке сайта,
+где отсутствует фильтр, будет выведено с маленькой буквы, как и было изначально.
+
+<!DOCTYPE html>
+<!-- sitewomen/women/templates/index.html -->
+...
+<head>
+    ...
+    <title> {{ title }} </title>
+</head>
+<body>
+...
+<h1> {{ title|capfirst }}</h1>
+</body>
+</html>
+
+Фильтр upper делает все буквы заглавными. В данном примере заголовок сайта будет состоять из заглавных букв.
+Фильтр lower делает необорот все буквы маленькими буквами
+<!DOCTYPE html>
+<!-- sitewomen/women/templates/index.html -->
+...
+<head>
+    ...
+    <title> {{ title|upper }} </title>
+</head>
+...
+</html>
+
+<!DOCTYPE html>
+<!-- sitewomen/women/templates/index.html -->
+...
+<head>
+    ...
+    <title> {{ title|lower }} </title>
+</head>
+...
+</html>
+
+Также сущесвтует фильтр cut, который удаляем символы. В данном случае будут удалены пробелы. Тут использовано
+два фильтра: cut и capfirst. То есть сначала первая буква становится заглавной, а потом удаляется пробел.
+
+<!DOCTYPE html>
+<!-- sitewomen/women/templates/index.html -->
+...
+<body>
+...
+<h1> {{ title|capfirst|cut:" " }}</h1>
+</body>
+</html>
+
+
+Фильтр default позволяет заменить несуществующую переменную или переменную с пустой строкой на переданое
+значение. В данном случае у нас не прописана переменная main_title, но у неё стоит фильтр с переданным
+значением "без заголовка" и поэтому значение будет подставлено и стоять до тех пор, пока не будет объявлено
+значение переменной.
+
+<!DOCTYPE html>
+<!-- sitewomen/women/templates/index.html -->
+...
+<head>
+    ...
+    <title> {{ main_title|default:"без заголовка" }} </title>
+</head>
+...
+</html>
+
+
+# sitewomen/women/views
+...
+def index(request):
+    data = {
+        'title': 'главная страница',
+        'main_title': '',
+        'menu': menu,
+        'float': 28.56,
+        'lst': [1, 2, 'abc', True],
+        'set': {1, 2, 3, 2, 5},
+        'dict': {'key_1': "value_1", 'key_2': 'value_2'},
+        'obj': MyClass(10, 20)
+    }
+    return render(request, "women/index.html", context=data)
+
+Следующий фильтр divisibleby проверяет деление целой части числа нацело на переданное число.
+В данном случае проверка деления числа float на число 2. На странице будет выведено True. В инам случае было бы
+выведено False
+
+<!DOCTYPE html>
+<!-- sitewomen/women/templates/index.html -->
+...
+<p> {{ float|divisibleby:"2" }}</p>
+...
+</body>
+</html>
+
+Фильтр join выводит строку из элементов и ставит между элементами передаваемую строку.
+В данном случае будут выведены все элементы списка menu через палочку |
+
+<!DOCTYPE html>
+<!-- sitewomen/women/templates/index.html -->
+...
+<body>
+<p> {{ menu|join" | " }}</p>
+...
+</body>
+</html>
+
+Фильтр length выводит длинну списка.
+
+<!DOCTYPE html>
+<!-- sitewomen/women/templates/index.html -->
+...
+<p> {{ lst|length }}</p>
+...
+</body>
+</html>
+
+Фильтр slugify превращает текст в slug.
+
+<!DOCTYPE html>
+<!-- sitewomen/women/templates/index.html -->
+...
+<body>
+...
+<p> {{ "Main Title"|slugify }}</p>
+...
+</body>
+</html>
+
+На странице будет выведено "main-title" вместо "Main Title"
+
+С остальными фильтрами можно ознакомится по ссылке
+
+docs.djangoproject.com/en/4.2/ref/templates/builtins/#first
+
+Все предложенные шаблоны можно использовать в коде python
+
+# sitewomen/women/views
+...
+from django.template.defaultfilters import slugify
+...
+def index(request):
+    data = {
+        ...
+        'url': slugify("The Main Page")
+    }
+    ...
+
+<!DOCTYPE html>
+<!-- sitewomen/women/templates/index.html -->
+...
+<body>
+...
+<p> {{ url }}</p>
+...
+</body>
+</html>
+
+Функция фильтр cut
+
+cut("the main page: Russia", ":")
+
+Вывод
+the main page Russia

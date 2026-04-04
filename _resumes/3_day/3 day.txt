@@ -1,0 +1,36 @@
+﻿3 day = 1.3 Модель MTV. Добавление приложения.
+
+django-admin startproject DAHUA = Создание проекта 
+
+python manage.py runserver = (нужно использовать после перемещения в ту папку, в которой есть файл manage.py) Запуск
+проекта
+
+ctrl + c = остановить сервер
+
+python manage.py startapp DAHUA = Создание приложения (!После этого необходимо записать название приложения,
+файл apps и название класса из этого файла через точку в файле settings.py в списке INSTALLED_APPS в ковычках!)
+
+settings.py
+
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'women.apps.WomenConfig'
+]
+
+women = приложение
+apps = файл из папки приложения
+WomenConfig = название класса
+
+
+# women/apps
+from django.apps import AppConfig
+
+
+class WomenConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'women'

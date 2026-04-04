@@ -1,0 +1,98 @@
+﻿10 day = 2.2 Передача данных (переменных) в шаблоны
+
+Можно сделать переменные в html страницах
+
+# sitewomen/women/views
+...
+menu = ["О сайте", "Добавить статью", "Обратная связь", "Войти"]
+
+
+def index(request):
+    data = {
+        'title': 'Главная страница',
+        'menu': menu
+    }
+    return render(request, "women/index.html", context=data)
+
+
+def about(request):
+    return render(request, 'women/about.html', {'title': 'О сайте'})
+...
+
+<!DOCTYPE html>
+<!-- sitewomen/women/templates/index.html -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title> {{ title }} </title>
+</head>
+<body>
+<p> {{ menu }}</p>
+<h1> {{ title }}</h1>
+</body>
+</html>
+
+Список будет отображён в виде строки
+
+Если переменная в функции отсуствует, то на странице она будет отсутствовать
+
+<!DOCTYPE html>
+<!-- sitewomen/women/templates/women/about.html -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title> {{ title }}</title>
+</head>
+<body>
+<p> {{ menu }}</p>
+<h1> {{ title }} </h1>
+</body>
+</html>
+
+Остальные типы данных будут отображаться в виде строки
+
+# sitewomen/women/views
+...
+def index(request):
+    data = {
+        'title': 'Главная страница',
+        'menu': menu,
+        'float': 28.56,
+        'lst': [1, 2, 'abc', True],
+        'set': {1, 2, 3, 2, 5},
+        'dict': {'key_1': "value_1", 'key_2': 'value_2'},
+        'obj': MyClass(10, 20)
+    }
+    return render(request, "women/index.html", context=data)
+...
+
+<!DOCTYPE html>
+<!-- sitewomen/women/templates/index.html -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title> {{ title }} </title>
+</head>
+<body>
+<p> {{ menu }}</p>
+<p> {{ float }}</p>
+<p> {{ lst }}</p>
+<p> {{ set }}</p>
+<p> {{ dict }}</p>
+<p> {{ obj }}</p>
+<h1> {{ title }}</h1>
+</body>
+</html>
+
+Обращаться к ключу или элементы из словаря или списка или множества внутри неполучится
+
+<p> {{ dict['key_1'] }}</p>
+<p> {{ lst[0] }}</p>
+
+Можно обратиться через точку, как и к атрибуту класса
+
+<p> {{ obj.a }}</p>
+<p> {{ dict.key_1 }}</p>
+<p> {{ lst.1 }}</p>
+
+В фигурные скобки можно передать только одну переменную

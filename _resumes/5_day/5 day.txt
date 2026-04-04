@@ -1,0 +1,20 @@
+﻿5 day = 1.5 Отладка проекта Django в PyCharm
+
+отладка
+
+PyCharm → Current File → Edit Configurations → + → Python → Name: sitewomen ; Working directory: "D:\Python\Projects\django\sitewomen"
+Нужно убедиться, что отображается нужное виртуальное окружение
+Run
+Python 3.11 (django) D:/Python/Projects/django/djvenv/Scripts/python.exe
+
+Scripts path: D:\Python\Projects\django\sitewomen\manage.py
+
+Parameters: runserver
+
+→ apply потом ещё ok
+
+Потом ставим точку остоновки и тыкаем жучка
+
+Потом внизу кнопка Debugger → Evaluate expression
+
+Чтобы поменять консоль powershell на командную строку нужно file → settings → в поиске: terminal → terminal → shell path → cmd
