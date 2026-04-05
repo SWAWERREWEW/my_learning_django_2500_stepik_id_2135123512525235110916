@@ -3,11 +3,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title> {{ main_title|default:"без заголовка" }} </title>
+    <title> {{ title|default:"без заголовка" }} </title>
 </head>
 <body>
 <p> {{ menu|join:" | " }}</p>
-<h1> {{ title|capfirst|cut:" " }}</h1>
+<h1> {{ title|capfirst }}</h1>
 <ul>
     {% for p in posts %}
     <li>

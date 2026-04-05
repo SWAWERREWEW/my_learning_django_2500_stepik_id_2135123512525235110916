@@ -25,3 +25,20 @@ data_db = [
 ]
 ...
 
+<!DOCTYPE html>
+<!-- sitewomen/women/templates/index.html -->
+...
+<body>
+<p> {{ menu|join:" | " }}</p>
+<h1> {{ title|capfirst }}</h1>
+<ul>
+    {% for p in posts %}
+    <li>
+        <h2> {{ p.title }} </h2>
+        <p> {{ p.content }} </p>
+        <hr>
+    </li>
+    {% endfor %}
+</ul>
+</body>
+</html>
