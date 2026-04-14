@@ -1,0 +1,150 @@
+﻿13 day = Шаблонный тег url
+
+<a href="URL-адресс страницы"> Название ссылки </a>
+
+Добавление ссылки Читать пост для открытия поста
+
+<!DOCTYPE html>
+<!-- sitewomen/women/templates/index.html -->
+...
+<body>
+...
+    <li>
+        <h2> {{ p.title }} </h2>
+        <p> {{ p.content }} </p>
+        <p><a href="post/{{ p.id }}"> Читать пост </a></p>
+        {% if not forloop.last %}
+        <hr>
+        {% endif %}
+    </li>
+...
+</body>
+</html>
+
+Но этот подход не самый хороший вариант и не рекомендуется (это хардкодинг). Поэтому нужны шаблоны, чтобы потом
+не делать изменения в каждой странице.
+
+# sitewomen/women/urls.py
+...
+"""Не забывать в конце пути ставить слеш /"""
+urlpatterns = [
+    path('', views.index, name='home'),
+    path('about/', views.about, name='about'),
+    path('post/<int:post_id>/', views.show_post, name='post')
+]
+
+# sitewomen/women/views
+from django.http import HttpResponse, HttpResponseNotFound, Http404
+from django.shortcuts import render, redirect
+from django.urls import reverse
+from django.template.loader import render_to_string
+from django.template.defaultfilters import slugify
+
+...
+def about(request):
+    ...
+
+def show_post(request, post_id):
+    return HttpResponse(f"Отображение статьи с id = {post_id}")
+...
+
+На сайте docs.djangoproject.com/en/4.2/ref/templates/builtins/#url будет пример использования тега
+
+{% url 'some-url-name' v1 v2 %}
+v1 и v2 это параметры, которые могут отсутствовать
+
+<!DOCTYPE html>
+<!-- sitewomen/women/templates/index.html -->
+<body>
+...
+    <li>
+        <h2> {{ p.title }} </h2>
+        <p> {{ p.content }} </p>
+        <p><a href="{% url 'post' p.id %}"> Читать пост </a></p>
+        {% if not forloop.last %}
+        <hr>
+        {% endif %}
+    </li>
+...
+</body>
+</html>
+
+Теперь нужно добавить рабочие ссылки О сайте, добавить статью, Обратная связь и Войти.
+
+# sitewomen/women/urls.py
+...
+urlpatterns = [
+    ...
+    path('about/', views.about, name='about'),
+    path('addpage/', views.addpage, name='add_page'),
+    path('contact/', views.contact, name='contact'),
+    path('login', views.login, name='login'),
+    path('post/<int:post_id>/', views.show_post, name='post'),
+]
+
+# sitewomen/women/views
+...
+menu = [
+    {'title': "О сайте", 'url_name': "about"},
+    {'title': "Добавить статью", 'url_name': "add_page"},
+    {'title': "Обратная связь", 'url_name': "contact"},
+    {'title': "Войти", 'url_name': "login"}
+]
+...
+def about(request):
+    ...
+
+
+def show_post(request, post_id):
+    return HttpResponse(f"Отображение статьи с id = {post_id}")
+
+
+def addpage(request):
+    return HttpResponse(f"Добавить статью")
+
+
+def contact(request):
+    return HttpResponse(f"Обратная связь")
+
+
+def login(request):
+    return HttpResponse(f"Авторизация")
+...
+
+<!DOCTYPE html>
+<!-- sitewomen/women/templates/index.html -->
+...
+<body>
+<ul>
+    <li><a href="{% url 'home' %}"> Главная страница </a></li>
+
+    {% for m in menu %}
+    <li>
+        <a href="{% url m.url_name %}"> {{ m.title }} </a>
+    </li>
+    {% endfor %}
+</ul>
+...
+</body>
+</html>
+
+Теперь добавим стиль для последней ссылки
+
+<!DOCTYPE html>
+<!-- sitewomen/women/templates/index.html -->
+...
+<body>
+<ul>
+    <li><a href="{% url 'home' %}"> Главная страница </a></li>
+
+    {% for m in menu %}
+    {% if not forloop.last %} <li> {% else %} <li class="last"> {% endif %}
+        <a href="{% url m.url_name %}"> {{ m.title }} </a>
+    </li>
+    {% endfor %}
+</ul>
+...
+</body>
+</html>
+
+Визуально ничего не изменится, но если открыть код страницы, то можно будет увидеть разницу
