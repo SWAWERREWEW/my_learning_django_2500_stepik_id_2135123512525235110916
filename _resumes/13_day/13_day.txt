@@ -48,7 +48,9 @@ def show_post(request, post_id):
     return HttpResponse(f"Отображение статьи с id = {post_id}")
 ...
 
-На сайте docs.djangoproject.com/en/4.2/ref/templates/builtins/#url будет пример использования тега
+На сайте
+docs.djangoproject.com/en/4.2/ref/templates/builtins/#url
+будет пример использования тега
 
 {% url 'some-url-name' v1 v2 %}
 v1 и v2 это параметры, которые могут отсутствовать

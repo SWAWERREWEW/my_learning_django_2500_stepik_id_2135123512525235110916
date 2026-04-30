@@ -1,28 +1,22 @@
-<!DOCTYPE html>
-<!-- sitewomen/women/templates/index.html -->
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title> {{ title|default:"без заголовка" }} </title>
-</head>
-<body>
-<ul>
-    <li><a href="{% url 'home' %}"> Главная страница </a></li>
+{% extends 'base.html' %}
+<!-- sitewomen/women/templates/women/index.html -->
 
-    {% for m in menu %}
-    {% if not forloop.last %} <li> {% else %} <li class="last"> {% endif %}
-        <a href="{% url m.url_name %}"> {{ m.title }} </a>
-    </li>
-    {% endfor %}
-</ul>
+{% block content %}
 <h1> {{ title|capfirst }}</h1>
+
+<nav>
+    <a href="#">Актрисы💥</a>  |
+    <a href="#">Певицы🎆</a>  |
+    <a href="#">Спортсменки👍</a>
+</nav>
+
 <ul>
     {% for p in posts %}
     {% if p.is_published == True %}
     <li>
-        <h2> {{ p.title }} </h2>
-        <p> {{ p.content }} </p>
-        <p><a href="{% url 'post' p.id %}"> Читать пост </a></p>
+        <h2> {{ p.title }} 🗝 </h2>
+        <p> {{ p.content }} 📝 </p>
+        <p><a href="{% url 'post' p.id %}"> Читать пост 📖 </a></p>
         {% if not forloop.last %}
         <hr>
         {% endif %}
@@ -30,5 +24,6 @@
     {% endif %}
     {% endfor %}
 </ul>
-</body>
-</html>
+
+
+{% endblock %}

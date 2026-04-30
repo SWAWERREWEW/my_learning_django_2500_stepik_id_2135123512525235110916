@@ -1,0 +1,153 @@
+﻿14 day 🌎 = 2.6 Наследование шаблонов. Тег include 🧠
+
+🧠💬
+win + . = добавление эмодзи
+💬
+
+🛠
+Был изменён файл
+# sitewomen/women/views
+...
+def about(request):
+    return render(request, 'women/about.html', {'title': 'О сайте 🔍', 'menu': menu})
+...
+
+Код из файла
+<!-- sitewomen/women/templates/women/index.html -->
+был скопирован и помещён в файл
+<!-- sitewomen/women/templates/women/about.html -->
+И в нём был убран второй тег ul
+
+🧠💬
+В коде нарушен принцип DRY ❌
+
+На сайте
+docs.djangoproject.com/en/4.2/ref/templates/builtins/
+Был найден тег block и extends
+💬
+
+🛠
+Был создан файл
+sitewomen/templates/base.html
+
+<!DOCTYPE html>
+<!-- sitewomen/templates/base.html -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>base📁</title>
+</head>
+<body>
+<h1>base📁</h1>
+</body>
+</html>
+
+
+Был изменён файл
+sitewomen/sitewomen/settings.py
+
+...
+TEMPLATES = [
+    {
+        ...
+        'DIRS': [
+            BASE_DIR / 'women' / 'templates',
+            BASE_DIR / 'templates'
+        ],
+        ...
+    },
+]
+...
+
+Был изменён файл
+# sitewomen/women/views
+...
+def about(request):
+    return render(request, 'base.html', {'title': 'О сайте 🔍', 'menu': menu})
+...
+
+🧠💬
+Теперь по адрессу
+http://127.0.0.1:8000/about/
+Отображается не шаблон about.html, а base.html. При этом они в разных папках.
+💬
+
+🛠
+Файл был изменён обратно
+# sitewomen/women/views
+...
+def about(request):
+    return render(request, 'women/about.html', {'title': 'О сайте 🔍', 'menu': menu})
+...
+
+Был изменён файл
+<!DOCTYPE html>
+<!-- sitewomen/templates/base.html -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title> {{ title|default:"без заголовка 🛠" }} </title>
+</head>
+<body>
+{% block content %} {% endblock %}
+</body>
+</html>
+
+Был изменён файл
+{% extends 'base.html' %}
+<!-- sitewomen/women/templates/women/about.html -->
+
+{% block content %}
+<h1> {{ title|default:"без заголовка 🛠" }} </h1>
+{% endblock %}
+
+🧠💬
+Теперь страница "о сайте" отображает лишь слово "О сайте 🔍"
+💬
+
+🛠
+Был изменён файл
+<!DOCTYPE html>
+<!-- sitewomen/templates/base.html -->
+...
+<body>
+<ul>
+    <li><a href="{% url 'home' %}"> Главная страница 🏠</a></li>
+
+    {% for m in menu %}
+    {% if not forloop.last %} <li> {% else %} <li class="last"> {% endif %}
+        <a href="{% url m.url_name %}"> {{ m.title }} </a>
+    </li>
+    {% endfor %}
+</ul>
+...
+</body>
+</html>
+
+🧠💬
+Теперь страница "о сайте" отображается с меню
+Тоже самое было сделано для файла index.html
+💬
+
+{% extends 'base.html' %}
+<!-- sitewomen/women/templates/women/index.html -->
+
+{% block content %}
+<h1> {{ title|capfirst }}</h1>
+<ul>
+    {% for p in posts %}
+    {% if p.is_published == True %}
+    <li>
+        <h2> {{ p.title }} 🗝 </h2>
+        <p> {{ p.content }} 📝 </p>
+        <p><a href="{% url 'post' p.id %}"> Читать пост 📖 </a></p>
+        {% if not forloop.last %}
+        <hr>
+        {% endif %}
+    </li>
+    {% endif %}
+    {% endfor %}
+</ul>
+{% endblock %}
+
+🕗 время остановки 9:29

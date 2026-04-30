@@ -6,10 +6,10 @@ from django.template.loader import render_to_string
 from django.template.defaultfilters import slugify
 
 menu = [
-    {'title': "О сайте", 'url_name': "about"},
-    {'title': "Добавить статью", 'url_name': "add_page"},
-    {'title': "Обратная связь", 'url_name': "contact"},
-    {'title': "Войти", 'url_name': "login"}
+    {'title': "О сайте 🔍", 'url_name': "about"},
+    {'title': "Добавить статью ➕", 'url_name': "add_page"},
+    {'title': "Обратная связь 💬", 'url_name': "contact"},
+    {'title': "Войти 🚪", 'url_name': "login"}
 ]
 
 data_db = [
@@ -21,7 +21,7 @@ data_db = [
 
 def index(request):
     data = {
-        'title': 'главная страница',
+        'title': 'главная страница 🏠',
         'menu': menu,
         'posts': data_db,
     }
@@ -29,23 +29,23 @@ def index(request):
 
 
 def about(request):
-    return render(request, 'women/about.html', {'title': 'О сайте'})
+    return render(request, 'women/about.html', {'title': 'О сайте 🔍', 'menu': menu})
 
 
 def show_post(request, post_id):
-    return HttpResponse(f"Отображение статьи с id = {post_id}")
+    return HttpResponse(f"Отображение статьи с id = {post_id} 📝")
 
 
 def addpage(request):
-    return HttpResponse(f"Добавить статью")
+    return HttpResponse(f"Добавить статью ➕")
 
 
 def contact(request):
-    return HttpResponse(f"Обратная связь")
+    return HttpResponse(f"Обратная связь 💬")
 
 
 def login(request):
-    return HttpResponse(f"Авторизация")
+    return HttpResponse(f"Авторизация 🗝")
 
 
 def custom_page_not_found(request, exception):
