@@ -1,14 +1,10 @@
 {% extends 'base.html' %}
-<!-- sitewomen/women/templates/women/index.html -->
+<!-- sitewomen\women\templates\women\index.html -->
 
 {% block content %}
 <h1> {{ title|capfirst }}</h1>
 
-<nav>
-    <a href="#">Актрисы💥</a>  |
-    <a href="#">Певицы🎆</a>  |
-    <a href="#">Спортсменки👍</a>
-</nav>
+{% include 'women/includes/nav.html' only with title2='what❓'%}
 
 <ul>
     {% for p in posts %}
@@ -25,5 +21,6 @@
     {% endfor %}
 </ul>
 
+{% include 'women/includes/nav.html' %}
 
 {% endblock %}

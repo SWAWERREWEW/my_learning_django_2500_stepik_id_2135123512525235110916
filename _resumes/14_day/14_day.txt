@@ -151,3 +151,72 @@ def about(request):
 {% endblock %}
 
 🕗 время остановки 9:29
+
+🛠➕
+Был создан файл
+<!-- sitewomen\women\templates\women\includes\nav.html -->
+<nav>
+    <a href="#">Актрисы💥</a>  |
+    <a href="#">Певицы🎆</a>  |
+    <a href="#">Спортсменки👍</a>
+</nav>
+
+<p>{{ title }}</p>
+
+🛠
+Быз изменён файл
+...
+<!-- sitewomen\women\templates\women\index.html -->
+
+{% block content %}
+...
+
+{% include 'women/includes/nav.html' %}
+
+<ul>
+    ...
+</ul>
+
+{% include 'women/includes/nav.html' %}
+
+{% endblock %}
+
+🧠💬
+Теперь на странице отображается всё импортируемое из файла nav.html 🚀, но отображается тег <p> , который мы почему-то
+добавили, но чтобы он не отображался, можно добавить слово only в конце тега {% include %}. Оно запрещает передачу переменных
+или тегов по типу <p>
+Что же конкретно делает слово only❓
+💬
+
+🛠
+Был изменён файл
+...
+<!-- sitewomen\women\templates\women\index.html -->
+{% block content %}
+...
+{% include 'women/includes/nav.html' only %}
+...
+{% endblock %}
+
+🧠💬
+Ещё есть параметр with для тега {% include %}, который позволяет подставлять в переменную необходимое значение и менять
+его для каждой страницы, которая сможет по своему импортировать шаблон nav.html
+💬
+
+🛠
+Был изменён файл
+<!-- sitewomen\women\templates\women\includes\nav.html -->
+...
+<p>{{ title2 }}</p>
+
+🛠
+Был изменён файл
+...
+<!-- sitewomen\women\templates\women\index.html -->
+{% block content %}
+...
+{% include 'women/includes/nav.html' only with title2='what❓'%}
+...
+{% endblock %}
+
+🧠💬Теперь на странице отображается вместо тега title2 значение 'what❓'💬
