@@ -1,0 +1,41 @@
+﻿15 day = 2.7 Подключение статистических файлов
+💾
+🧠💬
+    Подключение CSS, JAVASCRIPT, КАРТИНКИ
+    sitewomen\
+    ├──sitewomen\
+    |  └────static\ - это нестандартный путь
+    ├──women\
+    |  ├────static\
+    |  └─templates\
+    └──static\
+
+    Но лучше все их хранить в папке sitewomen\static\
+
+    Команда собирает все статические файлы в sitewomen\static
+    python manage.py collectstatic
+
+    Можно хранить папки static\ в каждом приложении, но потом собирать командой.
+
+    STATIC_URL есть в sitewomen\sitewomen\settings.py
+    STATIC_ROOT
+    STATCFILES_DIRS
+
+    должна быть строка в файле sitewomen\sitewomen\settings.py
+
+    INSTALLED_APPS = [
+        ...
+        'django.contrib.staticfiles',
+        ...
+    ]
+💬
+
+🛠➕
+Были созданы папки
+sitewomen\women\static\
+sitewomen\women\static\women
+sitewomen\women\static\women\js
+sitewomen\women\static\women\css
+sitewomen\women\static\women\images
+
+🕗 Остановка 6:15
