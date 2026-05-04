@@ -39,3 +39,32 @@ sitewomen\women\static\women\css
 sitewomen\women\static\women\images
 
 🕗 Остановка 6:15
+
+🛠➕
+Был создан файл
+sitewomen\women\static\women\css\styles.css
+
+🧠💬
+Синтаксис тега {% static %}
+{% load static %}
+...
+{% static 'путь к файлу' %}
+
+<link type="text/css" href="{% static 'women/css/styles.css' %}" rel="stylesheet" />
+💬
+
+🛠
+Был изменён файл
+{% load static %}
+
+<!DOCTYPE html>
+<!-- sitewomen/templates/base.html -->
+...
+<head>
+    ...
+    <link type="text/css" href="{% static 'women/css/styles.css' %}" rel="stylesheet" />
+</head>
+...
+</html>
+
+🕗 Остановка 10:57
