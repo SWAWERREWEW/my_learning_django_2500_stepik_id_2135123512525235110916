@@ -44,6 +44,77 @@ sitewomen\women\static\women\images
 Был создан файл
 sitewomen\women\static\women\css\styles.css
 
+
+И в нём было прописано
+
+html, body {
+	font-family: 'Arial';
+	margin: 0;
+	padding: 0;
+	height: 100%;
+	width: 100%;
+	color: #444;
+}
+
+a {
+	color: #0059b2;
+	text-decoration: none;
+}
+a:hover {
+	color: #CC0000;
+	text-decoration: underline;
+}
+
+img {max-width: 600px; height: auto;}
+
+img.img-article-left {
+	max-width: 300px;
+	height: auto;
+	float: left;
+	padding: 0 10px 10px 0;
+}
+
+img.img-article-left.thumb {
+	max-width: 150px;
+	height: auto;
+}
+
+p.link-read-post {
+	text-align: right;
+}
+p.link-read-post a {
+	padding: 10px;
+	min-width: 100px;
+	background: #333671;
+	color: #fff;
+	text-decoration: none;
+}
+
+div.article-panel {
+    background: #eee;
+    padding: 5px 10px 5px 10px;
+    box-sizing: border-box;
+    overflow: hidden;
+    color: #555;
+}
+div.article-panel p.first {
+    margin: 0;
+    float: left;
+}
+div.article-panel p.last {
+    margin: 0;
+    float: right;
+}
+
+ul.list-articles {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+ul.list-articles li {
+	border-bottom: 1px solid #ccc;
+}
+
 🧠💬
 Синтаксис тега {% static %}
 {% load static %}
@@ -68,3 +139,94 @@ sitewomen\women\static\women\css\styles.css
 </html>
 
 🕗 Остановка 10:57
+
+🧠💬
+Нужно скопировать заготовленные файлы шаблонов для оформления сайта, но это не было сделано из-за ошибок.
+В видео сказано, что это сделано просто чтобы не отвлекаться на оформление сайта.
+Были скопированны файлы из репозитория
+https://github.com/selfedu-rus/django4-lessons/blob/main/15_sitewomen.zip
+Но были удалены из-за неработоспособности и запретов на копирование.
+💬
+
+🛠
+Был изменён файл
+# sitewomen/women/views
+...
+data_db = [
+    {'id': 1, 'title': 'Анджелина Джоли', 'content': 'Биография Анджелина Джоли начинается с далёких 1700 годов,' +
+    ' когда мы не знали, что происходит в мире и когда мы интересовались этой личностью, у нас закардывалась мысль о' +
+    ' том, что мы делаем всё неправильно и некрасиво, потому что мы забили зонтик', 'is_published': True},
+    ...
+]
+
+🧠💬Дальше был рассмотрен фильтр truncatewords , который просто ограничивает количество символов в строке, а в конце
+выведено многоточие
+value|truncatewords:50💬
+
+🛠
+Был изменён файл
+{% extends 'base.html' %}
+<!-- sitewomen\women\templates\women\index.html -->
+...
+<ul>
+    ...
+    <li>
+        ...
+        <p> {{ p.content|truncatewords:30 }} 📝 </p>
+        ...
+    </li>
+    ...
+</ul>
+...
+{% endblock %}
+
+Был рассмотрен фильтр linebreaks , который позволяет делать переносы строки без тегов <p>
+
+🛠
+Был изменён файл
+{% extends 'base.html' %}
+<!-- sitewomen\women\templates\women\index.html -->
+...
+<ul>
+    ...
+    <li>
+        ...
+        <p> {{ p.content|linebreaks|truncatewords:30 }} 📝 </p>
+        ...
+    </li>
+    ...
+</ul>
+...
+{% endblock %}
+
+Дальше был рассмотрен фильтр {% autoscape %} который с параметров off выключает игнорирование тегов <h1> в строке или
+выключает экранирование
+
+🛠
+Был изменён файл
+{% extends 'base.html' %}
+<!-- sitewomen\women\templates\women\index.html -->
+...
+<ul>
+    ...
+    <li>
+        ...
+        {% autoscape off %}
+        <p> {{ p.content|linebreaks|truncatewords:30 }} 📝 </p>
+        {% endautoscape %}
+        ...
+    </li>
+    ...
+</ul>
+...
+{% endblock %}
+
+16:25
+
+🛠📦
+Папка static была перенесена из папки sitewomen\women в папку sitewomen\sitewomen
+А в файле sitewomen\sitewomen\settings.py было прописано
+# sitewomen\sitewomen\settings.py
+...
+STATIC_URL = 'static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']

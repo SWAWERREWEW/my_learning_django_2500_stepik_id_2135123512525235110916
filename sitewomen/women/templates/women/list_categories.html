@@ -1,0 +1,11 @@
+<!-- sitewomen\women\templates\women\list_categories.html -->
+{% load women_tags %}
+{% g as ca %}
+
+{% for inca in ca %}
+{% if inca.id == cat_selected %}
+<li class="selected">{{inca.name}}</li>
+{% else %}
+<h1> <a href="{% url 'category' inca.id %}"> {{ inca.name }} </a> </h1>
+{% endif %}
+{% endfor %}

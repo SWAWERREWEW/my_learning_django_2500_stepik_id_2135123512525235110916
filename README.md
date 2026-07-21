@@ -6,5 +6,3 @@ python manage.py runserver
 
 # Изучаемый курс
 https://stepik.org/lesson/1089289/step/1?auth=login&unit=1099867
-
-latter 12 day

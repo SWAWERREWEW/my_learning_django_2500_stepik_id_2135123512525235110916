@@ -13,9 +13,17 @@ menu = [
 ]
 
 data_db = [
-    {'id': 1, 'title': 'Анджелина Джоли', 'content': 'Биография Анджелина Джоли', 'is_published': True},
+    {'id': 1, 'title': 'Анджелина Джоли', 'content': 'Биография Анджелина Джоли начинается с далёких 1700 годов,' +
+    ' когда мы не знали, что происходит в мире и когда мы интересовались этой личностью, у нас закардывалась мысль о' +
+    ' том, что мы делаем всё неправильно и некрасиво, потому что мы забили зонтик', 'is_published': True},
     {'id': 2, 'title': 'Марго Робби', 'content': 'Биография Марго Робби', 'is_published': False},
     {'id': 3, 'title': 'Джулия Робертс', 'content': 'Биография Джулия Робертс', 'is_published': True},
+]
+
+cats_db = [
+    {'id': 1, 'name': 'Актрисы'},
+    {'id': 2, 'name': 'Певицы'},
+    {'id': 3, 'name': 'Спортсменки'},
 ]
 
 
@@ -46,6 +54,16 @@ def contact(request):
 
 def login(request):
     return HttpResponse(f"Авторизация 🗝")
+
+
+def show_category(request, cat_id):
+    data = {
+        'title': 'Отображение по рубрикам 📊',
+        'menu': menu,
+        'posts': data_db,
+        'cat_selected': cat_id
+    }
+    return render(request, "women/index.html", context=data)
 
 
 def custom_page_not_found(request, exception):

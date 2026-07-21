@@ -1,0 +1,234 @@
+16 day = 2.8 Пользовательские теги шаблонов
+
+simple tags
+inclusion tags
+
+🛠💾➕
+Сначала был созданы файлы с папкой
+sitewomen\women\templatetags\__init__.py
+sitewomen\women\templatetags\women_tags.py
+
+📝📊
+Было написано в файле sitewomen\women\templatetags\women_tags.py
+
+from django import template
+from women.views import cats_db
+
+# Регистрация новых тегов
+register = template.Library()
+
+@register.simple_tag(name='g')
+def get_categories():
+    return cats_db
+
+🧠💬
+Новый тег просто возвращает список в определённом месте html страницы
+
+📝⚙
+Было написано в файле sitewomen\women\views.py
+
+data_db = [...]
+
+cats_db = [
+    {'id': 1, 'name': 'Актрисы'},
+    {'id': 2, 'name': 'Певицы'},
+    {'id': 3, 'name': 'Спортсменки'},
+]
+
+
+def index(request):
+    ...
+
+⚙📝🛠
+В файле было написано sitewomen\templates\base.html
+
+{% load static %}
+{% load women_tags %}
+
+<!DOCTYPE html>
+...
+<body>
+...
+{% get_categories %}
+</body>
+</html>
+
+🚀🔍
+После запуска отобразиться тег в виде переменной cats_db
+
+🛠💾
+Было дописано в файле base.html
+...
+<body>
+...
+{% get_categories as ca %}
+{% for inca in ca %}
+<h1>{{ inca.name }}</h1>
+{% endfor %}
+</body>
+...
+
+🔍🚀📊
+После запуска были отображены значения переменной cats_db
+
+Было дописано в файле ∑ sitewomen\women\urls.py
+
+# sitewomen/women/urls.py
+...
+urlpatterns = [
+    ...
+    path('category/<int:cat_id>/', views.show_category, name='category')
+]
+
+В sitewomen/women/views.py файле было дописано
+...
+def login(request):
+    ...
+
+
+def show_category(request, cat_id):
+    return index(request)
+
+
+def custom_page_not_found(request, exception):
+    ...
+
+⚙🔍🛠
+Были изменения в файле sitewomen\templates\base.html
+
+{% get_categories as ca %}
+{% for inca in ca %}
+<h1> <a href="{% url 'category' inca.id %}"> {{ inca.name }} </a> </h1>
+{% endfor %}
+
+🧠💬 У декоратора @register.simple_tag есть параметр name, который подставляется в html странице вместо названия
+функции
+@register.simple_tag(name=g)
+def get_categories():
+    return cats_db
+
+{% g as ca %}
+{% for inca in ca %}
+<h1> <a href="{% url 'category' inca.id %}"> {{ inca.name }} </a> </h1>
+{% endfor %}
+
+🧠💬 inclusion tags возвращает фрагмент страницы
+
+🛠⚙
+Было изменено в файле sitewomen\women\templatetags\women_tags.py
+...
+@register.inclusion_tag('women/list_categories.html')
+def show_categories():
+    cats = cats_db
+    return {'cats': cats}
+
+💾⚙➕
+Был создан файл sitewomen/women/templates/women/list_categories.html
+
+<!-- sitewomen\women\templates\women\list_categories.html -->
+{% load women_tags %}
+{% g as ca %}
+{% for inca in ca %}
+<h1> <a href="{% url 'category' inca.id %}"> {{ inca.name }} </a> </h1>
+{% endfor %}
+
+🛠💾
+Было изменено в файле sitewomen/templates/base.html
+...
+<body>
+...
+
+{% show_categories %}
+
+</body>
+...
+
+🚩📊🚀👑🎉
+Это всё сделано, чтобы снова получить отсутствие изменений на странице сайта
+
+🛠💾
+Было изменено в файле
+# sitewomen\women\templatetags\women_tags.py
+...
+@register.inclusion_tag('women/list_categories.html')
+def show_categories(cat_selected=0):
+    cats = cats_db
+    return {'cats': cats, 'cat_selected': cat_selected}
+
+🛠💾
+<!-- sitewomen\women\templates\women\list_categories.html -->
+{% load women_tags %}
+{% g as ca %}
+
+{% for inca in ca %}
+{% if inca.id == cat_selected %}
+<li class="selected">{{inca.name}}</li>
+{% else %}
+<h1> <a href="{% url 'category' inca.id %}"> {{ inca.name }} </a> </h1>
+{% endif %}
+{% endfor %}
+
+🛠💾
+...
+<!-- sitewomen/templates/base.html -->
+...
+<body>
+...
+{% show_categories cat_selected %}
+
+</body>
+...
+
+🛠💾
+# sitewomen/women/views
+...
+def index(request):
+    data = {
+        'title': 'главная страница 🏠',
+        'menu': menu,
+        'posts': data_db,
+        'cat_selected': 0,
+    }
+    return render(request, "women/index.html", context=data)
+...
+def show_category(request, cat_id):
+    data = {
+        'title': 'Отображение по рубрикам 📊',
+        'menu': menu,
+        'posts': data_db,
+        'cat_selected': cat_id
+    }
+    return render(request, "women/index.html", context=data)
+...
+
+🚀🎉✅
+После запуска выбранная категория перестаёт быть ссылкой
+На странице http://127.0.0.1:8000/
+Ссылка Актриса остаётся рабочей
+Эта ссылка ведёт на страницу http://127.0.0.1:8000/category/1/
+Где Актриса становится обычным текстом вместо ссылки
+
+🛠💾
+Был изменён файл sitewomen/templates/base.html
+...
+{% block content %} {% endblock %}
+
+{% if cat_selected == 0 or cat_selected is None %}
+<h1>Всё категории</h1>
+{% else %}
+<h1> <a href="{% url 'home' %}"> Всё категории </a> </h1>
+{% endif %}
+
+{% show_categories cat_selected %}
+...
+
+🚀📊🚩
+После запуска надпись "Все категории" становится ссылкой при выбранной категории
+Это текст на странице http://127.0.0.1:8000/
+Но это становится ссылкой на страницах
+http://127.0.0.1:8000/category/1/
+http://127.0.0.1:8000/category/2/
+http://127.0.0.1:8000/category/3/
+
+🎉👑✅💥💲👍☕🌙🎈🎂
+Всё
