@@ -26,7 +26,7 @@ def get_categories():
 
 📝⚙
 Было написано в файле sitewomen\women\views.py
-
+...
 data_db = [...]
 
 cats_db = [
@@ -80,7 +80,7 @@ urlpatterns = [
     path('category/<int:cat_id>/', views.show_category, name='category')
 ]
 
-В sitewomen/women/views.py файле было дописано
+В файле было дописано sitewomen/women/views.py
 ...
 def login(request):
     ...
@@ -103,10 +103,13 @@ def custom_page_not_found(request, exception):
 
 🧠💬 У декоратора @register.simple_tag есть параметр name, который подставляется в html странице вместо названия
 функции
-@register.simple_tag(name=g)
+# sitewomen\women\templatetags\women_tags.py
+...
+@register.simple_tag(name='g')
 def get_categories():
     return cats_db
 
+sitewomen\templates\base.html
 {% g as ca %}
 {% for inca in ca %}
 <h1> <a href="{% url 'category' inca.id %}"> {{ inca.name }} </a> </h1>
@@ -180,7 +183,7 @@ def show_categories(cat_selected=0):
 ...
 
 🛠💾
-# sitewomen/women/views
+# sitewomen/women/views.py
 ...
 def index(request):
     data = {
@@ -214,9 +217,9 @@ def show_category(request, cat_id):
 {% block content %} {% endblock %}
 
 {% if cat_selected == 0 or cat_selected is None %}
-<h1>Всё категории</h1>
+<h1>Все категории</h1>
 {% else %}
-<h1> <a href="{% url 'home' %}"> Всё категории </a> </h1>
+<h1> <a href="{% url 'home' %}"> Все категории </a> </h1>
 {% endif %}
 
 {% show_categories cat_selected %}

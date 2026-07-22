@@ -1,4 +1,4 @@
-# sitewomen/women/views
+# sitewomen/women/views.py
 from django.http import HttpResponse, HttpResponseNotFound, Http404
 from django.shortcuts import render, redirect
 from django.urls import reverse
@@ -32,6 +32,7 @@ def index(request):
         'title': 'главная страница 🏠',
         'menu': menu,
         'posts': data_db,
+        'cat_selected': 0,
     }
     return render(request, "women/index.html", context=data)
 
