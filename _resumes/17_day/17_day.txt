@@ -1,0 +1,75 @@
+17 day = 3.1 Что такое БД, SQL и ORM
+
+https://docs.djangoproject.com/en/4.2/ref/databases/
+
+Базы данных. Таблицы.📊
+MTV (Models, Templates, Views)
+Модель это хранение и оперирование данными
+Django поддерживает базы данных (драйвера ORM)📁📶
+PostgreSQL
+Maria
+MySQL
+Oracle
+SQLite
+Хранение данных в виде связанных таблиц💼🗝📐
+В таблице колонки это поля, а строки это записи📝
+
+ORM (Object-Relational Mapping) = Универсальный код для этих баз данных или WSGI приложение💾🚀📦
+
+В файле sitewomen/sitewomen/settings.py
+
+...
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+...
+
+Эти строки означают, что Django взаимодействует с базами данных с расширением sqlite3💾📊🔍, а базой данных по
+умолчанию был файл db.sqlite3 ⚙
+
+Рекомендуется скачать SQLiteStudio
+https://sqlitestudio.pl
+Пока отсутствуют различия между этим и  DB browser for SQLite или любой другой СУБД
+
+🔍✔📊
+Были найдены таблицы в открытой базе данных sitewomen\db.sqlite3
+auth_group
+auth_group_permissions
+auth_permission
+auth_user
+auth_user_groups
+auth_user_user_permissions
+django_admin_log
+django_content_type
+django_migrations
+django_session
+
+Для создания таблицы нужно объявить класс (Таблицу) с Объектами класса (Записями таблицы)
+
+Необходимо создать таблицу women ➕📁📊
+id: integer, primary key
+title: VarChar
+content: Text
+time_create: DateTime
+time_update: DateTime
+is_published: Boolean
+
+Все модели прописываются в файле sitewomen\women\models.py
+💬📝📊(blank=True означает возможность оставить пустое значение в этом поле)
+
+🛠💾📝
+Был изменён файл sitewomen\women\models.py
+from django.db import models
+...
+# Create your models here.
+class Women(models.Model):
+    title = models.CharField(max_length=255)
+    content = models.TextField(blank=True)
+    time_create = models.DateTimeField(auto_now_add=True)
+    time_update = models.DateTimeField(auto_now=True)
+    is_published = models.BooleanField(default=True)
+
+Таблица расписана, но не создана
