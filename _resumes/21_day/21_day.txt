@@ -1,0 +1,50 @@
+21 day = 3.5 Сортировка, изменение и удаление записей
+
+Сортировка по убыванию📊
+.order_by("Поле_таблицы")
+Сортировка по возрастанию📊
+.order_by("-Поле_таблицы")
+или можно так
+.order_by("Поле_таблицы")[::-1]
+
+Есть возможность использовать несколько методов📝🔍📐
+Women.objects.filter(pk__lte=4).order_by("time_update")
+
+🛠📝💾
+Был изменён файл sitewomen\women\models.py
+...
+class Women(models.Model):
+    ...
+    class Meta:
+        ordering = ['time_create']
+        indexes = [
+            models.Index(fields=['time_create'])
+        ]
+📊📝⚙
+Это позволит установить сортировку по умолчанию, которая будет действовать и отображаться уже внутри самой таблице, а
+не только в консоли.
+🛠💾📊
+Можно изменить параметры для всех записей, например параметр is_published (Приминимо только ко всем записям или
+отфильтрованным с помощью filter)
+Women.objects.update(is_published=0)
+
+Этот код почему-то не работает❌📊🔍
+w = Women.objects.all()
+for i in w:
+    i.is_published = 0
+w.save()
+
+Women.objects.filter(pk__lte=2).update(is_published=1)
+
+Удаление записи 🔍📝❌💥
+.delete()
+
+Women.objects.get(id=3).delete()
+
+Women.objects.create(title='21 day', content='контент')
+
+⚡📁💾
+Из-за удаления, третий элемент имеет id=4 , а не id=3
+Лучше удаление не использовать❌✅🛠
+
+✅🎈☕🎂💥👑🎉🚀 Всё
