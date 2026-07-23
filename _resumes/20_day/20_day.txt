@@ -1,0 +1,108 @@
+20 day = 3.4 Методы выбора записей
+
+Были использованы команды для обнаружения некоего менеджера, на который ссылается модель Women🔍💾📶
+In [1]: from women.models import Women
+
+In [2]: Women.objects
+Out[2]: <django.db.models.manager.Manager at 0x1b2f6bf30e0>
+
+🛠📊📝
+Создаётся новая запись
+Women.objects.create(title='start_day_20', content='20_day')
+
+💬🔍📊(Для проверки до сих пор используется DB_browser for SQLite)
+
+📊🔍📝
+Команда для выбора всех записей
+Women.objects.all()
+
+
+In [4]: Women.objects.all()
+Out[4]: <QuerySet [<Women: Women object (1)>, <Women: Women object (2)>, <Women: Women object (3)>]>
+
+📉📁💬
+Но результат не очень полезный
+
+Был изменён файл sitewomen\women\models.py
+...
+class Women(models.Model):
+    ...
+    def __str__(self):
+        return self.title
+
+Для применения изменений нужно сначала выйти exit()
+
+In [5]: exit()
+
+(.venv) D:\python_programming\for_git_repositories\my_learning_django_2500_stepik_id_2135123512525235110916\sitewomen>python manage.py shell
+Python 3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]
+Type 'copyright', 'credits' or 'license' for more information
+IPython 9.15.0 -- An enhanced Interactive Python. Type '?' for help.
+Tip: We can't show you all tips on Windows as sometimes Unicode characters crash the Windows console, please help us debug it.
+
+In [1]: from women.models import Women
+
+In [2]: Women.objects.all()
+Out[2]: <QuerySet [<Women: Анджела>, <Women: КАРАБЛИК>, <Women: start_day_20>]>
+
+In [3]:
+
+Выбор первой записи по индексу🔍📦📁
+Women.objects.all()[0]
+
+При выполнении команды🔍📊📐
+w = Women.objects.all()[:3]
+Обращения к базе данных не происходит из-за принципа "ленивого запроса", однако оно происходит в момент обращения к
+самой переменной. Над переменной можно производить операции перебора через цикл for
+for i in w:
+    print(i)
+
+Если таблица огромная, существует фильтр🔍📦
+Women.objects.filter(title='Анджела')
+
+Для фильтра чисел необходимы методы💼📊📖
+Сравнение больше или равно
+.атрибут__gte=число
+Сравнение больше
+.атрибут__gt=число
+Сравнение меньше или равно
+.атрибут__lte=число
+Сравнение меньше
+.атрибут__lt=число
+
+Пример
+Women.objects.filter(pk__gt=2)
+
+Метод для поиска записей с фрагментом текста🔍📖📐
+.атрибут__contains='фрагмент'
+
+Пример
+Women.objects.filter(content__contains='а')
+Или без учёта регистра, хотя это не сработает из-за ограничений самой базы данных📝❌
+.атрибут__icontains='фрагмент'
+
+Перебор вариантов. Вывод записей с определёнными значениями из списка.🔍📝
+.атрибут__in=[число, число, и т д]
+Women.objects.filter(id__in=[1, 3])
+
+Есть возможность ставить несколько условий📦📝📊
+.filter(условие, условие, и т д)
+
+Women.objects.filter(content__contains='а', id__in=[1, 3])
+
+Можно ознакомиться с документацией🔍📖📊
+docs.djangoproject.com/en/4.2/ref/models/querysets/#field-lookups
+
+Существует возможность выбрать все записи, кроме определённых или выбранных по условию
+.exclude(условие)
+Будут выведены все записи, кроме записи с id=2
+Women.objects.exclude(id=2)
+
+Существует метод get, который возвращает либо ошибку при получении нескольких записей, либо возвращает одну запись.
+Ошибка
+Women.objects.get(id__in=[1, 3])
+
+Первая запись
+Women.objects.filter(id__in=[1, 3])[0]
+
+💥🎉✅🚀👑🎂🎈☕ Всё
