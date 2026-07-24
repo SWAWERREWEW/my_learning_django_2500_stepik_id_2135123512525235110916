@@ -8,7 +8,6 @@
 
 <ul>
     {% for p in posts %}
-    {% if p.is_published == True %}
     <li>
         <h2> {{ p.title }} 🗝 </h2>
         <p> {{ p.content|linebreaks|truncatewords:30 }} 📝 </p>
@@ -17,7 +16,6 @@
         <hr>
         {% endif %}
     </li>
-    {% endif %}
     {% endfor %}
 </ul>
 

@@ -1,0 +1,82 @@
+23 day = 3.7 Создание пользовательского менеджера модели
+
+📝🧠💬
+На сайте должны отображаться только статьи со значением published=1
+
+🛠💾
+Был изменён файл sitewomen\women\models.py
+...
+class PublishedManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_published=1)
+
+class Women(models.Model):
+    ...
+    is_published = ...
+    object = models.Manager()
+    published = PublishedManager()
+
+🛠💾
+Был изменён файл sitewomen/women/views.py
+...
+def index(request):
+    posts = Women.published.all()
+    ...
+
+✅🚀📝
+После запуска будут отображаться только опубликованые статьи со значением published=1
+
+❌🛠💾
+В файле sitewomen\women\template\women\index.html
+можно убрать строки
+{% if p.is_published == True %}
+и {% endif %} после </li>
+
+📝💬🧠
+Необходимо поменять 1 на Опубликовано для информативности для значения is_published
+
+🛠💾⚙
+Был изменён файл sitewomen\women\models.py
+...
+class PublishedManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_published=Women.Status.PUBLISHED)
+
+class Women(models.Model):
+    ...
+    class Status(models.IntegerChoices):
+        DRAFT = 0, 'Черновик'
+        PUBLISHED = 1, 'Опубликовано'
+    ...
+    is_published = models.BooleanField(choices=Status.choices, default=Status.DRAFT)
+
+🛠📝🚀
+Были сделаны миграции
+python manage.py makemigration
+python manage.py migrate
+
+🛠📊📁
+Поле is_published было заполнено нулями
+python manage.py shell
+from women.models import Women
+w = Women.objects.all()
+w.update(is_published=Women.Status.DRAFT)
+
+🛠📊📁
+Поле is_published было заполнено единицами
+for w in Women.objects.all():
+w.is_published = Women.Status.PUBLISHED
+w.save()
+
+🔍📦📊
+Можно изучить сам класс Status
+In [2]: Women.Status.choices
+Out[2]: [(0, 'Черновик'), (1, 'Опубликовано')]
+
+In [4]: Women.Status.labels
+Out[4]: ['Черновик', 'Опубликовано']
+
+In [5]: Women.Status.values
+Out[5]: [0, 1]
+
+✅👑☕🎂💥🎉🚩 Всё
