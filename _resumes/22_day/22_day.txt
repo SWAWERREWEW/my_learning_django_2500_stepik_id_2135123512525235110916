@@ -1,0 +1,229 @@
+22 day = 3.6 Слаги (slug) в URL-адресах. Метод get_absolute_uri()
+
+Слаг это идентификатор записи или уникальный фрагмент в адресе страницы
+
+https://proproprogs.ru/python_base/python3-osnovnye-metody-strok
+
+Слаг = python3-osnovnye-metody-strok
+
+Сначала стоит сделать отображение статьей по их идентификаторам
+🛠💾⚙
+Был изменён файл sitewomen/women/views.py
+...
+from sitewomen.women.models import Women
+...
+from django.shortcuts import ..., get_object_or_404
+...
+def about(request):
+    ...
+def show_post(request, post_id):
+    # Извлечение записи по критерию pk из модели Women
+    post = get_object_or_404(Women, pk=post_id)
+
+    data = {
+        'title': post.title,
+        'menu': menu,
+        'post': post,
+        'cat_selected': 1,
+    }
+
+    return render(request, 'women/post.html', data)
+
+➕💾🛠
+Был создан файл sitewomen\women\templates\women\post.html
+
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{{post.title}}</h1>
+
+{% if post.photo %}
+<p><img class="img-article-left" src="{{post.photo.url}}"/></p>
+{% endif %}
+
+{{post.content|linebreaks}}
+{% endblock %}
+
+🚀🎉✅
+После запуска на странице по кнопке "Читать пост" будет отображаться информация из базы данных.📖📊📁
+Они открываться будут по адресам📝📊📖
+http://127.0.0.1:8000/post/1/
+http://127.0.0.1:8000/post/3/
+Однако вторая статья всё равно не отображается во вкладке Все Категории, потому что для второй статьи поставлено
+значение is_published: False то есть статья не опубликована в файле sitewomen/women/views.py ❌⚙📝
+http://127.0.0.1:8000/post/2/
+
+Теперь создание самого слага вместо чисел 1, 2, 3 в конце адреса 📝⚙💬
+
+🛠📝⚙
+Был изменён файл sitewomen\women\models.py
+...
+class Women(models.Model):
+    title = ...
+    slug = models.SlugField(max_length=300, blank=True, db_index=True, default='')
+    ...
+
+♻📦⚙
+Для применения изменений необходимо снова сделать миграции
+
+python manage.py makemigrations
+python manage.py migrate
+python manage.py shell
+
+🛠💾➕
+Был создан файл sitewomen\women\my_dop_functions.py
+import re
+
+def cyrillic_to_latin(text: str) -> str:
+    # Словарь соответствия русских букв английским
+    rules = {
+        'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'yo',
+        'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm',
+        'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u',
+        'ф': 'f', 'х': 'kh', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'shch',
+        'ы': 'y', 'э': 'e', 'ю': 'yu', 'я': 'ya',
+        # Дополнительно переводим пробелы и дефисы
+        ' ': '-', '_': '-'
+    }
+
+    # Переводим текст в нижний регистр для упрощения
+    text = text.lower().strip()
+
+    # Посимвольно заменяем русские буквы на английские
+    output = []
+    for char in text:
+        output.append(rules.get(char, char))  # Если символа нет в словаре, оставляем как есть
+
+    result = "".join(output)
+
+    # Удаляем любые символы, которые НЕ являются буквами, цифрами или дефисом
+    result = re.sub(r'[^a-z0-9-]', '', result)
+
+    # Убираем двойные дефисы, если они случайно образовались (например, "--")
+    result = re.sub(r'-+', '-', result)
+
+    return result.strip('-')
+
+💬📊📖
+Для создания слага, состоящего из поля title с русскими символами нужно заменить их на английские буквы. Для этого и
+была создана функция cyrillic_to_latin. Необходимо запомнить, что в слаге только английские буквы, цифры, дефис и
+нижнее подчёркивание📝🔍🧠
+
+🛠📊
+В консоли будут заполнены пустые значения поля slug
+allow_unicode=True переведет буквы в безопасный для URL вид
+
+from women.models import Women
+from women.my_dop_functios import cyrillic_to_latin
+
+for w in Women.objects.all():
+    clean_title = cyrillic_to_latin(w.title)
+    clean_date = str(w.time_update).replace(' ', '-time').replace('.', '-').replace(':', '-').replace('+', '-')
+    w.slug = f"{clean_title}-date-{clean_date}"
+    w.save()
+
+🔍📊🗝
+Теперь записи в таблице имеют уникальный slug
+
+🛠📝⚙
+Был изменён файл sitewomen\women\models.py
+...
+class Women(models.Model):
+    title = ...
+    slug = models.SlugField(max_length=300, unique=True, db_index=True)
+
+⚙🗝💾
+Теперь поле slug является уникальным
+
+🛠💾
+Был изменён файл sitewomen/women/urls.py
+...
+urlpatterns = [
+    ...
+    path('login', ...),
+    path('post/<slug:post_slug>/', views.show_post, name='post'),
+    ...
+]
+
+🛠💾
+Был изменён файл sitewomen/women/views.py
+...
+def show_post(request, post_slug):
+    ...
+    post = get_object_or_404(Women, slug=post_slug)
+    ...
+
+ДОПОЛНИТЕЛЬНО📖💬🔍
+В учебных целях можно пропустить
+Можно сделать автоматическую генерацию слага на основе других заполненных полей дописав (фактически переопределив)
+функцию save в модуль Women из файла sitewomen\women\models.py
+...
+class Women(models.Model):
+    ...
+    def save(self, *args, **kwargs):
+        # Если слаг еще не заполнен (например, при создании нового поста)
+        if not self.slug:
+            # Переводим название в латиницу через вашу функцию
+            latin_title = cyrillic_to_latin(self.title)
+
+            # Генерируем уникальный слаг. Сначала сохраняем объект, чтобы получить pk,
+            # либо используем временный слаг, если это создание новой записи:
+            self.slug = f"slug-{latin_title}"
+
+        # Вызываем оригинальный метод сохранения Django
+        super().save(*args, **kwargs)
+
+        # Если это было первое сохранение и нам нужно вшить туда PK для 100% уникальности:
+        # (так как до super().save() у новой записи еще нет PK в базе данных)
+        if f"slug-{cyrillic_to_latin(self.title)}" == self.slug:
+            clean_date = self.time_update.strftime('%Y-%m-%d-time%H-%M-%S')
+            self.slug = f"slug-{self.pk}-{cyrillic_to_latin(self.title)}-date-{clean_date}"
+            # Сохраняем еще раз уже с готовым PK и датой
+            super().save(update_fields=['slug'])
+
+✅🚀🎉🚩
+После запуска при переходе по адресу будет отображена статья, а старая ссылка перестанет работать
+http://127.0.0.1:8000/post/karablik-date-2026-07-24-time06-13-55-569691-00-00/
+
+🛠💾⚙
+Был изменён файл sitewomen\women\models.py
+...
+from django.urls import reverse
+
+class Women(models.Model):
+    ...
+    class Meta:
+        ...
+    def __str__(self):
+        ...
+    def get_absolute_url(self):
+        return reverse('post', kwargs={'post_slug': self.slug})
+
+Был изменён файл
+sitewomen\women\templates\women\index.html
+...
+<ul>
+    ...
+        <p> {{ p.content|linebreaks|truncatewords:30 }} 📝 </p>
+        <p><a href="{{ url p.get_absolute_url }}"> Читать пост 📖 </a></p>
+        {% if not forloop.last %}
+        ...
+</ul>
+...
+
+🛠💾
+Был изменён файл sitewomen/women/views.py
+...
+def index(request):
+    posts = Women.objects.filter(is_published=1)
+    data = {
+        ...
+        'posts': posts,
+        ...
+    }
+...
+
+✅📶📦
+Теперь кнопка Читать Пост переводит по адресу со слагом
+
+🚩🎉🚀✅💥🎂☕👑 Всё

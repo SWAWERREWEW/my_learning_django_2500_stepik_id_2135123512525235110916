@@ -2,6 +2,8 @@
 
 # Запуск
 cd sitewomen
+python manage.py makemigrations
+python manage.py migrate
 python manage.py runserver
 
 # Изучаемый курс
