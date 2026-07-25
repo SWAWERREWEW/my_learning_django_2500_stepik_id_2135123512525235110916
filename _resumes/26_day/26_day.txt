@@ -1,0 +1,103 @@
+26 day = 4.3 ORM-команды для связи many-to-one
+
+Для получения атрибутов таблицы SQL запрос не выполняется (title, slug, cat_id), а для cat формируется запрос для
+формирования объекта всей привязанной модели. Судя по всему это означает, что title, slug, cat_id и т д уже
+сформированные объекты.
+
+То есть через одну модель, можно обратиться к атрибутам другой привязанной модели
+In [8]: Women.objects.get(id=1)
+Out[8]: <Women: Анджела>
+In [9]: Women.objects.get(id=1).cat
+Out[9]: <Category: Актрисы>
+In [10]: Women.objects.get(id=1).cat.name
+Out[10]: 'Актрисы'
+
+Частично можно сделать и наоборот. Через привязанную модель обратиться к другой модели.
+In [20]: Category.objects.get(id=1).women_set.all()
+Out[20]: <QuerySet [<Women: Анджела>, <Women: КАРАБЛИК>, <Women: start_day_20>]>
+In [21]: Category.objects.get(id=1).women_set.all()[0]
+Out[21]: <Women: Анджела>
+In [22]: Category.objects.get(id=1).women_set.all()[0].title
+Out[22]: 'Анджела'
+
+Можно реализовать переименование атрибута women_set
+
+🛠💾
+Был изменён файл sitewomen\women\models.py
+...
+class Women(models.Model):
+    ...
+    cat = models.ForeignKey('Category', on_delete=models.PROTECT, related_name='posts')
+...
+
+Обращение
+In [2]: Category.objects.get(id=1).posts.all()
+Out[2]: <QuerySet [<Women: Анджела>, <Women: КАРАБЛИК>, <Women: start_day_20>]>
+
+Эти команды идентичны и выполняют одинаковые SQL запросы по неизвестной причине
+Women.objects.filter(cat__in=[1, 2])
+Women.objects.filter(cat_id__in=[1, 2])
+
+Выводы этих команд и SQL запросы
+In [1]: from women.models import Women, Category
+In [2]: from django.db import connection
+In [3]: Women.objects.filter(cat__in=[1, 2])
+Out[3]: <QuerySet [<Women: Анджела>, <Women: КАРАБЛИК>, <Women: start_day_20>]>
+In [4]: Women.objects.filter(cat_id__in=[1, 2])
+Out[4]: <QuerySet [<Women: Анджела>, <Women: КАРАБЛИК>, <Women: start_day_20>]>
+In [5]: connection.queries
+Out[5]:
+[{'sql': 'SELECT "women_women"."id", "women_women"."title", "women_women"."slug", "women_women"."content", "women_women"."time_create", "women_women"."time_update", "women_women"."is_published", "women_women"."cat_id" FROM "women_women" WHERE "women_women"."cat_id" IN (1, 2) ORDER BY "women_women"."time_create" ASC LIMIT 21',
+  'time': '0.000'},
+ {'sql': 'SELECT "women_women"."id", "women_women"."title", "women_women"."slug", "women_women"."content", "women_women"."time_create", "women_women"."time_update", "women_women"."is_published", "women_women"."cat_id" FROM "women_women" WHERE "women_women"."cat_id" IN (1, 2) ORDER BY "women_women"."time_create" ASC LIMIT 21',
+  'time': '0.000'}]
+
+Будут отображены все записи таблицы Women по условию, что поле cat равно таблице Category
+Women.objects.filter(cat__in=Category.objects.all())
+Потому что само поле и есть таблица
+In [11]: Women.objects.get(id=1).cat
+Out[11]: <Category: Актрисы>
+In [12]: Women.objects.get(id=2).cat
+Out[12]: <Category: Актрисы>
+In [13]: Women.objects.get(id=3).cat
+Out[13]: <Category: Актрисы>
+
+Можно отобразить записи с условием только для одного поля
+Category.objects.filter(slug='aktrisy')
+
+Можно также отобразить записи из одной таблицы с условием для одного поля привязанной таблицы. То есть отображение всех
+полей таблицы Women, если их идентификаторы связаны с теми полями привязанной таблицы, у которых slug = 'aktrisy'.
+Отвечая на вопросы: Какая запись таблицы Category в поле slug имеет 'aktrisy', какой у неё идентификатор и у каких
+записей таблицы Women такой же идентификатор в поле cat_id
+Women.objects.filter(cat__slug='aktrisy')
+
+Можно использовать больше люкапов. Отображение по полю slug, если там есть буква 'a'.
+Women.objects.filter(cat__slug__contains='a')
+
+Category.objects.filter(posts__slug__contains='date')
+In [20]: Category.objects.filter(posts__slug__contains='date')
+Out[20]: <QuerySet [<Category: Актрисы>, <Category: Актрисы>, <Category: Актрисы>]>
+In [21]: Category.objects.filter(posts__slug__contains='date').all()
+Out[21]: <QuerySet [<Category: Актрисы>, <Category: Актрисы>, <Category: Актрисы>]>
+In [22]: Category.objects.filter(posts__slug__contains='date')[0]
+Out[22]: <Category: Актрисы>
+In [23]: Category.objects.filter(posts__slug__contains='date')[1]
+Out[23]: <Category: Актрисы>
+In [28]: Category.objects.filter(posts__slug__contains='date')[2].name
+Out[28]: 'Актрисы'
+In [26]: Category.objects.filter(posts__slug__contains='date')[0].name
+Out[26]: 'Актрисы'
+
+Тут произошло объединение таблиц
+title       content             cat_id  id_from_category  name      slug_cat
+----------------------------------------------------------------------------
+Анджела	    Биография Анджелы   1       1                 Актрисы   aktrisy
+КАРАБЛИК	333_не_дата			1       1                 Актрисы	aktrisy
+start_day_20 20_day			    1       1                 Актрисы	aktrisy
+
+В таблице Women поле cat_id было заменено на поля записи с соответствующим id
+В том месте, где должна стоять 1 в поле cat_id появилась первая запись таблицы Category и была продублирована в тех
+местах, где тоже стояла 1
+
+Чтобы отображались уникальные записи, а не такие дубликаты, существует лукап distinct()
+Category.objects.filter(posts__slug__contains='date').distinct()
