@@ -1,0 +1,119 @@
+25 day = 4.2 Создание связи many-to-one многие к одному
+
+📝📊💾
+Необходимо создать вторую таблицу и связать с первой
+
+women
+id, title, content, slug, time_create, time_update, is_published,
+cat_id: Integer, foreign key (Внешний ключ) = id из таблицы category
+
+category
+id,
+name: VarChar
+slug: VarChar
+
+ForeignKey:
+to = ссылка или строка класса модели, с которой происходит связывание (в нашем случае это класс Category - модели для
+категорий)
+on_delete = тип ограничения при удалении внешней записи (в нашем примере это удаление из таблицы Category (первичная
+модель)) Задание поведения записей при удалении записи одной таблицы
+
+models.CASCADE = при удалении записи из первичной модели (у нас это таблица Category) происходит удаление всех записей
+из вторичной модели (Women), связанных с удаляемой категорией.
+
+models.PROTECT = запрещает удаление записи из первичной модели, если она используется во вторичной (выдаёт исключение)
+
+models.SET_NULL = при удалении записи первичной модели устанавливает значение foreign key в NULL у соответствующих
+записей вторичной модели.
+
+models.SET_DEFAULT = при удалении записи первичной модели устанавливает значение foreign key в значение по умолчанию,
+которое должно быть определено через класс ForeignKey у соответствующих записей вторичной модели
+
+models.DO_NOTHING = удаление записи в первичной модели не вызывает никаких действий у вторичных моделей.
+
+🛠⚙💾
+Был изменён файл sitewomen\women\models.py
+...
+class Women(models.Model):
+    ...
+    is_published = ...
+    cat = models.ForeignKey('Category', on_delete=models.PROTECT, null=True)
+...
+class Category(models.Model):
+    name = models.CharField(max_length=100, db_index=True)
+    slug = models.SlugField(max_length=255, unique=True, db_index=True)
+
+    def __str__(self):
+        return self.name
+
+⚙📥📝
+Необходимо зафиксировать эти изменения с помощью команд
+python manage.py makemigrations
+python manage.py migrate
+
+Выводы команд 📊🔍♻
+(.venv) D:\python_programming\for_git_repositories\my_learning_django_2500_stepik_id_2135123512525235110916\sitewomen>python manage.py makemigrations
+Migrations for 'women':
+  women\migrations\0006_category_women_cat.py
+    - Create model Category
+    - Add field cat to women
+
+(.venv) D:\python_programming\for_git_repositories\my_learning_django_2500_stepik_id_2135123512525235110916\sitewomen>python manage.py migrate
+Operations to perform:
+  Apply all migrations: admin, auth, contenttypes, sessions, women
+Running migrations:
+  Applying women.0006_category_women_cat... OK
+
+(.venv) D:\python_programming\for_git_repositories\my_learning_django_2500_stepik_id_2135123512525235110916\sitewomen>
+
+📝🛠➕📊
+Дальше необходимо записать данные в новую пустую таблицу
+python manage.py shell
+from women.models import Women, Category
+Category.objects.create(name='Актрисы', slug='aktrisy')
+Category.objects.create(name='Певицы', slug='pevicy')
+
+➕📊📝
+Запись данных в поле cat_id
+python manage.py shell
+from women.models import Women, Category
+Women.objects.all().update(cat_id=1)
+
+🛠💾⚙
+Был изменён файл sitewomen\women\models.py
+...
+class Women(models.Model):
+    ...
+    is_published = ...
+    cat = models.ForeignKey('Category', on_delete=models.PROTECT)
+...
+
+⚙📊♻
+Были повторно использованы и созданы миграции
+(.venv) D:\python_programming\for_git_repositories\my_learning_django_2500_stepik_id_2135123512525235110916\sitewomen>python manage.py makemigrations
+It is impossible to change a nullable field 'cat' on women to non-nullable without providing a default. This is because the database needs something to populate existing rows.
+Please select a fix:
+ 1) Provide a one-off default now (will be set on all existing rows with a null value for this column)
+ 2) Ignore for now. Existing rows that contain NULL values will have to be handled manually, for example with a RunPython or RunSQL operation.
+ 3) Quit and manually define a default value in models.py.
+Select an option: 2
+Migrations for 'women':
+  women\migrations\0007_alter_women_cat.py
+    - Alter field cat on women
+
+(.venv) D:\python_programming\for_git_repositories\my_learning_django_2500_stepik_id_2135123512525235110916\sitewomen>python manage.py migrate
+Operations to perform:
+  Apply all migrations: admin, auth, contenttypes, sessions, women
+Running migrations:
+  Applying women.0007_alter_women_cat... OK
+
+(.venv) D:\python_programming\for_git_repositories\my_learning_django_2500_stepik_id_2135123512525235110916\sitewomen>
+
+В таблице написано не cat а cat_id потому что это внешний ключ. cat_id объект таблицы, а cat это объект другой таблицы.
+In [3]: Women.objects.get(id=1).cat
+Out[3]: <Category: Актрисы>
+
+In [4]: Women.objects.get(id=1).cat_id
+Out[4]: 1
+
+on_delete = models.PROTECT защищается только связанные записи
