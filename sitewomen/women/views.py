@@ -1,6 +1,6 @@
 # sitewomen/women/views.py
 from gc import get_objects
-from .models import Women
+from .models import Women, Category
 
 from django.http import HttpResponse, HttpResponseNotFound, Http404
 from django.shortcuts import render, redirect, get_object_or_404
@@ -70,12 +70,14 @@ def login(request):
     return HttpResponse(f"Авторизация 🗝")
 
 
-def show_category(request, cat_id):
+def show_category(request, cat_slug):
+    category = get_object_or_404(Category, slug=cat_slug)
+    posts = Women.published.filter(cat_id=category.pk)
     data = {
-        'title': 'Отображение по рубрикам 📊',
+        'title': f'Рубрика {category.name} 📊',
         'menu': menu,
-        'posts': data_db,
-        'cat_selected': cat_id
+        'posts': posts,
+        'cat_selected': category.pk,
     }
     return render(request, "women/index.html", context=data)
 

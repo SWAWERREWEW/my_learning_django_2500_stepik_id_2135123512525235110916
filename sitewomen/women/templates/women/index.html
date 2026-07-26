@@ -9,8 +9,9 @@
 <ul>
     {% for p in posts %}
     <li>
-        <h2> {{ p.title }} 🗝 </h2>
-        <p> {{ p.content|linebreaks|truncatewords:30 }} 📝 </p>
+        <h2> {{ p.title }} 🗝 {{ p.cat.name }} </h2>
+        <p> {{ p.content|truncatewords:30 }} 📝 </p>
+        <p> дата {{p.time_update}} </p>
         <p><a href="{{ p.get_absolute_url }}"> Читать пост 📖 </a></p>
         {% if not forloop.last %}
         <hr>

@@ -1,0 +1,84 @@
+27 day = 4.4 Отображение постов по рубрикам
+
+Задача отобразить категории на сайте из таблицы Category
+
+🛠💾
+Был изменён файл sitewomen/women/urls.py
+...
+urlpatterns = [
+    ...
+    path('post/<slug...)
+    path('category/<slug:cat_slug>/', views.show_category, name='category')
+]
+
+🛠💾
+Был изменён файл sitewomen\women\views.py
+...
+from .models import Women, Category
+...
+def show_category(request, cat_slug):
+    category = get_object_or_404(Category, slug=cat_slug)
+    posts = Women.published.filter(cat_id=category.pk)
+    data = {
+        'title': f'Рубрика {category} 📊',
+        'menu': menu,
+        'posts': posts,
+        'cat_selected': category.pk,
+    }
+    return render(request, "women/index.html", context=data)
+...
+🔍🧠💬
+Тут были использованы две раздельные переменные category и posts для уменьшения нагрузки на сервер.
+
+🛠💾
+Был изменён файл sitewomen\women\templatetags\women_tags.py
+...
+from women.models import Category
+...
+def show_categories(cat_selected=0):
+    cats = Category.objects.all()
+    ...
+
+🛠💾
+Был изменён файл sitewomen\women\templates\women\list_categories.html
+{% for cat in cats %}
+{% if cat.id == cat_selected %}
+<li class="selected"> {{cat.name}} </li>
+{% else %}
+<li><a href="{{ cat.get_absolute_url }}"> {{cat.name}} </a></li>
+{% endif %}
+{% endfor %}
+
+🛠💾
+Был изменён файл sitewomen\women\models.py
+...
+class Category(models.Model):
+    ...
+    def get_absolute_url(self):
+        return reverse('category', kwargs={'cat_slug': self.slug})
+
+🛠💾
+Был изменён файл sitewomen\women\templates\women\index.html
+
+{% block content %}
+...
+<ul>
+    {% for p in posts %}
+    <li>
+        <h2> {{ p.title }} 🗝 {{ p.cat.name }} </h2>
+        <p> {{ p.content|truncatewords:30 }} 📝 </p>
+        <p> дата {{p.time_update}} </p>
+        <p><a href="{{ p.get_absolute_url }}"> Читать пост 📖 </a></p>
+        {% if not forloop.last %}
+        <hr>
+        {% endif %}
+    </li>
+    {% endfor %}
+</ul>
+...
+
+✅📊📈
+Теперь стало только две кнопки: Актрисы, Певицы. Каждая из них ведёт на адреса на которых отображаются записи из
+соответствующих таблиц из базы данных db.sqlite3
+http://127.0.0.1:8000/category/aktrisy/
+http://127.0.0.1:8000/category/pevicy/
