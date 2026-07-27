@@ -1,3 +1,4 @@
+<!-- sitewomen\women\templates\women\post.html -->
 {% extends 'base.html' %}
 
 {% block content %}
@@ -6,6 +7,16 @@
 {% if post.photo %}
 <p><img class="img-article-left" src="{{post.photo.url}}"/></p>
 {% endif %}
+
+{% with post.tags.all as tags %}
+{% if tags %}
+    <p>Теги:
+    {% for t in tags %}
+    <a href="{{ t.get_absolute_url }}">{{t.tag}}</a>
+    {% endfor %}
+    </p>
+{% endif %}
+{% endwith %}
 
 {{post.content|linebreaks}}
 {% endblock %}

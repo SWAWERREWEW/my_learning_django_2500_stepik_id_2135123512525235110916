@@ -1,6 +1,6 @@
 # sitewomen/women/views.py
 from gc import get_objects
-from .models import Women, Category
+from .models import Women, Category, TagPost
 
 from django.http import HttpResponse, HttpResponseNotFound, Http404
 from django.shortcuts import render, redirect, get_object_or_404
@@ -84,3 +84,15 @@ def show_category(request, cat_slug):
 
 def custom_page_not_found(request, exception):
     return HttpResponseNotFound("<h1> Страница не найдена </h1>")
+
+
+def show_tag_postlist(request, tag_slug):
+    tag = get_object_or_404(TagPost, slug=tag_slug)
+    posts = tag.tags.filter(is_published=Women.Status.PUBLISHED)
+    data = {
+        'title': f"Тег: {tag.tag}",
+        'menu': menu,
+        'posts': posts,
+        'cat_selected': None,
+    }
+    return render(request, 'women/index.html', context=data)

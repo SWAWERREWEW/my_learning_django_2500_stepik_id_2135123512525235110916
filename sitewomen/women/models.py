@@ -57,6 +57,9 @@ class TagPost(models.Model):
     def __str__(self):
         return self.tag
 
+    def get_absolute_url(self):
+        return reverse('tag', kwargs={'tag_slug': self.slug})
+
 
 class AgainWomen(models.Model):
     title = models.CharField(max_length=255)
