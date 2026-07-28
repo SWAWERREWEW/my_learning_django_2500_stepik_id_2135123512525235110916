@@ -1,0 +1,62 @@
+30 day = 4.7 Связь one-to-one (один ко однму)
+
+Необходимо создать связь один ко одному. Связь таблицы Women и Husband по правилу: Каждая женщина может иметь только
+одного мужа и у каждого мужа может быть только одна женщина
+
+🛠💾
+Был изменён файл sitewomen\women\models.py
+...
+class Women(models.Model):
+    ...
+    tags = ...
+    husband = models.OneToOneField('Husband', on_delete=models.SET_NULL)
+
+class Husband(models.Model):
+    name = models.CharField(max_length=100)
+    age = models.IntegerField(null=True)
+
+    def __str__(self):
+        return self.name
+
+🛠📊⚙📦
+Чтобы таблица создалась, необходимо создать и выполнить миграции
+python manage.py makemigrations
+python manage.py migrate
+
+🛠📊➕
+Потом необходимо добавить записи в новую таблицу
+python manage.py shell
+from women.models import Husband
+Husband.objects.create(name='kikidon', age=2_000_000_000)
+Husband.objects.create(name='pistol', age=2)
+Husband.objects.create(name='гусь')
+Husband.objects.create(name='чо')
+
+🛠📊➕
+Добавление записей в поля husband_id в таблице Women
+h2 = Husband.objects.get(id=2)
+w2 = Women.objects.get(id=2)
+w2.husband = Husband.objects.get(id=2)
+w2.save()
+w2.husband
+Husband.objects.get(id=2).wuman
+
+Отображение связанных записей через менеджеры связей
+In [5]: w2 = Women.objects.get(id=2)
+In [6]: w2.husband
+Out[6]: <Husband: pistol>
+In [7]: Husband.objects.get(id=2).wuman
+Out[7]: <Women: КАРАБЛИК>
+In [8]: w2
+Out[8]: <Women: КАРАБЛИК>
+
+🛠📊❌
+Можно стереть запись в поле Husband_id
+w2.husband = None
+w2.save()
+
+➕📊🛠
+Добавление второго мужа для третьей записи
+w3 = Women.objects.get(id=3)
+w3.husband = Husband.objects.get(id=2)
+w3.save()
