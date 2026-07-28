@@ -60,3 +60,5 @@ w2.save()
 w3 = Women.objects.get(id=3)
 w3.husband = Husband.objects.get(id=2)
 w3.save()
+
+🎉✅🎂☕👑🏠🕗🎈 Всё

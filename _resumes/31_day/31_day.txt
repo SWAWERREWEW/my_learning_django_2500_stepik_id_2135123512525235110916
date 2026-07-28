@@ -1,0 +1,39 @@
+31 day = 5.1 ORM-команды с классом Q
+
+📊📖🌎
+Страница документации
+docs.djangoproject.com/en/4.2/ref/models/querysets/#q-objects
+
+В команду filter можно передавать условия и они будут связаны логическим "И", но существует объект класса Q и символ |,
+который позволяет реализовать условия с логическим "ИЛИ".
+
+python manage.py shell
+from women.models import Woman
+from django.db.models import Q
+Women.objects.filter(Q(id=1) | Q(id=2))
+
+Существует также и логическое "НЕ" и специальное добавление логического "И"
+Women.objects.filter(Q(id__lte=3) & ~Q(id=2))
+
+Существует метод icontains, который позволяет поставить условия для поиска по фрагменту
+Women.objects.filter(title__icontains="а")
+
+Можно объединять условия, однако класс Q должен быть впереди.
+Women.objects.filter(Q(id__lte=3) & ~Q(id=2), title__icontains="а")
+Но можно использовать класс Q и в таком случае запятая ставит скобки в условии
+Women.objects.filter(Q(id__lte=3) & ~Q(id=2), Q(title__icontains="а") | Q(title__icontains="б"))
+На языке SQL запроса это выглядит так
+WHERE ("women_women"."id" <= 3 AND NOT ("women_women"."id" = 2) AND ("women_women"."title" LIKE \'%а%\' ESCAPE \'\\\'
+OR "women_women"."title" LIKE \'%б%\' ESCAPE \'\\\'))
+
+Это выяснено с помощью библиотеки connection и функции атрибута queries[-1]
+(это было в конспекте 19 day.txt и в пункте 3.3 Понятие CRUD. Добавление записей в таблицу БД)
+from django.db import connection
+connection.queries[-1]
+
+Приоритет операций: ~ & |
+~ = наивысший приоритет
+& = средний приоритет
+| = наименьший приоритет
+
+🎉✅🎂☕👑🏠🕗🎈 Всё
