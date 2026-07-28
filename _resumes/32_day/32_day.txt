@@ -1,0 +1,38 @@
+32 day = 5.2 Методы выбора записей. Методы exists() и count()
+
+Метод first() отображает первую запись, а last отображает последнюю запись в соответствии сортировки по умолчанию,
+которая была установлена в файле sitewomen\women\models.py В подклассе Meta
+Women.objects.first()
+
+Можно таким образом получать первую запись при сортировке
+Women.objects.order_by("id").first()
+
+Обратная сортировка
+Women.objects.order_by("-id").first()
+
+Метод earliest отображает наименьшее значение, а latest наоборот отображает наибольшее значение.
+Women.objects.all().earliest("time_update")
+Women.objects.earliest("-time_update")
+
+Метод get_previous_by_ отображает предыдущую запись относительно выбранной по выбранному полю, а get_next_by_ наоборот
+отображает следующую запись относительно выбранной по выбранному полю. В скобках можно прописывать дополнительное
+условие, однако оно проверяют только следующую запись при get_next_by_ и только предыдущую при get_previous_by_
+В данном случае для второй записи по полю time_update была отображена предыдущая запись относительно неё
+w2 = Women.objects.get(id=2)
+w2.get_previous_by_time_update()
+w2.get_next_by_time_update(id__gte=3)
+
+Метод exists() проверяет наличие хотя бы одной записи в выборке или таблице
+In [49]: Women.objects.filter(id__gte=2).exists()
+Out[49]: True
+In [50]: Women.objects.filter(id__gte=10).exists()
+Out[50]: False
+In [52]: Women.objects.exists()
+Out[52]: True
+
+Метод count() считает количество записей в выборке или таблице
+In [51]: Women.objects.filter(id__gte=2).count()
+Out[51]: 3
+
+
+✅🎉🎂☕👑🕗💥🚀 Всё
