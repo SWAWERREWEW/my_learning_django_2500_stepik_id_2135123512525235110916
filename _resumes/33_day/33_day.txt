@@ -1,0 +1,55 @@
+33 day = 5.3 Класс F, Value и метод annotate()
+
+Класс F позволяет сравнивать значения полей для каждой отдельной записи.
+В данном случае будут выведены те записи, чьё значение в поле id больше, чем cat_id
+from django.db.models import F
+Women.objects.filter(id__gt=F("cat_id"))
+
+Но можно было это сделать и обычным кодом
+for w in Women.objects.all():
+if w.id > w.cat_id:
+print(Women.objects.get(id=w.id).title)
+
+Для следующих действий необходимо создать дополнительное поле для таблицы Husband
+🛠💾
+Был изменён файл sitewomen\women\models.py
+...
+class Husband(models.Model):
+    ...
+    age = ...
+    some_count = models.IntegerField(blank=True, default=0)
+    ...
+...
+
+🛠📊📝
+Для переноса изменений в базу данных необходимо сделать миграции
+python manage.py makemigrations
+python manage.py migrate
+
+🛠📊📝
+Необходимо заполнить все поля с помощью переопределения
+В данном случае у всех записей значение этого поля будет увеличено на 1.
+Все значения обновлены путём того, что значение поля переопределялась на саму себя, увеличенную на единицу.
+Класс F создал переменную со значением выбранного поля.
+python manage.py shell
+from women.models import Husband
+from django.db.models import F
+Husband.objects.update(some_count = F("some_count") + 1)
+h4 = Husband.objects.get(id=4).name
+h4 = h4 + h4
+h4.save()
+
+Можно создать новое поле или поля с помощью команды annotate и заполнять все записи значениями классов Value и F
+from django.db.models import Value
+Husband.objects.all().annotate(is_really=Value(True))
+Husband.objects.all().annotate(is_really=Value(5+4))
+Husband.objects.all().annotate(is_really=Value("skateboard"))
+Husband.objects.all().annotate(is_really=F("name")*4)
+Husband.objects.all().annotate(is_really=F("name")*4, again_is_really=5)
+
+Чтобы отобразить значения
+lst = Husband.objects.all().annotate(is_really=F("name")*4, again_is_really=5)
+for e in lst:
+print(list(e.__dict__.values())[1:])
+
+🎉🎉👑👑🚀🚀✅✅💥💥 Всё
