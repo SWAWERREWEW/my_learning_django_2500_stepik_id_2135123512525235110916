@@ -1,0 +1,40 @@
+35 day = 5.5 Группировка и агрегирование. Вычисления на стороне СУБД
+
+python manage.py shell
+from women.models import Women, Category
+from django.db.models import Count, F
+
+Отображение поля cat_id и добавление поля cat_id с количеством записей.
+Например для cat_id = 1 существуте несколько записей и поэтому в новом поле id__count будет 3
+Women.objects.values("cat_id").annotate(Count("id"))
+Women.objects.values("cat_id").annotate(Count("title"))
+Women.objects.values("cat_id").annotate(total=Count("title"))
+
+Отображение количества записей для каждой категории, где posts это обращение к таблице Women
+Создаётся поле total, перебираются id каждой категории, потом высчитывается их количество в таблице Women через posts
+(менеджер связывания) и потом это значение переносится в новое поле total для каждой отдельной категории
+Category.objects.annotate(total=Count("posts"))
+
+Отображение количества тегов используемых в таблице Women но при условии, что они существуют и их количество больше нуля
+TagPost.objects.annotate(total=Count("tags")).filter(total__gt=0)
+
+Необходимо сделать отображение категорий при условии существования в них записей.
+
+🛠💾
+Был изменён файл sitewomen\women\templatetags\women_tags.py
+...
+def show_categories(cat_selected=0):
+    cats = Category.objects.annotate(total=Count("posts")).filter(total__gt=0)
+    ...
+...
+def show_all_tags():
+    return {'tags': TagPost.objects.annotate(total=Count("tags")).filter(total__gt=0)}
+
+Так как django это богатый framework можно обратиться к документации за дополнительным функционалом
+docs.djangoproject.com/en/4.2/ref/models/database-functions/
+
+Вычисление длины
+from django.db.models.functions import Length
+lst = Husband.objects.annotate(len_name=Length('name'))
+
+✅👑🚀💥🎉 Всё
