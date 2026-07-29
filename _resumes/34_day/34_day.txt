@@ -1,0 +1,23 @@
+34 day = Агрегирующие функции. Метод values()
+
+🌎📖🗝
+Можно обратиться к документации по поводу агрегирующих функций
+docs.djangoproject.com/en/4.2/ref/models/querysets/#aggregation-functions
+
+python manage.py shell
+from django.db.models import Count, Sum, Avg, Max, Min
+from women.models import Husband
+
+Агрегирующие функции и их применение
+Husband.objects.aggregate(Min("age"))
+Husband.objects.aggregate(Min("age"), Max("age"))
+Husband.objects.aggregate(big=Min("age"), little=Max("age"))
+Husband.objects.aggregate(super=Min("age") - Max("age"))
+Husband.objects.aggregate(middle_value=Avg("age"))
+
+Метод valies отображает выбранные поля
+Women.objects.values("title", "cat_id")
+Women.objects.values("title", "cat__name")
+Women.objects.values("title", "cat__name").get(id=2)
+
+✅🚀👑🎉🌎💥📖🗝 Всё
