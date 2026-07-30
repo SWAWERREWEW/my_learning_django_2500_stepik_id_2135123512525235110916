@@ -11,6 +11,9 @@ class PublishedManager(models.Manager):
 # Create your models here.
 class Women(models.Model):
     class Meta:
+        verbose_name = "Женщина с планеты кибертрон в классе мета"
+        verbose_name_plural = "Женщины с планеты кибертрон в классе мета"
+
         ordering = ['time_create']
         indexes = [
             models.Index(fields=['time_create'])
