@@ -1,0 +1,77 @@
+37 day = 6.1 Подключение админ-панели. Регистрация моделей.
+
+В файле # sitewomen\sitewomen\settings.py
+присутствует параметр с подключением моделя админ-панели
+...
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    ...
+]
+...
+А в файле sitewomen/sitewomen/urls
+...
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    ...
+]
+Что означает доступность админ-панели при переходе по адресу
+https://127.0.0.1/admin/
+Однако в итоге переносит на страницу с авторизацией без возможности её пройти из-за отсутствия у нас логина и пароля
+http://127.0.0.1:8000/admin/login/?next=/admin/
+
+Необходимо создать логин с паролем (суперпользователя) и настроить русский язык для админ панели
+
+🛠💾
+Был изменён файл sitewomen\sitewomen\settings.py
+...
+# LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-RU'
+...
+
+🛠📝💬➕
+В терминале
+python manage.py createsuperuser
+Были введены данные
+random
+random@random.random
+random
+
+В панели по умолчанию есть возможность управлять пользователями и группами пользователей и настраивать их.
+
+Необходимо зарегистрировать приложение Women
+
+🛠💾
+Был изменён файл sitewomen\women\admin.py
+from django.contrib import admin
+from .models import Women
+
+# Register your models here.
+admin.site.register(Women)
+
+Приложение появляется в админ панели, а при просмотре записей появляется кнопка "СМОТРЕТЬ НА САЙТЕ >" при существовании
+фукнций get_absolute_url в файле sitewomen\women\models.py
+
+Изменение настроек вида админ панели
+
+🛠💾
+Был изменён файл sitewomen/sitewomen/urls
+...
+admin.site.site_header = "Администрирование панели"
+admin.site.index_title = "Женщины с сайта Women"
+
+🛠💾
+Был изменён файл sitewomen\women\models.py
+...
+class Women(models.Model):
+    class Meta:
+        verbose_name = "Женщина с планеты кибертрон в классе мета"
+        verbose_name_plural = "Женщины с планеты кибертрон в классе мета"
+        ...
+...
+
+🛠💾
+# sitewomen\women\apps.py
+...
+class WomenConfig(AppConfig):
+    verbose_name = "Приложение Женщина"
+    ...

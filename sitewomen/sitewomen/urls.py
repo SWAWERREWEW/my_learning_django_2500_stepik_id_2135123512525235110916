@@ -30,3 +30,5 @@ urlpatterns = [
 ]
 
 # handler400 = sitewomen.women.views.custom_page_not_found
+admin.site.site_header = "Администрирование панели"
+admin.site.index_title = "Женщины с сайта Women"
