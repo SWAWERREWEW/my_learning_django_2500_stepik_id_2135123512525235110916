@@ -1,0 +1,96 @@
+36 day = 5.6 Оптимизация сайта с Django Debug Toolbar
+
+Критерии оптимизированности сайта
+- Скорость работы приложения
+- нагрузку на СУБД (частота и сложность запросов)
+- Корректность возвращаемых пользователю данных
+
+Для оценки этих характеристик используется Django Debug Toolbar
+
+📥📦🗝
+Можно зайти на сайт
+https://pypi.org
+вести надпись Django Debug Toolbar и получить команду для установки этой библиотеки
+https://pypi.org/project/django-debug-toolbar/
+pip install django-debug-toolbar==4.2.0
+
+Или можно создать файл req.txt (requirements) в корне проекта (где будет папка .venv) и написать
+django==4.2.1
+ipython==9.15.0
+django-debug-toolbar==4.2.0
+
+(django-extensions==3.2.3)
+
+📥📦📦
+А потом выполнить команду
+pip install -r req.txt
+
+После установки Django Debug Toolbar необходимо его привязать к сайту
+В этом может помочь сайт
+https://django-debug-toolbar.readthedocs.io/en/latest/installation.html
+
+🛠💾📦
+Был изменён файл sitewomen/sitewomen/settings.py
+...
+ALLOWED_HOSTS = [...]
+INTERNAL_IPS = ["127.0.0.1"]
+...
+INSTALLED_APPS = [
+    ...
+    "debug-toolbar",
+]
+MIDDLEWARE = [
+    ...
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
+]
+...
+
+Осталось прописать путь к странице debug-а
+
+🛠💾
+Был изменён файл sitewomen/sitewomen/urls.py
+...
+urlpatterns = [
+    ...
+    path("__debug__/", include("debug_toolbar.urls")),
+]
+...
+
+По кнопке DJDT справа можно отобразить всю информацию. По вкладке SQL можно перейти и увидеть все обращения к базе
+данных и обнаружить повторяющиеся 3 similar queries.
+🛠💾❌
+Если удалить кусок файла sitewomen\women\templates\women\index.html
+...
+{{ p.cat.name }}
+...
+То пропадёт надпись 3 similar queries и это будет говорить об успешной оптимизации и избавления от повторяющихся
+обращений
+
+Однако без этого куска {{ p.cat.name }} от файла sitewomen\women\templates\women\index.html
+не получится отображать категории, но для оптимизации и реализации такой задачи существуют методы
+select_related(key) = загрузка сразу всех связанных данных по вненему ключу с типом ForeignKey
+prefetch_related(key) = загрузка сразу всех связанных данных по внешнему ключу с типом ManyToManyField
+
+💾🛠
+Был изменён sitewomen/women/views.py
+...
+def index(request):
+    posts = Women.published.all().select_related('cat')
+    data = ...
+...
+def show_tag_postlist(request, tag_slug):
+    ...
+    posts = tag.tags.filter(is_published=Women.Status.PUBLISHED).select_related("cat")
+...
+def show_category(request, cat_slug):
+    ...
+    posts = Women.published.filter(cat_id=category.pk).select_related("cat")
+...
+
+💾🛠
+Был возвращён кусок файла {{ p.cat.name }} в файл sitewomen\women\templates\women\index.html
+
+🚀✅
+После запуска никакого дублирования не происходит, а категории снова отображаются на главной странице
+
+✅📈👑🚩🌎♻⚡🧠💥🎉🎂☕ Всё

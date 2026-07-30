@@ -25,7 +25,8 @@ from django.urls import path, include
 """Не забывать в конце пути ставить слеш /"""
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('women.urls'))
+    path('', include('women.urls')),
+    path("__debug__/", include("debug_toolbar.urls")),
 ]
 
 # handler400 = sitewomen.women.views.custom_page_not_found
