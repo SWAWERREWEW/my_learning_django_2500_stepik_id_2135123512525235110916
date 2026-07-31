@@ -1,0 +1,74 @@
+39 day = Пользовательские поля и действия в админ-панели
+
+Необходимо добавить новое поле в таблицу в админ панель без добавления в базу данных
+
+💾🛠
+Был изменён файл sitewomen\women\models.py
+...
+class WomenAdmin(admin.ModelAdmin):
+    list_display = ("id", "title", "time_create", "is_published", "cat", "brief_info")
+    ...
+    def brief_info(self, women: Women):
+        return f"Длинна контента {len(women.content)} и {women.content[:5]}"
+...
+
+Можно русифицировать новое поле
+
+💾🛠
+Был изменён файл sitewomen\women\admin.py
+...
+class WomenAdmin(admin.ModelAdmin):
+    ...
+    @admin.display(description="Ещё Инфа")
+    def brief_info(self, women: Women):
+        return ...
+...
+
+Возможность сортировка по новому полю
+
+💾🛠
+Был изменён файл sitewomen\women\admin.py
+...
+class WomenAdmin(admin.ModelAdmin):
+    ...
+    @admin.display(description="Ещё Инфа", ordering="content")
+    def brief_info(self, women: Women):
+        ...
+...
+
+Необходимо добавить новое действие во вкладку "Действия" под названием "Сделать опубликованным" и сообщением об
+изменениях
+
+💾🛠
+Был изменён файл sitewomen\women\admin.py
+...
+class WomenAdmin(admin.ModelAdmin):
+    ...
+    list_editable = ...
+    # list_per_page = 1
+    actions = ["set_published"]
+
+    ...
+    def brief_info(...):
+        ...
+
+    @admin.action(description="Сделать опубликованными")
+    def set_published(self, request, queryset):
+        count = queryset.update(is_published=Women.Status.PUBLISHED)
+        self.message_user(request, f"Измена {count} зуписей на опубликовано")
+
+Необходимо добавить новое действие во вкладку "Действия" под названием "Убрать опубликованность" и сообщением об
+изменениях с ⚠ восклицательным знаком и оранжевым цветом
+
+💾🛠
+Был изменён файл sitewomen\women\admin.py
+...
+class WomenAdmin(...):
+    ...
+    actions = ["set_published", "set_draft"]
+    ...
+    @admin.action(description="Убрать опубликованность")
+    def set_draft(self, request, queryset):
+        count = queryset.update(is_published=Women.Status.DRAFT)
+        self.message_user(request, f"Измена {count} зуписей и убрана опубликованность")
+...
