@@ -1,2 +1,4 @@
 ﻿djvenv/
+.venv/
 .idea/
+.idea

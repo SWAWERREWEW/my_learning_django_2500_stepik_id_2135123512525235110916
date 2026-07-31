@@ -1,0 +1,122 @@
+38 day = 6.2 Настройка отображения списка статей
+
+Необходимо изменить изначальное отображение таблицы из приложения women в админ панеле. Изначально отображаются записи
+без идентификаторов и другой информации. Задача добавить эти поля в админ панель.
+
+🛠💾
+Был изменён файл sitewomen\women\admin.py
+# sitewomen\women\admin.py
+...
+class WomenAdmin(admin.ModelAdmin):
+    list_display = ("id", "title", "time_create", "is_published")
+# Register your models here.
+admin.site.register(Women, WomenAdmin)
+
+✅🚀
+После запуска отображается таблица со всеми прописанными полями
+
+Необходима сортировка и кликабельность надписей у каждой записи.
+
+💾🛠
+Был изменён файл sitewomen\women\admin.py
+...
+@admin.register(Women)
+class WomenAdmin(admin.ModelAdmin):
+    list_display = ("id", "title", "time_create", "is_published")
+    list_display_links = ("id", "title", "time_create", "is_published")
+    ordering = ["time_create", "title"]
+
+# Register your models here. 
+# admin.site.register(Women, WomenAdmin)
+
+✅🚀
+После запуска все надписи каждой записи стали кликабельными и с переходом на подробную информацию о записи с помощью
+переменной list_display_links, а также записи стали сортироваться по полю time_create с помощью переменной ordering.
+Причём сортировка по двум полям просто происходит последовательно. Сначала по первому полю, потом по второму при
+записях с одинаковыми значениями в первом поле.
+
+Необходимо русифицировать названия полей
+
+💾🛠
+Был изменён файл # sitewomen\women\models.py
+...
+class Women(models.Model):
+    ...
+    title = models.CharField(max_length=255, verbose_name="зугаловах")
+    slug = models.SlugField(max_length=300, unique=True, db_index=True, verbose_name="СЛагъ")
+    content = models.TextField(blank=True, verbose_name="КАНТЕНТсодержимое")
+    time_create = models.DateTimeField(auto_now_add=True, verbose_name="Тайм рождения")
+    time_update = models.DateTimeField(auto_now=True, verbose_name="Обнова")
+    is_published = models.BooleanField(choices=Status.choices, default=Status.DRAFT, verbose_name="Стутус")
+    cat = models.ForeignKey('Category', on_delete=models.PROTECT, related_name='posts', verbose_name="Котигория")
+    tags = models.ManyToManyField('TagPost', blank=True, related_name='tags', verbose_name="Тегишки")
+    husband = models.OneToOneField('Husband', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='wuman', verbose_name="Мужьяки")
+...
+
+Необходимо зарегистрировать модель Категории
+
+💾🛠
+Был изменён файл sitewomen\women\admin.py
+...
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ("id", "name", "slug")
+    list_display_links = ("id", "name", "slug")
+# Register ...
+# admin. ...
+
+Необходимо русифицироваать зарегистрированную модель
+
+💾🛠
+Был изменён файл sitewomen\women\models.py
+...
+class Category(models.Model):
+    class Meta:
+        verbose_name = "Категорька из категорий в классе Мета"
+        verbose_name_plural = "Категорьки из категорий в классе Мета"
+
+    name = models.CharField(max_length=100, db_index=True, verbose_name="ИменаНоНеймов")
+    slug = models.SlugField(max_length=255, unique=True, db_index=True, verbose_name="СЛагъ")
+    ...
+...
+
+Необходимо сделать возможность редактировать поля is_published, cat и title
+
+💾🛠
+Был изменён файл sitewomen\women\admin.py
+...
+@admin.register(Women)
+class WomenAdmin(admin.ModelAdmin):
+    list_display = ("id", "title", "time_create", "is_published", "cat")
+    list_display_links = ("id", "time_create")
+    ordering = ["time_create"]
+    list_editable = ("is_published", "title", "cat")
+...
+
+Отображение поля is_published в таблице происходит неверное и противоречит действительным данным по причине того, что в
+файле sitewomen\women\models.py
+во время определения поля происходит присваивание ему числового значения 0 и 1 вместо булевого Ложь и Правда из-за
+ограничений django. Для исправления было использовано преобразование чисел в значения на примере
+lil = (1, 0, 1, 1, 1, 0)
+print(tuple(map(lambda x: True if x == 1 else False, lil)))
+# Вывод (True, False, True, True, True, False)
+
+💾🛠
+Был изменён файл sitewomen\women\models.py
+class Women(models.Model):
+    ...
+    is_published = models.BooleanField(choices=tuple(map(lambda x: (bool(x[0]), x[1]), Status.choices)),
+        default=Status.DRAFT, verbose_name="Стутус")
+    ...
+
+Существует возможность ограничения по количеству отображаемых записей на одной странице с помощью переменной
+list_per_page в файле sitewomen\women\admin.py. После этого внизу отобразиться кнопка для пролистывания страниц.
+...
+@admin.register(Women)
+class WomenAdmin(admin.ModelAdmin):
+    ...
+    list_editable = ...
+    list_per_page = 1
+
+✅🚀🌎🎉👑🚩⚡💥 Всё
