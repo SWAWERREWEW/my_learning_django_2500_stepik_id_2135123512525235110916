@@ -1,6 +1,8 @@
 # sitewomen\women\models.py
 from django.db import models
 from django.urls import reverse
+from django.template.defaultfilters import slugify
+from .my_dop_functions import cyrillic_to_latin
 
 
 class PublishedManager(models.Manager):
@@ -28,6 +30,10 @@ class Women(models.Model):
 
     def get_absolute_url(self):
         return reverse('post', kwargs={'post_slug': self.slug})
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(cyrillic_to_latin(self.title))
+        super().save(self, *args, **kwargs)
 
 
     objects = models.Manager()

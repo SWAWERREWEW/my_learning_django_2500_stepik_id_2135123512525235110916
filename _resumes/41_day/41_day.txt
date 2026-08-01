@@ -1,0 +1,94 @@
+41 day = 6.5 Настройка формы редактирования записей.
+
+Есть возможность добавить или убрать редактирование записей таблиц
+Могут быть выбраны те поля, которые можно будет редактировать в админ панели и в указанном порядке
+
+sitewomen\women\admin.py
+...
+class WomenAdmin(admin.ModelAdmin):
+    fields = ["title"]
+    ...
+...
+
+В панели также есть кнопка "➕Добавить" при нажатии на неё появляется форма для заполнения новой добавляемой записи,
+однако если в переменной fields не указаны обязательные поля, то будет выведена ошибка.
+
+exclude
+Противоположностью этой переменной является exclude. Она исключает поля из админ панели при редактировании.
+
+readonly_field
+Переменная readonly_fields запрещает редактирование записей в админ панели, но отображает их при редактировании записей.
+
+💾🛠
+Был изменён файл sitewomen\women\admin.py
+...
+class WomenAdmin(admin.ModelAdmin):
+    # fields = ["title"]
+    readonly_fields = ["slug"]
+    ...
+...
+
+Существует возможность сделать поле slug автоматически заполняемым
+
+💾🛠
+Был изменён файл sitewomen\women\models.py
+...
+from django.template.defaultfilters import slugify
+...
+class Women(models.Model):
+    ...
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.title)
+        super().save(self, *args, **kwargs)
+    ...
+...
+
+Если было установлено значение readonly_fields для поля slug, то его нельзя будет редактировать при добавлении новой
+записи, однако поле будет заполняться автоматически. (В поле до сих пор нельзя использовать русские буквы)
+
+Для преобразования русских букв в слаг с английскими буквами необходимо создать вспомогательную функцию. Она уже была
+прописана в файле sitewomen\women\my_dop_functions.py и поэтому её можно просто импортировать
+
+💾🛠
+Был изменён файл sitewomen\women\models.py
+...
+from .my_dop_functions import cyrillic_to_latin
+...
+class Women(models.Model):
+    ...
+    def save(self, *args, **kwargs):
+        self.slug = slugify(cyrillic_to_latin(self.title))
+        super().save(self, *args, **kwargs)
+    ...
+...
+
+Существует возможность автозаполнения поля slug на ходу при вводе значения для поля title до тех пор, пока поле slug
+не тронуто, однако можно стереть оба поля, нажать сохранить, получить ошибку и снова начать заполнять с автоматическим
+заполнением на ходу.
+
+💾🛠
+Был изменён файл sitewomen\women\admin.py
+...
+class WomenAdmin(admin.ModelAdmin):
+    # fields = ["title"]
+    # readonly_fields = ["slug"]
+    prepopulated_fields = {"slug": ("title", )}
+    ...
+...
+
+Есть возможность добавить редактирование связанного поля tags. При редактировании можно зажать ctrl и нажимать на теги,
+которые будут у новой записи.
+
+💾🛠
+Был изменён файл sitewomen\women\admin.py
+...
+class WomenAdmin(admin.ModelAdmin):
+    fields = ["title", "is_published", "slug", "cat", "tags"]
+    # readonly_fields = ["slug"]
+    prepopulated_fields = {"slug": ("title", )}
+    ...
+...
+
+Можно изменить внешний вид поля при редактировании filter_horizontal = ["tags"]
+
+✅🎂💥☕👑🎉🚀 Всё
