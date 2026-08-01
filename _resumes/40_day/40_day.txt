@@ -1,0 +1,100 @@
+40 day = 6.4 панел поиска и панель фильтрации
+
+Можно добавить кнопку для быстрого перехода на панель администратора
+
+💾🛠
+Был изменён файл sitewomen/templates/base.html
+...
+<body>
+<a href="http://127.0.0.1:8000/admin/"> Неглавнаястраница </a>
+<ul>
+    ...
+</ul>
+...
+</body>
+...
+
+Необходимо сделать панель поиска
+
+💾🛠
+Был изменён файл sitewomen\women\admin.py
+...
+class WomenAdmin(admin.ModelAdmin):
+    ...
+    actions = ...
+    search_fields = ["title"]
+...
+
+Можно сделать панель поиска по двум полям даже из другой связанной таблицы
+Логика в переборе этих двух полей и вывод записей при содержании фрагмента хотя бы в одной из полей.
+Будут отобраны все записи, если хотя в одной из выбранных полей будет содержаться фрагмент.
+
+💾🛠
+Был изменён файл sitewomen\women\admin.py
+...
+class WomenAdmin(admin.ModelAdmin):
+    ...
+    actions = ...
+    search_fields = ["title", "cat__name"]
+...
+
+Существует также метод startwith позволяющий делать поиск при условии совпадения этого фрагмента с началом записи в
+выбранном поле
+Пример
+search_fields = ["title__startwith"]
+
+Есть возможность добавить панель фильтрации по заданным критериям
+
+💾🛠
+Был изменён файл sitewomen\women\admin.py
+...
+class WomenAdmin(admin.ModelAdmin):
+    ...
+    search_fields = ...
+    list_filter = ["is_published", "cat"]
+...
+
+Есть возможность даже добавить свой фильтр.
+Фильтрация не происходит из-за отсутствия фильтрации в функции queryset, однако меняется адрес на
+http://127.0.0.1:8000/admin/women/women/?Stutus=married&q=
+http://127.0.0.1:8000/admin/women/women/?Stutus=single&q=
+
+💾🛠
+Был изменён файл sitewomen\women\admin.py
+...
+class MarriedFilter(admin.SimpleListFilter):
+    title = "Стутус Жанщин"
+    parameter_name = "Stutus"
+
+    def lookups(self, request, model_admin):
+        return [
+            ('married', 'Замжен'),
+            ('single', ' ОДИН ДОМА')
+        ]
+
+    def queryset(self, request, queryset):
+        return queryset
+...
+class WomenAdmin(admin.ModelAdmin):
+    ...
+    search_fields = ...
+    list_filter = ["is_published", "cat", MarriedFilter]
+...
+
+Исправление панели фильтрации или добавление фильтрации в функцию queryset
+
+💾🛠
+Был изменён файл sitewomen\women\admin.py
+...
+class MarriedFilter(...):
+    ...
+    def queryset(self, request, queryset):
+        if self.value() == "married":
+            return queryset.filter(husband__isnull=False)
+        elif self.value() == "single":
+            return queryset.filter(husband__isnull=True)
+        else:
+            return queryset
+...
+
+✅☕🎂💥👑🎉🚀 Всё

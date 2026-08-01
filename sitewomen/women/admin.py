@@ -3,6 +3,25 @@ from django.contrib import admin, messages
 from .models import Women, Category
 
 
+class MarriedFilter(admin.SimpleListFilter):
+    title = "Стутус Жанщин"
+    parameter_name = "Stutus"
+
+    def lookups(self, request, model_admin):
+        return [
+            ('married', 'Замжен'),
+            ('single', ' ОДИН ДОМА')
+        ]
+
+    def queryset(self, request, queryset):
+        if self.value() == "married":
+            return queryset.filter(husband__isnull=False)
+        elif self.value() == "single":
+            return queryset.filter(husband__isnull=True)
+        else:
+            return queryset
+
+
 @admin.register(Women)
 class WomenAdmin(admin.ModelAdmin):
     list_display = ("id", "title", "time_create", "is_published", "cat", "brief_info")
@@ -11,6 +30,8 @@ class WomenAdmin(admin.ModelAdmin):
     list_editable = ("is_published", "title", "cat")
     # list_per_page = 1
     actions = ["set_published", "set_draft"]
+    search_fields = ["title", "cat__name"]
+    list_filter = ["is_published", "cat", MarriedFilter]
 
     @admin.display(description="Ещё Инфа", ordering="content")
     def brief_info(self, women: Women):
