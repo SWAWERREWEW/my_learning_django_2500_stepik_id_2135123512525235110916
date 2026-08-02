@@ -1,0 +1,77 @@
+42 day = 6.6 Настраиваем внешний вид админ-панели
+
+Можно обратиться к документации за дополнительной информацией про настройку сайта и все нюансы
+docs.djangoproject.com/en/4.2/ref/contrib/admin/
+
+Код админ панели по умолчанию находится в
+"External Libraries\site-packages\django\contrib\admin\templates\admin\base_site.html"
+Но можно подключить свой код создав файл sitewomen\templates\admin\base_site.html
+
+💾🛠➕
+Был создан файл sitewomen\templates\admin\base_site.html
+{% extends "admin/base.html" %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}">{{ site_header|default:_('Django administration') }}</a></h1>
+{% if user.is_anonymous %}
+  {% include "admin/color_theme_toggle.html" %}
+{% endif %}
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
+
+Существует тег extrastyle для подключения статических файлов
+
+💾🛠➕
+Был создан пустой файл
+sitewomen\static\css\admin\admin.css
+
+🛠💾
+Был изменён файл
+<!-- sitewomen\templates\admin\base_site.html -->
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}">{{ site_header|default:_('Django administration') }}</a></h1>
+{% if user.is_anonymous %}
+  {% include "admin/color_theme_toggle.html" %}
+{% endif %}
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="{% static 'css/admin/admin.css' %}">
+{% endblock %}
+
+Однако стили не загружаются вообще, потому что новый файл
+sitewomen\static\css\admin\admin.css
+находится в не стандартной папке, которую нужно прописать в sitewomen\sitewomen\settings.py
+
+🛠💾
+Был изменён файл sitewomen\sitewomen\settings.py
+STATIC_URL = ...
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
+...
+
+🛠💾
+Был изменён файл sitewomen\static\css\admin\admin.css
+#header, .module caption, #changelist-filter h2{
+    background: #00a020;
+}
+
+div.breadcrumbs{
+    background: #006000;
+}
+
+После этого цвет верхней панели был изменён
+
+Тег header был найден по кнопке "Посмотреть код элемента" или F12 на странице в браузере и поэтому использован в файле
+sitewomen\static\css\admin\admin.css
