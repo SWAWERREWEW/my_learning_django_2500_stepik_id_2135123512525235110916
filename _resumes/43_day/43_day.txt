@@ -1,0 +1,102 @@
+43 day = 7.1 Что такое HTML-формы. Отправка данных по GET и POST-запросам
+
+Необходимой частью сайта является форма (связанная либо не связанная с моделью) для регистрации, входа и ввода другой
+информации.
+
+Несвязанная служит для поиска или отправки письма. Её необходимо сделать.
+
+Можно об этом ознакомится в документации
+docs.djangoproject.com/en/4.2/topics/forms/
+
+💾🛠
+Был изменён файл sitewomen\women\views.py
+...
+def addpage(request):
+    return render(request, 'women/addpage.html', {"menu": menu, "title": "Добавить статью➕"})
+...
+
+➕🛠💾
+Был создан файл sitewomen\women\template\women\addpage.html
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{{title}}</h1>
+<p>Сдержание муххахаха</p>
+{% endblock %}
+
+Была создана форма заполнения
+
+🛠💾
+Был изменён файл sitewomen\women\template\women\addpage.html
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{{title}}</h1>
+<form action="">
+  <p><input type="text"> </p>
+  <p><input type="checkbox"> </p>
+  <p><input type="number"> </p>
+  <p><input type="password"> </p>
+</form>
+<p>Сдержание муххахаха📖📝📦</p>
+{% endblock %}
+
+Для ознакомления с остальными элементами для формы заполнения можно обратиться к другой документации
+www.w3schools.com/html/html_forms.asp
+
+Дальше необходимо доделать оформление
+
+🛠💾
+Был изменён файл sitewomen\women\template\women\addpage.html
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{{title}}</h1>
+<form action="">
+  <p>Лох это растение: <input type="text"> </p>
+  <p><label for="id_1">Лох это растение💥: </label><input type="text" id="id_1"> </p>
+  <p><label for="id_2">Правда❓: </label><input type="checkbox" id="id_2"> </p>
+  <p><label for="id_3">Сколько лохов📝: </label><input type="number" id="id_3"> </p>
+  <p><label for="id_4">Пароль от лоха🗝: </label><input type="password" id="id_4"> </p>
+</form>
+<p>Сдержание муххахаха📖📝📦</p>
+{% endblock %}
+
+Нехватает кнопки для отправки данных в базу данных ъ
+
+💾🛠
+Был изменён файл sitewomen\women\template\women\addpage.html
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{{title}}</h1>
+<form action="">
+  <p>Лох это растение: <input type="text"> </p>
+  <p><label for="id_1">Лох это растение💥: </label><input type="text" id="id_1" name="field_text"> </p>
+  <p><label for="id_2">Правда❓: </label><input type="checkbox" id="id_2" name="field_checkbox"> </p>
+  <p><label for="id_3">Сколько лохов📝: </label><input type="number" id="id_3" name="field_number"> </p>
+  <p><label for="id_4">Пароль от лоха🗝: </label><input type="password" id="id_4" name="field_password"> </p>
+  <p><button type="submit">🚀Отправить лоха🚀</button></p>
+</form>
+<p>Сдержание муххахаха📖📝📦</p>
+{% endblock %}
+
+Кнопка переносит на адрес
+http://127.0.0.1:8000/addpage/?field_text=artko&field_number=&field_password=cft678ujn
+или на такой адрес, если чтото было введено
+http://127.0.0.1:8000/addpage/?field_text=%D0%92%D0%B2%D0%B5%D0%B4%D1%91%D0%BD%D0%BD%D0%BE%D0%B5+
+%D1%80%D0%B0%D1%81%D1%82%D0%B5%D0%BD%D0%B8%D0%B5&field_checkbox=on&field_number=
+0&field_password=%D0%B2%D0%B2%D0%B5%D0%B4%D0%B5%D0%BD%D0%BD%D1%8B%D0%B9+%D0%BF%D0%B0%D1%80%D0%BE%D0%BB%D1%8C
+
+Причём, если поставить красную метку (нажатие на номер строки в левой стороне) сначала запустить сайт обычным способом,
+а потом перезапустить в режиме Debug и нажать на кнопку "🚀Отправить лоха🚀", то в меню Debug можно будет увидеть
+метод GET, который отображает содержимое отправленных данных.
+
+Если прописать <form action="/">, то при нажатии кнопки "🚀Отправить лоха🚀" будет автоматический переход на главную
+страницу по адресу
+http://127.0.0.1:8000/
+
+Для скрытия пароля из адресной строки после отправки используется method="post". Если его просто добавить, то после
+отправки будет отображена страница отклонения запроса и ошибка доступа
+Для исправления этой ошибки нужно использовать {% csrf token %} ниже
+После этого отправленные данные будут отображаться в методе POST как и в GET
