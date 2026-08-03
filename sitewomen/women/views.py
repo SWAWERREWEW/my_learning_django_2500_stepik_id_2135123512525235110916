@@ -1,6 +1,7 @@
-# sitewomen/women/views.py
+# sitewomen\women\views.py
 from gc import get_objects
 from .models import Women, Category, TagPost
+from .forms import AddPostForm
 
 from django.http import HttpResponse, HttpResponseNotFound, Http404
 from django.shortcuts import render, redirect, get_object_or_404
@@ -59,7 +60,20 @@ def show_post(request, post_slug):
 
 
 def addpage(request):
-    return render(request, 'women/addpage.html', {"menu": menu, "title": "Добавить статью➕"})
+    if request.method == 'POST':
+        form = AddPostForm(request.POST)
+        # if form.is_valid():
+        #    print("Лох")
+        #    print(form.cleaned_data)
+    else:
+        form = AddPostForm()
+
+    data = {
+        'menu': menu,
+        'title': 'Добавить статью➕',
+        'form': form
+    }
+    return render(request, 'women/addpage.html', data)
 
 
 def contact(request):
