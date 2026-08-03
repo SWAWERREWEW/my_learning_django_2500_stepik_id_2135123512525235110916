@@ -33,7 +33,7 @@ class Women(models.Model):
 
     def save(self, *args, **kwargs):
         self.slug = slugify(cyrillic_to_latin(self.title))
-        super().save(self, *args, **kwargs)
+        super().save(*args, **kwargs)
 
 
     objects = models.Manager()
