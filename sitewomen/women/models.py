@@ -3,6 +3,7 @@ from django.db import models
 from django.urls import reverse
 from django.template.defaultfilters import slugify
 from .my_dop_functions import cyrillic_to_latin
+# from django.core.validators import MinLengthValidator, MaxLengthValidator
 
 
 class PublishedManager(models.Manager):
@@ -40,6 +41,9 @@ class Women(models.Model):
     published = PublishedManager()
     title = models.CharField(max_length=255, verbose_name="зугаловах")
     slug = models.SlugField(max_length=300, unique=True, db_index=True, verbose_name="СЛагъ")
+    # slug = models.SlugField(max_length=300, unique=True, db_index=True, verbose_name="СЛагъ",
+    #                         MinLengthValidator(3, message="БОЛЬШЕ БУКАВ"),
+    #                         MaxLengthValidator(255, message="МЕНЬШЕ 255 БУКАВ"))
     content = models.TextField(blank=True, verbose_name="КАНТЕНТсодержимое")
     time_create = models.DateTimeField(auto_now_add=True, verbose_name="Тайм рождения")
     time_update = models.DateTimeField(auto_now=True, verbose_name="Обнова")

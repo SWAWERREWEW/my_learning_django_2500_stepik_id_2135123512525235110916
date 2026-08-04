@@ -1,0 +1,79 @@
+46 day = 7.4 Валидация полей формы
+
+Есть возможность создавать дополнительные ограничения на ввод данных
+Например ограничение длинны. После этого сам браузер будет напоминанть про минимальную длину.
+
+В файле sitewomen\women\forms.py
+...
+class AddPostForm(forms.Form):
+    title = forms.CharField(max_length=255, min_length=3, label="🔳Зугаловок")
+    ...
+
+Есть параметр для вывода определённых сообщений об ошибках со стороны сервера
+
+В файле sitewomen\women\forms.py
+from django.core.validators import MinLengthValidator, MaxLengthValidator
+...
+class AddPostForm(forms.Form):
+    title = forms.CharField(max_length=255, min_length=3, label="🔳Зугаловок", error_messages={
+    'min_length': 'БОЛЬШЕ БУКАВ',
+    'required': 'СУПЕР НУЖНОЕ ПОЛЕ'})
+    slug = forms.SlugField(max_length=300, label="🔳Слаг", validators=[
+    MinLengthValidator(5),
+    MaxLengthValidator(100)]
+    )
+    ...
+
+В файле sitewomen\women\models.py
+class Women(models.Model):
+    ...
+    slug = models.SlugField(max_length=300, unique=True, db_index=True, verbose_name="СЛагъ",
+            MinLengthValidator(3, message="БОЛЬШЕ БУКАВ"),
+            MaxLengthValidator(255, message="МЕНЬШЕ 255 БУКАВ"))
+    ...
+...
+
+Причём бывает необходимость создать свой валидатор. Для этого можно зажать ctrl и нажать мышкой на уже существующий
+валидатор и скопировать часть кода.
+
+💾🛠
+Был изменён файл sitewomen\women\forms.py
+...
+from django.core.validators import MinLengthValidator, MaxLengthValidator, ValidationError
+@deconstructible
+class RussianValidator:
+    ALLOWED_CHARS = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЬЫЪЭЮЯабвгдеёжзийклмнопрстуфхцчшщбыъэюя0123456789- "
+    code = 'russian'
+
+    def __init__(self, message=None):
+        self.message = message if message else "РОССИЯ СВЯЩЕННАЯ НАША ДЕРЖВА, РОССИЯ ОЧЕНЬ ЛЮБИТ РУССКИЕ СЛОВА"
+
+    def __call__(self, value):
+        if not (set(value) <= set(self.ALLOWED_CHARS)):
+            raise ValidationError(self.message, code=self.code, params={"value": value})
+class AddPostForm(forms.Form):
+    title = forms.CharField(max_length=255, min_length=3, label="🔳Зугаловок", error_messages={
+    'min_length': 'БОЛЬШЕ БУКАВ',
+    'required': 'СУПЕР НУЖНОЕ ПОЛЕ'}, validators=[RussianValidator(),])
+    ...
+
+Иногда создание своих валидаторов можно избежать. Конкретно эту задачу можно было решить проще.
+
+💾🛠
+Был изменён файл sitewomen\women\forms.py
+...
+class AddPostForm(forms.Form):
+    title = forms.CharField(max_length=255, min_length=3, label="🔳Зугаловок", error_messages={
+    'min_length': 'БОЛЬШЕ БУКАВ',
+    'required': 'СУПЕР НУЖНОЕ ПОЛЕ'})
+    # title = forms.CharField(max_length=255, min_length=3, label="🔳Зугаловок", error_messages={
+    # 'min_length': 'БОЛЬШЕ БУКАВ',
+    # 'required': 'СУПЕР НУЖНОЕ ПОЛЕ'}, validators=[RussianValidator(),])
+    slug = forms.SlugField(max_length=300, label="🔳Слаг")...
+    ...
+    def clean_title(self):
+        title = self.cleaned_data['title']
+        ALLOWED_CHARS = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЬЫЪЭЮЯабвгдеёжзийклмнопрстуфхцчшщбыъэюя0123456789- "
+        if not (set(title) <= set(ALLOWED_CHARS)):
+            raise ValidationError("Должны быть только русские символы, дефис и пробел.")
+        return title
