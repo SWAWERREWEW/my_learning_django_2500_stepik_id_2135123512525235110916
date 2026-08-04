@@ -1,0 +1,76 @@
+47 day = 7.5 Формы связанные с моделями
+
+За прошлое занятие произошло дублирование кода в файлах
+sitewomen\women\models.py
+sitewomen\women\forms.py
+Необходимо это исправить
+
+💾🛠
+Был изменён файл sitewomen\women\forms.py
+...
+from .models import Husband, Category, Women
+...
+class AddPostForm(forms.ModelForm):
+    cat = forms.ModelChoiceField(queryset=Category.objects.all(), empty_label="Что❓", label="🔳Котигорька")
+    husband = forms.ModelChoiceField(queryset=Husband.objects.all(), required=False, empty_label="Что❓", label="🔳мУж")
+
+    class Meta:
+        model = Women
+        fields = ['title', 'slug', 'content', 'is_published', 'cat', 'husband', 'tags']
+
+Осталось дописать остапьные прежние настройки
+
+💾🛠
+Был изменён файл sitewomen\women\forms.py
+...
+class AddPostForm(forms.ModelForm):
+    cat = forms.ModelChoiceField(queryset=Category.objects.all(), empty_label="Что❓", label="🔳Котигорька")
+    husband = forms.ModelChoiceField(queryset=Husband.objects.all(), required=False, empty_label="Что❓", label="🔳мУж")
+
+        class Meta:
+        model = Women
+        # Импортированные поля
+        fields = ['title', 'slug', 'content', 'is_published', 'cat', 'husband', 'tags']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-input'}),
+            'content': forms.Textarea(attrs={'cols': 50, 'rows': 3})
+        }
+        # Названия полей
+        labels = {'title': 'НеЗугаловах'}
+
+После этого можно использовать функцию save(), вместо различных проверок и ручных записей данных. Все ошибки
+отображаются автоматически.
+
+💾🛠
+Был изменён файл sitewomen\women\views.py
+def addpage(request):
+    if request.method == 'POST':
+        form = AddPostForm(request.POST)
+        if form.is_valid():
+            print("ЛоЛ")
+            print(form.cleaned_data)
+            form.save()
+            # try:
+                # print([i for i in form.cleaned_data.keys()])
+                # print([i for i in form.cleaned_data.values()])
+                # print(*form.cleaned_data)
+                # Women.objects.create(**form.cleaned_data)
+                # print("Ура, победа✅📥💾📦")
+                # print(form.add_error(None, "Ура, победа, всё отправлено 💾📦📥✅ создана запись" +
+                #                      str([i for i in form.cleaned_data.values()])))
+            # except:
+            #     print(form.add_error(None, "Неизвестная ошибка при записи в базу данных"))
+    ...
+
+До сих пор можно создавать собственные валидаторы
+
+💾🛠
+Был изменён файл sitewomen\women\forms.py
+...
+class AddPostForm(forms.ModelForm):
+    ...
+    def clean_title(self):
+        title = self.cleaned_data['title']
+        if len(title) > 50:
+            raise ValidationError("51 символов блин много")
+        return title

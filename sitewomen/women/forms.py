@@ -1,7 +1,7 @@
 # sitewomen\women\forms.py
 from django import forms
 from django.utils.deconstruct import deconstructible
-from .models import Husband, Category
+from .models import Husband, Category, Women
 from django.core.validators import MinLengthValidator, MaxLengthValidator, ValidationError
 
 
@@ -18,6 +18,30 @@ class RussianValidator:
             raise ValidationError(self.message, code=self.code, params={"value": value})
 
 
+class AddPostForm(forms.ModelForm):
+    cat = forms.ModelChoiceField(queryset=Category.objects.all(), empty_label="Что❓", label="🔳Котигорька")
+    husband = forms.ModelChoiceField(queryset=Husband.objects.all(), required=False, empty_label="Что❓", label="🔳мУж")
+
+    class Meta:
+        model = Women
+        # Импортированные поля
+        fields = ['title', 'slug', 'content', 'is_published', 'cat', 'husband', 'tags']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-input'}),
+            'content': forms.Textarea(attrs={'cols': 50, 'rows': 3})
+        }
+        # Названия полей
+        labels = {'title': 'НеЗугаловах'}
+
+    def clean_title(self):
+        title = self.cleaned_data['title']
+        if len(title) > 50:
+            raise ValidationError("51 символов блин много💥")
+        return title
+
+
+
+"""
 class AddPostForm(forms.Form):
     title = forms.CharField(max_length=255, min_length=3, label="🔳Зугаловок", error_messages={
     'min_length': 'БОЛЬШЕ БУКАВ',
@@ -41,3 +65,4 @@ class AddPostForm(forms.Form):
         if not (set(title) <= set(ALLOWED_CHARS)):
             raise ValidationError("РОССИЯ СВЯЩЕННАЯ НАША ДЕРЖВА, РОССИЯ ОЧЕНЬ ЛЮБИТ РУССКИЕ СЛОВА")
         return title
+"""

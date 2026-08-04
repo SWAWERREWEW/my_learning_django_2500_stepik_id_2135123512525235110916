@@ -63,18 +63,19 @@ def addpage(request):
     if request.method == 'POST':
         form = AddPostForm(request.POST)
         if form.is_valid():
-            print("Лох")
+            print("ЛоЛ")
             print(form.cleaned_data)
-            try:
-                print([i for i in form.cleaned_data.keys()])
-                print([i for i in form.cleaned_data.values()])
-                print(*form.cleaned_data)
-                Women.objects.create(**form.cleaned_data)
-                print("Ура, победа✅📥💾📦")
-                print(form.add_error(None, "Ура, победа, всё отправлено 💾📦📥✅ создана запись" +
-                                     str([i for i in form.cleaned_data.values()])))
-            except:
-                print(form.add_error(None, "Неизвестная ошибка при записи в базу данных"))
+            form.save()
+            # try:
+                # print([i for i in form.cleaned_data.keys()])
+                # print([i for i in form.cleaned_data.values()])
+                # print(*form.cleaned_data)
+                # Women.objects.create(**form.cleaned_data)
+                # print("Ура, победа✅📥💾📦")
+                # print(form.add_error(None, "Ура, победа, всё отправлено 💾📦📥✅ создана запись" +
+                #                      str([i for i in form.cleaned_data.values()])))
+            # except:
+            #     print(form.add_error(None, "Неизвестная ошибка при записи в базу данных"))
 
     else:
         form = AddPostForm()
