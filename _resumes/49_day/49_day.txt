@@ -1,0 +1,147 @@
+49 day = 7.7 Загрузка файлов с использованием классов моделей
+
+Проблема прошлой реализации загрузки файлов была в отсутствии информации о файле про имя, дату, время и отсутствия
+привязки с базой данных. Необходимо реализовать привязку к базе данных для информативности.
+
+💾🛠
+Был изменён файл
+sitewomen\women\models.py
+...
+class  UploadFiles(models.Model):
+    file = models.FileField(upload_to='sitewomen/uploads_model')
+
+💬🛠📊
+Для записи модели в базу данных
+python manage.py makemigrations
+python manage.py migrate
+
+(.venv) D:\...\sitewomen>python manage.py makemigrations
+Migrations for 'women':
+  women\migrations\0012_uploadfiles_alter_category_options_and_more.py
+    - Create model UploadFiles
+    - Change Meta options on category
+    - Change Meta options on women
+    - Alter field name on category
+    - Alter field slug on category
+    - Alter field cat on women
+    - Alter field content on women
+    - Alter field husband on women
+    - Alter field is_published on women
+    - Alter field slug on women
+    - Alter field tags on women
+    - Alter field time_create on women
+    - Alter field time_update on women
+    - Alter field title on women
+
+(.venv) D:\...\sitewomen>python manage.py migrate
+Operations to perform:
+  Apply all migrations: admin, auth, contenttypes, sessions, women
+Running migrations:
+  Applying women.0012_uploadfiles_alter_category_options_and_more... OK
+
+(.venv) D:\python_programming\for_git_repositories\my_learning_django_2500_stepik_id_2135123512525235110916\sitewomen>
+
+После этого в базе данных появляется таблица women_uploadfiles с полями id и file
+Теперь необходимо реализовать связку отправляемого файла и созданной таблицы.
+
+💾🛠
+Был изменён файл sitewomen\women\views.py
+...
+from .models import Women, Category, TagPost, UploadFiles
+...
+def about(request):
+    if request.method == "POST":
+        form = UploadFileForm(request.POST, request.FILES)
+        if form.is_valid():
+            fp = UploadFiles(file=form.cleaned_data['file'])
+            fp.save()
+            # Передаётся атрибут из класса UploadFileForm
+            # handle_uploaded_file(form.cleaned_data['file'])
+    ...
+...
+
+После отправки файл появляется и в базе данных и в директории sitewomen\uploads_model\
+sitewomen\uploads_model\обои_луна_istock-1162816285_2f2.jpg
+А при повторной отправке файл переименовывается
+sitewomen\uploads_model\обои_луна_istock-1162816285_2f2_jgBPSkM.jpg
+
+Осталось реализовать возможность сохранять все файлы только в одну директорию
+
+💾🛠
+Был изменён файл sitewomen\sitewomen\settings.py
+...
+USE_TZ = ...
+MEDIA_ROOT = BASE_DIR / 'media
+...
+
+Можно удалить директории
+sitewomen\uploads\
+sitewomen\uploads_model\
+
+🎉✅🚀
+После отправки нового файла, он был сохранён в новую автоматически созданную директорию
+sitewomen\media\sitewomen\uploads_model\hacker_man_utopia_show_2020-08-22_20-17-07.PNG
+
+Необходимо реализовать возможность привязывать изображения к существующим моделям
+
+💾🛠
+Был изменён файл sitewomen\women\models.py
+...
+class Women(models.Model):
+    ...
+    slug = ...
+    # slug = ...
+    photo = models.ImageField(upload_to="media/%Y/%m/%d", default=None, blank=True, null=True, verbose_name="Фотка🔳")
+    ...
+...
+
+💬🛠📊
+Для записи модели в базу данных
+python manage.py makemigrations
+python manage.py migrate
+
+(.venv) D:\...\sitewomen>python manage.py makemigrations
+Migrations for 'women':
+  women\migrations\0013_women_photo.py
+    - Add field photo to women
+
+(.venv) D:\...\sitewomen>python manage.py migrate
+Operations to perform:
+  Apply all migrations: admin, auth, contenttypes, sessions, women
+Running migrations:
+  Applying women.0013_women_photo... OK
+
+После этого в таблице появляется новое фото.
+Необходимо добавить это поле в форму для редактирования.
+
+💾🛠
+Был изменён файл sitewomen\women\template\women\addpage.html
+...
+<form action="" method="post" enctype="multipart/form-data">
+...
+
+💾🛠
+Был изменён файл sitewomen\women\forms.py
+...
+class AddPostForm(forms.ModelForm):
+    ...
+    class Meta:
+        ...
+        fields = ['title', 'slug', 'content', 'is_published', 'cat', 'husband', 'tags', 'photo']
+        ...
+...
+
+💾🛠
+Был изменён файл sitewomen\women\views.py
+...
+def addpage(request):
+    if request.method == 'POST':
+        form = AddPostForm(request.POST, request.FILES)
+        ...
+...
+
+После перезапуска при добавлении новой статьи через форму можно добавить к записи фотографию, которая автоматически
+сохраняется
+sitewomen/media/2026/08/05/error404_wallpaper_Exv0v43gMCc.jpg
+
+🚀🔳✅🎉📊👑💥📦🎂 Всё

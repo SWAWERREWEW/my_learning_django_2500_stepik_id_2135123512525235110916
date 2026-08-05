@@ -1,6 +1,6 @@
 # sitewomen\women\views.py
 from gc import get_objects
-from .models import Women, Category, TagPost
+from .models import Women, Category, TagPost, UploadFiles
 from .forms import AddPostForm, UploadFileForm
 
 from django.http import HttpResponse, HttpResponseNotFound, Http404
@@ -42,18 +42,20 @@ def index(request):
     return render(request, "women/index.html", context=data)
 
 
-def handle_uploaded_file(f):
-    with open(f"sitewomen/uploads/{f.name}", "wb+") as destination:
-        for chunk in f.chunks():
-            destination.write(chunk)
+# def handle_uploaded_file(f):
+#     with open(f"sitewomen/uploads/{f.name}", "wb+") as destination:
+#         for chunk in f.chunks():
+#             destination.write(chunk)
 
 
 def about(request):
     if request.method == "POST":
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
+            fp = UploadFiles(file=form.cleaned_data['file'])
+            fp.save()
             # Передаётся атрибут из класса UploadFileForm
-            handle_uploaded_file(form.cleaned_data['file'])
+            # handle_uploaded_file(form.cleaned_data['file'])
         # handle_uploaded_file(request.FILES["file_upload"])
     else:
         form = UploadFileForm()
@@ -76,7 +78,7 @@ def show_post(request, post_slug):
 
 def addpage(request):
     if request.method == 'POST':
-        form = AddPostForm(request.POST)
+        form = AddPostForm(request.POST, request.FILES)
         if form.is_valid():
             print("ЛоЛ")
             print(form.cleaned_data)
