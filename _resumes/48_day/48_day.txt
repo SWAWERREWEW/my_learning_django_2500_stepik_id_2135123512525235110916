@@ -1,0 +1,137 @@
+48 day = 7.6 Загрузка (upload) файлов на сервер. Классы FileField, ImageField
+
+Создание формы на вкладке "О сайте" для загрузки произвольных файлов.
+
+🛠💾
+Был изменён файл sitewomen/women/templates/women/about.html
+...
+{% block content %}
+<h1> {{ title|default:"без заголовка 🛠" }} </h1>
+<form action="" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <p>
+        <input type="file" name="file_upload">
+    </p>
+    <p>
+        <button type="submit">Внести</button>
+    </p>
+</form>
+{% endblock %}
+
+
+
+🛠💾
+Был изменён файл sitewomen\women\views.py
+...
+def about(request):
+    if request.method == "POST":
+        pass
+    ...
+...
+
+🔍📊🗝
+После запуска в тестовом режиме будет отображён ключ к переданному файлу SAVE_20230326_130447.jpg и через него
+необходимо сохранить файл на сервере
+
+FILES = {MultiValueDict: 1} <MultiValueDict: {'file_upload': [<InMemoryUploadedFile: SAVE_20230326_130447.jpg (image/jpeg)>]}>
+ 'file_upload' = {InMemoryUploadedFile: 308159} [<InMemoryUploadedFile: SAVE_20230326_130447.jpg (image/jpeg)>]
+
+📖🌎🔍
+Для дополнительной информации можно обратиться к документации
+https://docs.djangoproject.com/en/4.2/topics/http/file-uploads/
+
+Осталось реализовать возможность сохранения файла в определённую директорию upload
+
+🛠💾
+Был изменён файл sitewomen\women\views.py
+...
+def handle_uploaded_file(f):
+    with open(f"sitewomen/uploads/{f.name}", "wb+") as destination:
+        for chunk in f.chunks():
+            destination.write(chunk)
+def about(request):
+    def about(request):
+    if request.method == "POST":
+        handle_uploaded_file(request.FILES["file_upload"])
+    ...
+...
+
+➕📁
+Была создана директория sitewomen\uploads\
+
+После запуска файл появляется в новой директории sitewomen\uploads\
+Однако отправка перед выбором файла вызовет ошибку, потому что данные никак не проверяются. Необходимо создать класс
+формы и валидацию.
+
+🛠💾
+Был изменён файл sitewomen\women\forms.py
+...
+class UploadFileForm(forms.Form):
+    file = forms.FileField(label="Файл")
+
+🛠💾
+Был изменён файл sitewomen\women\views.py
+...
+def about(request):
+    if request.method == "POST":
+        form = UploadFileForm(request.POST, request.FILES)
+        # handle_uploaded_file(request.FILES["file_upload"])
+    else:
+        form = UploadFileForm()
+    return render(request, 'women/about.html',
+        {'title': 'О сайте 🔍', 'menu': menu, 'form': form})
+...
+
+🛠💾
+Был изменён файл sitewomen/women/templates/women/about.html
+{% extends 'base.html' %}
+<!-- sitewomen/women/templates/women/about.html -->
+...
+    {% csrf_token %}
+    {{ form.as_p }}
+    <!-- <p><input type="file" name="file_upload"></p>-->
+...
+
+При повторном запуске кнопка "Отправить" перед выбором файла лишь высветит сообщение о пустом файле.
+
+Необходимо сделать дополнительную валидацию
+
+
+🛠💾
+Был изменён файл sitewomen\women\views.py
+...
+def about(request):
+    if request.method == "POST":
+        form = UploadFileForm(request.POST, request.FILES)
+        if form.is_valid():
+            # Передаётся атрибут из класса UploadFileForm
+            handle_uploaded_file(form.cleaned_data['file'])
+        # handle_uploaded_file(request.FILES["file_upload"])
+    else:
+        form = UploadFileForm()
+    return render(request, 'women/about.html',
+        {'title': 'О сайте 🔍', 'menu': menu, 'form': form})
+...
+
+При повторной отправке файла, файл будет пересоздан в папке для избежания дубликатов.
+В качестве домашнего задания необходимо реализовать возможность сохранять дубликаты с переименованием, но в целом это
+будет на следующем занятии.
+
+Существуют различные формы для загрузки данных.
+FileField для загрузки файлов
+ImageField для загрузки только изображений
+
+📥📦➕
+Для работы ImageField необходимо уставновить библиотеку pillow==10.0.0
+Которая создана для работы с изображениями
+pip install pillow==10.0.0
+
+🛠💾
+Был изменён файл sitewomen\women\forms.py
+...
+class UploadFileForm(forms.Form):
+    file = forms.ImageField(label="Файл")
+
+После этого класс ImageField будет работать без ошибок
+
+✅🎉🎂☕👑🧿🍌🗝💥🎈🚀 Всё

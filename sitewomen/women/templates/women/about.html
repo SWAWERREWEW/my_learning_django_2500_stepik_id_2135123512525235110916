@@ -3,4 +3,12 @@
 
 {% block content %}
 <h1> {{ title|default:"без заголовка 🛠" }} </h1>
+<form action="" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <!-- <p><input type="file" name="file_upload"></p>-->
+    <p>
+        <button type="submit">Внести</button>
+    </p>
+</form>
 {% endblock %}
