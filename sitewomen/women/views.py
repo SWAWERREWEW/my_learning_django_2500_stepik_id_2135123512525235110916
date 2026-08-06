@@ -1,8 +1,10 @@
 # sitewomen\women\views.py
-from gc import get_objects
 from .models import Women, Category, TagPost, UploadFiles
 from .forms import AddPostForm, UploadFileForm
 
+from gc import get_objects
+from django.views import View
+from django.views.generic import TemplateView
 from django.http import HttpResponse, HttpResponseNotFound, Http404
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
@@ -139,3 +141,44 @@ def show_tag_postlist(request, tag_slug):
         'cat_selected': None,
     }
     return render(request, 'women/index.html', context=data)
+
+
+class AddPage(View):
+    def get(self, request):
+        form = AddPostForm(request.POST, request.FILES)
+        data = {
+            'menu': menu,
+            'title': 'Добавить статью➕',
+            'form': form
+        }
+        return render(request, 'women/addpage.html', data)
+    def post(self, request):
+        form = AddPostForm(request.POST, request.FILES)
+        if form.is_valid():
+            print("ЛоЛ")
+            print(form.cleaned_data)
+            form.save()
+        data = {
+            'menu': menu,
+            'title': 'Добавить статью➕',
+            'form': form
+        }
+        return render(request, 'women/addpage.html', data)
+
+
+class WomenHome(TemplateView):
+    template_name = 'women/index.html'
+    extra_context = {
+        'title': 'главная страница 🏠',
+        'menu': menu,
+        'posts': Women.published.all().select_related('cat'),
+        'cat_selected': 0,
+    }
+
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+    #     context["title"] = 'главная страница 🏠'
+    #     context["menu"] = menu
+    #     context["posts"] = Women.published.all().select_related('cat')
+    #     context["cat_selected"] = int(self.request.GET.get("cat_id", 0))
+    #     return context

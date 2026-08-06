@@ -1,0 +1,148 @@
+51 day = 8.1 Введение в CBV (Class Based Views). Классы View и TemplateView
+
+🌎🔍📖
+Подробно ознакомится с классами представлений можно в документации
+https://docs.djangoproject.com/en/4.2/ref/class-based-views/
+
+Необходимо заменить функции представления на классы представления
+
+🛠💾
+Был изменён файл
+# sitewomen\women\views.py
+...
+from django.views import View
+...
+class AddPage(View):
+    def get(self, request):
+        form = AddPostForm(request.POST, request.FILES)
+        data = {
+            'menu': menu,
+            'title': 'Добавить статью➕',
+            'form': form
+        }
+        return render(request, 'women/addpage.html', data)
+    def post(self, request):
+        form = AddPostForm(request.POST, request.FILES)
+        if form.is_valid():
+            print("ЛоЛ")
+            print(form.cleaned_data)
+            form.save()
+        data = {
+            'menu': menu,
+            'title': 'Добавить статью➕',
+            'form': form
+        }
+        return render(request, 'women/addpage.html', data)
+
+Потом необходимо использовать этот новый созданный класс
+
+🛠💾
+Был изменён файл
+# sitewomen\women\urls.py
+...
+urlpatterns = [
+    ...
+    # path('addpage/', views.addpage, name='add_page'),
+    path('addpage/', views.AddPage.as_view(), name='add_page'),
+    ...
+]
+
+Никаких изменений после запуска нету, а значит всё работает так, как нужно.
+Тоже самое для функции index
+
+🛠💾
+Был изменён файл
+# sitewomen\women\views.py
+...
+from django.views.generic import TemplateView
+...
+class WomenHome(TemplateView):
+    template_name = 'women/index.html'
+
+🛠💾
+Был изменён файл
+# sitewomen\women\urls.py
+...
+urlpatterns = [
+    path('', views.WomenHome.as_view(), name='home'),
+    # path('', views.index, name='home'),
+    ...
+]
+
+После запуска отображается практически пустая главная страница сайта, потому что ничего не было передано.
+
+При переходе через ctrl по классу TemplateView и по get_context_data можно найти переменную extra_context = None.
+В эту переменную передаются данные для отображения.
+
+🛠💾
+Был изменён файл
+# sitewomen\women\views.py
+...
+class WomenHome(TemplateView):
+    template_name = 'women/index.html'
+    extra_context = {
+        'title': 'главная страница 🏠',
+        'menu': menu,
+        'posts': Women.published.all().select_related('cat'),
+        'cat_selected': 0,
+    }
+
+Можно прописать так, но тогда предётся всё передавать в этот параметр, а иначе будет отображаться только
+'Новое название' и снова пустая страница
+
+# sitewomen\women\urls.py
+...
+path('', views.WomenHome.as_view(extra_context={'title': 'Новое название'}), name='home'),
+...
+
+При переходе с помощью ctrl по TemplateView → ContextMixin можно найти функцию get_context_data
+Необходимо прописать такую же функцию в WomenHome для возможности отображения постов по идентификатору категории в
+адресной строке.
+
+🛠💾
+Был изменён файл
+# sitewomen\women\views.py
+...
+class WomenHome(TemplateView):
+    template_name = 'women/index.html'
+    # extra_context = {
+    #     'title': 'главная страница 🏠',
+    #     'menu': menu,
+    #     'posts': Women.published.all().select_related('cat'),
+    #     'cat_selected': 0,
+    # }
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = 'главная страница 🏠'
+        context["menu"] = menu
+        context["posts"] = Women.published.all().select_related('cat')
+        context["cat_selected"] = int(self.request.GET.get("cat_id", 0))
+        return context
+
+После запуска при переходе по адресу
+http://127.0.0.1:8000/?cat_id=1
+отображается первая категория
+
+Однако в данном случае метод get_context_data избыточен и бессмысленен на фоне extra_context
+
+🛠💾
+Был изменён файл
+# sitewomen\women\views.py
+...
+class WomenHome(TemplateView):
+    template_name = 'women/index.html'
+    extra_context = {
+        'title': 'главная страница 🏠',
+        'menu': menu,
+        'posts': Women.published.all().select_related('cat'),
+        'cat_selected': 0,
+    }
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+    #     context["title"] = 'главная страница 🏠'
+    #     context["menu"] = menu
+    #     context["posts"] = Women.published.all().select_related('cat')
+    #     context["cat_selected"] = int(self.request.GET.get("cat_id", 0))
+    #     return context
+
+✅🎉🎈🧿🏠🎂☕👑💥🍀 Всё
