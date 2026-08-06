@@ -1,5 +1,6 @@
 # sitewomen\women\admin.py
 from django.contrib import admin, messages
+from django.utils.safestring import mark_safe
 from .models import Women, Category
 
 
@@ -24,12 +25,13 @@ class MarriedFilter(admin.SimpleListFilter):
 
 @admin.register(Women)
 class WomenAdmin(admin.ModelAdmin):
-    fields = ["title", "is_published", "slug", "cat", "tags"]
-    # readonly_fields = ["slug"]
+    fields = ["title", "is_published", "slug", "cat", "tags", 'photo', 'post_photo']
+    readonly_fields = ["post_photo"]
     prepopulated_fields = {"slug": ("title", )}
     filter_horizontal = ["tags"]
-    list_display = ("id", "title", "time_create", "is_published", "cat", "brief_info")
+    list_display = ("id", "title", "time_create", "is_published", "cat", "brief_info", 'post_photo')
     list_display_links = ("id", "time_create")
+    save_on_top = True
 
     ordering = ["time_create"]
     list_editable = ("is_published", "title", "cat")
@@ -51,6 +53,12 @@ class WomenAdmin(admin.ModelAdmin):
     def set_draft(self, request, queryset):
         count = queryset.update(is_published=Women.Status.DRAFT)
         self.message_user(request, f"Измена {count} зуписей и убрана опубликованность", messages.WARNING)
+
+    @admin.display(description="ФФотка")
+    def post_photo(self, women: Women):
+        if women.photo:
+            return mark_safe(f"<img src={women.photo.url} width=50>")
+        return "Нету Фотак"
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):

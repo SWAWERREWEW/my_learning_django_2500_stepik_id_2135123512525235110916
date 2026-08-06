@@ -1,0 +1,61 @@
+50 day = 7.8 Отображение изображений в HTML-документе и админ-панели
+
+cd sitewomen
+python manage.py shell
+from women.models import Women
+
+В шаблоне sitewomen\women\templates\women\post.html
+Есть проблема с отображением картинок. Для решения необходимо исправить ссылку в шаблоне и прописать один путь для всех
+изображений.
+
+💾🛠
+Был изменён файл
+sitewomen\sitewomen\settings.py
+...
+MEDIA_ROOT = ...
+MEDIA_URL = '/media/
+...
+
+Настройка пути к изображениям в режиме Отладки, потому что на настоящем сервере уже всё будет настроено в этих
+настройках необходимости не будет.
+
+💾🛠
+Был изменён файл
+# sitewomen/sitewomen/urls
+from django.conf.urls.static import static
+import settings
+...
+urlpatterns = [
+    ...
+]
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+...
+
+После запука фото отображается на странице в соответствии к каждой записи.
+Необходимо отобразить фото в админ панели при редактировании.
+save_on_top = True отображает кнопки сохранения наверху
+
+Был изменён файл
+# sitewomen\women\admin.py
+...
+from django.utils.safestring import mark_safe
+...
+class WomenAdmin(admin.ModelAdmin):
+    fields = ["title", "is_published", "slug", "cat", "tags", 'photo', 'post_photo']
+    readonly_fields = ["post_photo"]
+    prepopulated_fields = ...
+    filter_horizontal = ...
+    list_display = ("id", "title", "time_create", "is_published", "cat", "brief_info", 'post_photo')
+    list_display_links = ...
+    save_on_top = True
+    ...
+    def set_draft(self, request, queryset):
+        ...
+    @admin.display(description="ФФотка")
+    def post_photo(self, women: Women):
+        if women.photo:
+            return mark_safe(f"<img src={women.photo.url} width=50>")
+        return "Нету Фотак"
+
+✅🎉📦🗝🍀💲🌎🍌 Всё
