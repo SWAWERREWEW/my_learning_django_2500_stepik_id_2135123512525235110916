@@ -4,7 +4,7 @@ from .forms import AddPostForm, UploadFileForm
 
 from gc import get_objects
 from django.views import View
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, ListView
 from django.http import HttpResponse, HttpResponseNotFound, Http404
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
@@ -127,6 +127,23 @@ def show_category(request, cat_slug):
     return render(request, "women/index.html", context=data)
 
 
+class WomenCategory(ListView):
+    template_name = 'women/index.html'
+    context_object_name = 'posts'
+    allow_empty = False
+
+    def get_queryset(self):
+        return Women.published.filter(cat__slug=self.kwargs['cat_slug']).select_related("cat")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        cat = context['posts'][0].cat
+        context['title'] = 'Категория - ' + cat.name
+        context['menu'] = menu
+        context['cat_selected'] = cat.pk
+        return context
+
+
 def custom_page_not_found(request, exception):
     return HttpResponseNotFound("<h1> Страница не найдена </h1>")
 
@@ -166,14 +183,19 @@ class AddPage(View):
         return render(request, 'women/addpage.html', data)
 
 
-class WomenHome(TemplateView):
+class WomenHome(ListView):
+    # model = Women
+    # По умолчанию ищется шаблон \women\women\women_list.html но у нас такого нету❌📁⚠
     template_name = 'women/index.html'
+    context_object_name = "posts"
     extra_context = {
         'title': 'главная страница 🏠',
         'menu': menu,
-        'posts': Women.published.all().select_related('cat'),
         'cat_selected': 0,
     }
+
+    def get_queryset(self):
+        return Women.published.all().select_related('cat')
 
     # def get_context_data(self, **kwargs):
     #     context = super().get_context_data(**kwargs)
