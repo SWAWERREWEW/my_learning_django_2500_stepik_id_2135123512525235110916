@@ -1,0 +1,66 @@
+53 day = 8.3 Класс DetailView
+
+Необходимо сделать отображение Тегов через класс вместо функции
+
+💾🛠
+Был изменён файл
+# sitewomen\women\views.py
+...
+class TagPostList(ListView):
+    template_name = 'women/index.html'
+    context_object_name = 'posts'
+    allow_empty = False
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        tag = TagPost.objects.get(slug=self.kwargs['tag_slug'])
+        context['title'] = 'Тег: ' + tag.tag
+        context['menu'] = menu
+        context['cat_selected'] = None
+        return context
+
+    def get_queryset(self):
+        return Women.published.filter(tags__slug=self.kwargs['tag_slug']).select_related('cat')
+
+💾🛠
+Был изменён файл
+# sitewomen\women\urls.py
+...
+urlpatterns = [
+    ...
+    path('tag/<slug:tag_slug>/', views.TagPostList.as_view(), name='tag'),
+]
+
+Для отображения деталей поста используется класс DetailView. Им можно заменить функцию show_post.
+Параметр slug_url_kwarg позволяет в адресе использовать выбранную переменную
+Переопределение функции get_object позволило запретить просмотр статьей без статуса опубликовано.
+
+💾🛠
+Был изменён файл
+# sitewomen\women\views.py
+...
+from django.views.generic import TemplateView, ListView, DetailView
+...
+class ShowPost(DetailView):
+    context_object_name = 'post'
+    template_name = 'women/post.html'
+    slug_url_kwargs = 'post_slug'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = context['post'].title
+        context['menu'] = menu
+        return context
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(Women.published, slug=self.kwargs[self.slug_url_kwargs])
+
+💾🛠
+Был изменён файл
+# sitewomen\women\urls.py
+...
+urlpatterns = [
+    ...
+    path('post/<slug:post_slug>/', views.ShowPost.as_view(), name='post'),
+    ...
+]

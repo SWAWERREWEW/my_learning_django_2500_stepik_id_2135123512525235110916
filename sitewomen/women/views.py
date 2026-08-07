@@ -4,7 +4,7 @@ from .forms import AddPostForm, UploadFileForm
 
 from gc import get_objects
 from django.views import View
-from django.views.generic import TemplateView, ListView
+from django.views.generic import TemplateView, ListView, DetailView
 from django.http import HttpResponse, HttpResponseNotFound, Http404
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
@@ -76,6 +76,21 @@ def show_post(request, post_slug):
     }
 
     return render(request, 'women/post.html', data)
+
+
+class ShowPost(DetailView):
+    context_object_name = 'post'
+    template_name = 'women/post.html'
+    slug_url_kwargs = 'post_slug'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = context['post'].title
+        context['menu'] = menu
+        return context
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(Women.published, slug=self.kwargs[self.slug_url_kwargs])
 
 
 def addpage(request):
@@ -158,6 +173,23 @@ def show_tag_postlist(request, tag_slug):
         'cat_selected': None,
     }
     return render(request, 'women/index.html', context=data)
+
+
+class TagPostList(ListView):
+    template_name = 'women/index.html'
+    context_object_name = 'posts'
+    allow_empty = False
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        tag = TagPost.objects.get(slug=self.kwargs['tag_slug'])
+        context['title'] = 'Тег: ' + tag.tag
+        context['menu'] = menu
+        context['cat_selected'] = None
+        return context
+
+    def get_queryset(self):
+        return Women.published.filter(tags__slug=self.kwargs['tag_slug']).select_related('cat')
 
 
 class AddPage(View):
