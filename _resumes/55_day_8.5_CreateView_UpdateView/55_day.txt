@@ -1,0 +1,68 @@
+55 day = 8.5 Классы CreateView и UpdateView
+
+Текущий класс AddPage в данный момент работает как отправитель данных в базу данных, но для этого был создан класс
+CreateView.
+Был закоментарована функция form_valid и success_url потому что эти действия выполняются уже в наследуемом классе
+CreateView, который автоматически делает проверку, переносит данные в базу данных и даже автоматически берёт адрес из
+модели get_absolute_url из указанной формы.
+После этого и после кнопки отправки автоматически будет перенаправление на страницу новой статьи.
+Можно было заменить
+form_class = AddPostForm
+на
+model = Women
+fields = "__all__"
+# fields = ['slug', 'title', ...]
+Что означало бы, что происходит связывание с моделью и взятие всех полей.
+
+🛠💾
+Был изменён файл
+# sitewomen\women\views.py
+...
+from django.views.generic import TemplateView, ListView, DetailView, FormView, CreateView, UpdateView
+...
+class AddPage(CreateView):
+    form_class = AddPostForm
+    template_name = 'women/addpage.html'
+    # success_url = reverse_lazy('home')
+    extra_context = {
+        'menu': menu,
+        'title': 'Добавление статьи➕'
+    }
+    # def form_valid(self, form):
+    #     form.save()
+    #     super().form_valid(form)
+
+Необходимо добавить возможность редактировать существующую статью с чем поможет класс UpdateView
+
+🛠💾
+Был изменён файл
+# sitewomen\women\views.py
+...
+from django.views.generic import TemplateView, ListView, DetailView, FormView, CreateView, UpdateView
+...
+class EditPage(UpdateView):
+    model = Women
+    fields = "__all__"
+    template_name = 'women/addpage.html'
+    success_url = reverse_lazy('home')
+    extra_context = {
+        "menu": menu,
+        "title": "Редактирование статьи 🛠"
+    }
+class AddPage(CreateView):
+    ...
+
+🛠💾
+Был изменён файл
+# sitewomen\women\urls.py
+...
+urlpatterns = [
+    ...
+    path('edit/<slug:slug>/', views.EditPage.as_view(), name='edit_page'),
+]
+
+🌎🔍📖
+Для подробной информации можно обратиться к документации
+docs.djangoproject.com/en/4.2/ref/class-based-views/
+
+✅📖🔍🌎🚀🍌👑🎂🎉💥 Всё

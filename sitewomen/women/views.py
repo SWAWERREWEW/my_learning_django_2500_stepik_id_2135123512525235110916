@@ -5,7 +5,7 @@ from .forms import AddPostForm, UploadFileForm
 
 from gc import get_objects
 from django.views import View
-from django.views.generic import TemplateView, ListView, DetailView, FormView
+from django.views.generic import TemplateView, ListView, DetailView, FormView, CreateView, UpdateView
 from django.http import HttpResponse, HttpResponseNotFound, Http404
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
@@ -193,17 +193,29 @@ class TagPostList(ListView):
         return Women.published.filter(tags__slug=self.kwargs['tag_slug']).select_related('cat')
 
 
-class AddPage(FormView):
-    form_class = AddPostForm
+class EditPage(UpdateView):
+    model = Women
+    fields = "__all__"
     template_name = 'women/addpage.html'
     success_url = reverse_lazy('home')
+    extra_context = {
+        "menu": menu,
+        "title": "Редактирование статьи 🛠"
+    }
+
+
+class AddPage(CreateView):
+    form_class = AddPostForm
+    template_name = 'women/addpage.html'
+    # success_url = reverse_lazy('home')
     extra_context = {
         'menu': menu,
         'title': 'Добавление статьи➕'
     }
-    def form_valid(self, form):
-        form.save()
-        super().form_valid(form)
+    # def form_valid(self, form):
+    #     form.save()
+    #     super().form_valid(form)
+
 # class AddPage(View):
 #     def get(self, request):
 #         form = AddPostForm(request.POST, request.FILES)
