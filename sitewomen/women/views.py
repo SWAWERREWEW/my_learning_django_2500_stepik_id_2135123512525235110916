@@ -1,10 +1,11 @@
 # sitewomen\women\views.py
+from django.urls.base import reverse_lazy
 from .models import Women, Category, TagPost, UploadFiles
 from .forms import AddPostForm, UploadFileForm
 
 from gc import get_objects
 from django.views import View
-from django.views.generic import TemplateView, ListView, DetailView
+from django.views.generic import TemplateView, ListView, DetailView, FormView
 from django.http import HttpResponse, HttpResponseNotFound, Http404
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
@@ -192,27 +193,38 @@ class TagPostList(ListView):
         return Women.published.filter(tags__slug=self.kwargs['tag_slug']).select_related('cat')
 
 
-class AddPage(View):
-    def get(self, request):
-        form = AddPostForm(request.POST, request.FILES)
-        data = {
-            'menu': menu,
-            'title': 'Добавить статью➕',
-            'form': form
-        }
-        return render(request, 'women/addpage.html', data)
-    def post(self, request):
-        form = AddPostForm(request.POST, request.FILES)
-        if form.is_valid():
-            print("ЛоЛ")
-            print(form.cleaned_data)
-            form.save()
-        data = {
-            'menu': menu,
-            'title': 'Добавить статью➕',
-            'form': form
-        }
-        return render(request, 'women/addpage.html', data)
+class AddPage(FormView):
+    form_class = AddPostForm
+    template_name = 'women/addpage.html'
+    success_url = reverse_lazy('home')
+    extra_context = {
+        'menu': menu,
+        'title': 'Добавление статьи➕'
+    }
+    def form_valid(self, form):
+        form.save()
+        super().form_valid(form)
+# class AddPage(View):
+#     def get(self, request):
+#         form = AddPostForm(request.POST, request.FILES)
+#         data = {
+#             'menu': menu,
+#             'title': 'Добавить статью➕',
+#             'form': form
+#         }
+#         return render(request, 'women/addpage.html', data)
+#     def post(self, request):
+#         form = AddPostForm(request.POST, request.FILES)
+#         if form.is_valid():
+#             print("ЛоЛ")
+#             print(form.cleaned_data)
+#             form.save()
+#         data = {
+#             'menu': menu,
+#             'title': 'Добавить статью➕',
+#             'form': form
+#         }
+#         return render(request, 'women/addpage.html', data)
 
 
 class WomenHome(ListView):
