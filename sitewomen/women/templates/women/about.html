@@ -2,13 +2,21 @@
 <!-- sitewomen/women/templates/women/about.html -->
 
 {% block content %}
-<h1> {{ title|default:"без заголовка 🛠" }} </h1>
-<form action="" method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <!-- <p><input type="file" name="file_upload"></p>-->
+    <h1> {{ title|default:"без заголовка 🛠" }} </h1>
+
+    {% for pagan in page_object.paginator.page_range %}
+        {% if forloop.last %}
+        <a href="?page={{ pagan }}"> 🗝[{{ pagan }}] </a>
+        {% elif forloop.first %}
+        🌎<a href="?page={{ pagan }}"> 🗝[{{ pagan }}] </a> ...
+        {% else %}
+        <a href="?page={{ pagan }}"> 🗝[{{ pagan }}] </a> ...
+        {% endif %}
+    {% endfor %}
+
+    {% for item in page_object %}
     <p>
-        <button type="submit">Внести</button>
+        📖{{ item.id }}: {{ item.title }}, {{ item.cat }}
     </p>
-</form>
+    {% endfor %}
 {% endblock %}

@@ -1,0 +1,121 @@
+57 day = 8.7 Введение в пагинацию. Класс Paginator
+
+Пагинация это постраничное разбиение длинного списка
+Например есть 100 задач, которые можно разбить на 10 страниц по 10 задач, вместо бесконечного списка.
+
+Если на странице официальной документации
+https://docs.djangoproject.com/en/4.2/
+набрать запрос «pagination», то сразу увидим первые две подходящие ссылки.
+По первой ссылке представлен пример работы класса пагинатора:
+https://docs.djangoproject.com/en/4.2/topics/pagination/
+А по второй – API данного класса (набор методов и свойств для работы с ним):
+https://docs.djangoproject.com/en/4.2/ref/paginator/
+
+Сначала необходимо перейти в оболочку Django
+python manage.py shell
+from django.core.paginator import Paginator
+women = ["а", "не понял", "что вы", "делаете", "в", "моём холодильнике"]
+
+Дальше необходим экземпляр класса со списком данных и количеством элементов на одной странице
+pag = Paginator(women, 3)
+
+Дальше можно узнать количество элементов
+pag.count
+Количество страниц
+pag.num_pages
+Итератор перебор страниц
+pag.page_range
+Выбранная страница
+pag.page(1)
+In [8]: pag.page(1)
+Out[8]: <Page 1 of 2>
+In [9]: pag.page(2)
+Out[9]: <Page 2 of 2>
+
+Можно узнать элементы одной страницы
+pag.page(1).object_list()
+pag.page(2).object_list()
+
+Можно узнать существует ли следующая страница
+pag.page(1).has_next()
+Или предыдущая
+pag.page(2).has_previous()
+Или хоть какие-либо рядом
+pag.page(1).has_other_pages()
+
+Можно вернуть номер следующей страницы
+pag.page(1).next_page_number()
+
+Осталось это использовать на сайте
+
+💾🛠
+Был изменён файл
+# sitewomen\women\views.py
+...
+from django.core.paginator import Paginator
+...
+def about(request):
+    contact_list = Women.published.all()
+    paginator = Paginator(contact_list, 3)
+    page_number = request.GET.get('page')
+    page_object = paginator.get_page(page_number)
+    return render(request, 'women/about.html',
+        {'title': 'О сайте 🔍', 'menu': menu, 'page_object': page_object})
+...
+
+🛠💾❌
+Из файла
+# sitewomen\women\views.py
+Были удалены функции index, handle_uploaded_file, addpage, show_category, show_tag_postlist и закомментированные ранее
+строки кода.
+
+💾🛠
+Был изменён файл
+<!-- sitewomen/women/templates/women/about.html -->
+...
+<form action="" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% for item in page_object %}
+    <p>
+        {{ item.id }}: {{ item.title }}, {{ item.cat }}
+    </p>
+    {% endfor %}
+    <!--{{ form.as_p }}-->
+    ...
+</form>
+...
+
+После запуска и переходе по адресу
+http://127.0.0.1:8000/about/
+Будет отображены первые три записи
+А переходе по адресу
+http://127.0.0.1:8000/about/?page=2
+Будут отображены следующие три записи
+
+Необходимо отобразить кнопки для навигации по страницам
+
+💾🛠
+Был изменён файл
+<!-- sitewomen/women/templates/women/about.html -->
+...
+{% block content %}
+    <h1> {{ title|default:"без заголовка 🛠" }} </h1>
+
+    {% for pagan in page_object.paginator.page_range %}
+        {% if forloop.last %}
+        <a href="?page={{ pagan }}"> 🗝[{{ pagan }}] </a>
+        {% elif forloop.first %}
+        🌎<a href="?page={{ pagan }}"> 🗝[{{ pagan }}] </a> ...
+        {% else %}
+        <a href="?page={{ pagan }}"> 🗝[{{ pagan }}] </a> ...
+        {% endif %}
+    {% endfor %}
+
+    {% for item in page_object %}
+    <p>
+        📖{{ item.id }}: {{ item.title }}, {{ item.cat }}
+    </p>
+    {% endfor %}
+{% endblock %}
+
+🌎🗝💥🎂👑🍌🚀✅🎉 Всё
