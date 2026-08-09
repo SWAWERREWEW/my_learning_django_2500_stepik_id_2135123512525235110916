@@ -1,0 +1,171 @@
+56 day = 8.6 Mixins как способ улучшения программного кода
+
+Миксин это класс с наследыванием у нескольких классов
+Необходимо создать класс DataMixin для отображения информации в шаблонах. Нужно, чтобы этот класс унаследовали классы
+для сокращения кода.
+
+🛠💾
+Был изменён файл
+# sitewomen\women\views.py
+...
+from .utils import DataMixin, menu
+...
+class ShowPost(DataMixin, DetailView):
+    context_object_name = 'post'
+    template_name = 'women/post.html'
+    slug_url_kwargs = 'post_slug'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return self.get_mixin_context(context, title=context['post'].title)
+        # context['title'] = context['post'].title
+        # context['menu'] = menu
+        # return context
+...
+
+🛠💾➕
+Был создан файл
+# sitewomen\women\utils.py
+menu = [
+    {'title': "О сайте 🔍", 'url_name': "about"},
+    {'title': "Добавить статью ➕", 'url_name': "add_page"},
+    {'title': "Обратная связь 💬", 'url_name': "contact"},
+    {'title': "Войти 🚪", 'url_name': "login"}
+]
+class DataMixin:
+    def get_mixin_context(self, context, **kwargs):
+        context["menu"] = menu
+        context["cat_selected"] = None
+        context.update(kwargs)
+        return context
+
+
+🎉✅Успешная замена удалась✅🎉
+
+🛠💾
+Был изменён файл
+# sitewomen\women\views.py
+...
+class WomenHome(DataMixin, ListView):
+    # model = Women
+    # # По умолчанию ищется шаблон \women\women\women_list.html но у нас такого нету❌📁⚠
+    template_name = 'women/index.html'
+    context_object_name = "posts"
+    title_page = 'главная страница 🏠'
+    # extra_context = {
+    #     'title': 'главная страница 🏠',
+    #     'menu': menu,
+    #     'cat_selected': 0,
+    # }
+...
+
+🛠💾❌
+из файла
+# sitewomen\women\views.py
+удалены строки
+...
+menu = [
+    {'title': "О сайте 🔍", 'url_name': "about"},
+    {'title': "Добавить статью ➕", 'url_name': "add_page"},
+    {'title': "Обратная связь 💬", 'url_name': "contact"},
+    {'title': "Войти 🚪", 'url_name': "login"}
+]
+...
+
+🛠💾
+Был изменён файл
+# sitewomen\women\utils.py
+...
+class DataMixin:
+    title_page = None
+    extra_context = {}
+
+    def __init__(self):
+        if self.title_page:
+            self.extra_context["title"] = self.title_page
+
+        if "menu" not in self.extra_context:
+            self.extra_context["menu"] = menu
+
+    def get_mixin_context(self, context, **kwargs):
+        ...
+
+После запуска, как обычно, не будет изменений и это хорошо✅
+
+
+🛠💾
+Был изменён файл
+# sitewomen\women\views.py
+...
+class WomenHome(DataMixin, ListView):
+    # model = Women
+    # # По умолчанию ищется шаблон \women\women\women_list.html но у нас такого нету❌📁⚠
+    template_name = 'women/index.html'
+    cat_selected = 0
+    context_object_name = "posts"
+    title_page = 'главная страница 🏠'
+...
+
+🛠💾
+Был изменён файл
+# sitewomen\women\utils.py
+...
+class DataMixin:
+    title_page = None
+    cat_selected = None
+    extra_context = {}
+
+    def __init__(self):
+        if self.title_page:
+            self.extra_context["title"] = self.title_page
+
+        if self.cat_selected is not None:
+            self.extra_context["cat_selected"] = self.cat_selected
+
+        if "menu" not in self.extra_context:
+            self.extra_context["menu"] = menu
+    ...
+
+🛠💾
+Был изменён файл
+# sitewomen\women\views.py
+...
+    class EditPage(DataMixin, UpdateView):
+    model = Women
+    fields = "__all__"
+    template_name = 'women/addpage.html'
+    success_url = reverse_lazy('home')
+    title_page = "Редактирование статьи 🛠"
+    # extra_context = {
+    #     "menu": menu,
+    #     "title": "Редактирование статьи 🛠"
+    # }
+...
+class AddPage(DataMixin, CreateView):
+    form_class = AddPostForm
+    template_name = 'women/addpage.html'
+    title_page = 'Добавление статьи➕'
+    # success_url = reverse_lazy('home')
+    # extra_context = {
+    #     'menu': menu,
+    #     'title': 'Добавление статьи➕'
+    # }
+...
+class WomenCategory(DataMixin, ListView):
+    template_name = 'women/index.html'
+    context_object_name = 'posts'
+    allow_empty = False
+
+    def get_queryset(self):
+        return Women.published.filter(cat__slug=self.kwargs['cat_slug']).select_related("cat")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        cat = context['posts'][0].cat
+        return self.get_mixin_context(context, title='Категория - ' + cat.name, cat_selected=cat.pk)
+        # context['title'] = 'Категория - ' + cat.name
+        # context['menu'] = menu
+        # context['cat_selected'] = cat.pk
+        # return context
+...
+
