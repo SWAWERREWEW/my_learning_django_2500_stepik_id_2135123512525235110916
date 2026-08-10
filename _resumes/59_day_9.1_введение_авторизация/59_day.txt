@@ -1,0 +1,81 @@
+59 day = 9.1 Введение в авторизацию пользователей
+
+Аутентификация это проверка подлинности или наличия пользователя по введённым данным. Выполняет ассоциацию или связь
+введённых данных с пользователем, сохранённым в таблице базы данных.
+Авторизация это разрешение на доступ или непосредственно вход к закрытой части сайта. Часто на этом этапе выполняется
+сохранение в сессии идентификатора пользователя, говорящий о том, что пользователь успешно прошёл аутентификацию.
+
+🔍🌎📖
+Подробнее можно узнать в документации
+https://docs.djangoproject.com/en/4.2/topics/auth/default/
+
+В базе данных существует таблица auth_user в которой хранятся логины и пароли пользователей, однако в зашифрованном
+виде.
+Необходимо создать авторизацию и аутентификацию
+Создаётся приложение users
+
+💾📥📦⚙
+python manage.py startapp users
+
+🛠💾
+Был изменён файл
+# sitewomen\sitewomen\settings.py
+...
+INSTALLED_APPS = [
+    ...
+    'users.apps.UsersConfig',
+    ...
+]
+...
+
+💾➕🛠
+Был создан файл
+# sitewomen\users\urls.py
+from django.urls import path
+from . import views
+
+app_name = "users"
+
+"""Не забывать в конце пути ставить слеш /"""
+urlpatterns = [
+    # users:
+    # users:login
+    path('login/', views.login_user, name='login'),
+    path('logout/', views.logout_user, name='logout'),
+]
+
+🛠💾
+Был изменён файл
+# sitewomen/sitewomen/urls
+...
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', include('women.urls')),
+    path('users/', include('users.urls', namespace="users")),
+    path("__debug__/", include("debug_toolbar.urls")),
+]
+...
+
+Параметр namespace создаёт особое пространство имён.
+В файле
+# sitewomen\users\urls.py
+прописано name='login', но из-за пространства имён namespace="users" из файла
+# sitewomen/sitewomen/urls
+Необходимо будет прописывать users:login
+
+🛠💾
+Был изменён файл
+# sitewomen/users/views.py
+from django.http.response import HttpResponse
+from django.shortcuts import render
+# Create your views here.
+def login_user(request):
+    return HttpResponse("login")
+def logout_user(request):
+    return HttpResponse("logout")
+
+После запуска можно переходить по адресам
+http://127.0.0.1:8000/users/login/
+http://127.0.0.1:8000/users/logout/
+
+🚀📦🎈🎂👑💥🚩🎉✅🌎 Всё
