@@ -1,6 +1,57 @@
 {% extends 'base.html' %}
 <!-- sitewomen\women\templates\women\index.html -->
 
+
+{% block navigation %}
+    {% if page_obj.has_other_pages %}
+
+    {% for pagan in paginator.page_range %}
+
+        {% if page_obj.number == pagan %}
+            {% if forloop.last %}
+            🗝[{{ pagan }}🚩]
+            {% elif forloop.first %}
+            🌎 🗝[{{ pagan }}🚩] ...
+            {% else %}
+            🗝[{{ pagan }}🚩] ...
+            {% endif %}
+        {% elif pagan >= page_obj.number|add:-2 and pagan <= page_obj.number|add:2 %}
+            {% if forloop.last %}
+            <a href="?page={{ pagan }}"> 🗝[{{ pagan }}] </a>
+            {% elif forloop.first %}
+            🌎<a href="?page={{ pagan }}"> 🗝[{{ pagan }}] </a> ...
+            {% else %}
+            <a href="?page={{ pagan }}"> 🗝[{{ pagan }}] </a> ...
+            {% endif %}
+        {% endif %}
+
+    {% endfor %}
+
+    <br>
+    {% if page_obj.has_previous %}
+    ..<a href="?page={{ page_obj.previous_page_number }}"> [←] </a>..
+    {% else %}
+    .. [❌] ..
+    {% endif %}
+
+    {% if page_obj.has_next %}
+    ..<a href="?page={{ page_obj.next_page_number }}"> [→] </a>..
+    {% else %}
+    .. [❌] ..
+    {% endif %}
+
+    <br>
+    {% for pagan in paginator.page_range %}
+        {% if forloop.first %}
+        <a href="?page={{ pagan }}"> 🗝[{{ pagan }}] </a> ......
+        {% elif forloop.last%}
+        <a href="?page={{ pagan }}"> 🗝[{{ pagan }}] </a>
+        {% endif %}
+    {% endfor %}
+
+    {% endif %}
+{% endblock %}
+
 {% block content %}
 <h1> {{ title|capfirst }}</h1>
 

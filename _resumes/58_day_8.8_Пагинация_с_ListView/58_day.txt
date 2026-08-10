@@ -1,0 +1,215 @@
+58 day = 8.8 Пагинация с классом ListView
+
+Нужно интегрировать пагенацию на главную страницу
+
+🛠💾
+Был изменён файл
+# sitewomen\women\views.py
+...
+class WomenHome(DataMixin, ListView):
+    ...
+    title_page = ...
+    paginate_by = 3
+    def get_queryset(self):
+        ...
+
+В данном случае функцию about с пагнитором заменил класс ListView и paginate_by
+
+После запуска при переходе по адресам
+http://127.0.0.1:8000/
+http://127.0.0.1:8000/?page=2
+Будет отображаться одна из страниц пагинации
+
+Осталось добавить кнопки для переключения и пролистывания страниц
+
+🛠💾
+Был изменён файл
+<!-- sitewomen/templates/base.html -->
+...
+<li>{% show_all_tags %}</li>
+
+{% block navigation %}
+{% endblock %}
+
+{% block content %} {% endblock %}
+...
+
+🛠💾
+Был изменён файл
+<!-- sitewomen\women\templates\women\index.html -->
+{% block navigation %}
+{% for pagan in paginator.page_range %}
+    {% if forloop.last %}
+    <a href="?page={{ pagan }}"> 🗝[{{ pagan }}] </a>
+    {% elif forloop.first %}
+    🌎<a href="?page={{ pagan }}"> 🗝[{{ pagan }}] </a> ...
+    {% else %}
+    <a href="?page={{ pagan }}"> 🗝[{{ pagan }}] </a> ...
+    {% endif %}
+{% endfor %}
+{% endblock %}
+{% block content %}
+...
+
+🛠💾
+Был изменён файл
+# sitewomen\women\views.py
+...
+class DataMixin:
+    paginate_by = 3
+    ...
+...
+
+🛠💾❌
+Из файла
+# sitewomen\women\views.py
+Были удалены строки
+paginate_by = 3
+Из блока класса WomenHome
+
+После этого пагинация появляется на страницах тегов, категорий и на главной странице.
+Необходимо доработать для отсутствия кликабельности кнопки нажатия на текущую страницу и для отсутствия кнопки для
+единственной страницы
+
+🛠💾
+Был изменён файл
+<!-- sitewomen\women\templates\women\index.html -->
+...
+{% block navigation %}
+    {% if page_obj.has_other_pages %}
+    {% for pagan in paginator.page_range %}
+
+        {% if page_obj.number == pagan %}
+            {% if forloop.last %}
+            🗝[{{ pagan }}]
+            {% elif forloop.first %}
+            🌎 🗝[{{ pagan }}] ...
+            {% else %}
+            🗝[{{ pagan }}] ...
+            {% endif %}
+        {% else %}
+            {% if forloop.last %}
+            <a href="?page={{ pagan }}"> 🗝[{{ pagan }}] </a>
+            {% elif forloop.first %}
+            🌎<a href="?page={{ pagan }}"> 🗝[{{ pagan }}] </a> ...
+            {% else %}
+            <a href="?page={{ pagan }}"> 🗝[{{ pagan }}] </a> ...
+            {% endif %}
+        {% endif %}
+
+    {% endfor %}
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+...
+
+Необходимо ограничить количество кнопок для пролистывания страниц в зависимости от текущей страницы и отображения лишь
+соседних
+
+🛠💾
+Был изменён файл
+# sitewomen\women\utils.py
+...
+class DataMixin:
+    paginate_by = 2
+    ...
+...
+
+🛠💾
+Был изменён файл
+<!-- sitewomen\women\templates\women\index.html -->
+...
+{% block navigation %}
+    {% if page_obj.has_other_pages %}
+    {% for pagan in paginator.page_range %}
+
+        {% if page_obj.number == pagan %}
+            {% if forloop.last %}
+            ...
+        {% elif pagan >= page_obj.number|add:-2 and pagan <= page_obj.number|add:2 %}
+            {% if forloop.last %}
+            ...
+        {% endif %}
+
+    {% endfor %}
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+...
+
+
+Можно добавить кнопки для перемещения на предыдущую или предыдущую страницу ← → а для удобства добавить значок на
+кнопку с текущей страницу 🚩
+
+
+🛠💾
+Был изменён файл
+<!-- sitewomen\women\templates\women\index.html -->
+{% block navigation %}
+    {% if page_obj.has_other_pages %}
+
+    {% for pagan in paginator.page_range %}
+
+        {% if page_obj.number == pagan %}
+            {% if forloop.last %}
+            🗝[{{ pagan }}🚩]
+            {% elif forloop.first %}
+            🌎 🗝[{{ pagan }}🚩] ...
+            {% else %}
+            🗝[{{ pagan }}🚩] ...
+            {% endif %}
+        {% elif pagan >= page_obj.number|add:-2 and pagan <= page_obj.number|add:2 %}
+            {% if forloop.last %}
+            <a href="?page={{ pagan }}"> 🗝[{{ pagan }}] </a>
+            {% elif forloop.first %}
+            🌎<a href="?page={{ pagan }}"> 🗝[{{ pagan }}] </a> ...
+            {% else %}
+            <a href="?page={{ pagan }}"> 🗝[{{ pagan }}] </a> ...
+            {% endif %}
+        {% endif %}
+
+    {% endfor %}
+    <br>
+    {% if page_obj.has_previous %}
+    ..<a href="?page={{ page_obj.previous_page_number }}"> [←] </a>..
+    {% else %}
+    .. [❌] ..
+    {% endif %}
+
+    {% if page_obj.has_next %}
+    ..<a href="?page={{ page_obj.next_page_number }}"> [→] </a>..
+    {% else %}
+    .. [❌] ..
+    {% endif %}
+
+    {% endif %}
+{% endblock %}
+...
+
+Необходимо отобразить первую и последную страницу
+
+
+🛠💾
+Был изменён файл
+<!-- sitewomen\women\templates\women\index.html -->
+{% block navigation %}
+    ...
+    .. [❌] ..
+    {% endif %}
+
+    <br>
+    {% for pagan in paginator.page_range %}
+        {% if forloop.first %}
+        <a href="?page={{ pagan }}"> 🗝[{{ pagan }}] </a> ......
+        {% elif forloop.last%}
+        <a href="?page={{ pagan }}"> 🗝[{{ pagan }}] </a>
+        {% endif %}
+    {% endfor %}
+
+    {% endif %}
+{% endblock %}
+...
+
+🚩💥🌎👑🎂🗝🎈☕✅ Всё
