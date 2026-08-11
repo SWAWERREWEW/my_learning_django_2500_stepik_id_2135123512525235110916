@@ -1,0 +1,150 @@
+61 day = 9.3 Шаблонные контекстные процессоры
+
+Необходимо добавить меню на страницу авторизации
+
+💾🛠
+Был изменён файл
+# sitewomen\women\templatetags\women_tags.py
+...
+from women.utils import menu
+...
+from sitewomen.women.utils import menu
+register = ...
+@register.simple_tag
+def get_menu():
+    return menu
+
+💾🛠
+Был изменён файл
+<!-- sitewomen/templates/base.html -->
+...
+<ul>
+    <li><a href="{% url 'home' %}"> Главная страница 🏠</a></li>
+    {% get_menu as menu %}
+    {% for m in menu %}
+    {% if not forloop.last %} <li> {% else %} <li class="last"> {% endif %}
+        <a href="{% url m.url_name %}"> {{ m.title }} </a>
+    </li>
+    {% endfor %}
+</ul>
+...
+
+После запуска и переходе по адресу
+http://127.0.0.1:8000/users/login/
+Отображается меню
+
+❌💾🛠
+После этого можно убрать лишние строки
+if "menu" not in self.extra_context:
+self.extra_context["menu"] = menu
+...
+context["menu"] = menu
+из файла
+# sitewomen\women\utils.py
+
+Шаблонные контекстные процессоры позволяют отображать независимую информацию на всех страницах.
+Всё что находится в файле
+# sitewomen\sitewomen\settings.py
+списке
+TEMPLATES
+в словаре по ключу
+'context_processors'
+содержимое
+'django.template.context_processors.debug',
+'django.template.context_processors.request',
+'django.contrib.auth.context_processors.auth',
+'django.contrib.messages.context_processors.messages',
+
+💾🛠➕
+Был создан файл
+# sitewomen/users/context_processors.py
+from women.utils import menu
+def get_women_context(request):
+    return {"mainmenu": menu}
+
+🛠💾
+Был изменён файл
+# sitewomen\sitewomen\settings.py
+...
+TEMPLATES = [
+    {
+        ...
+        'OPTIONS': {
+            'context_processors': [
+                ...
+                'users.context_processors.get_women_context'
+...
+
+🛠💾
+Был изменён файл
+<!-- sitewomen/templates/base.html -->
+...
+{% for m in mainmenu %}
+...
+
+❌🛠💾
+Была удалена строка
+{% get_menu as menu %}
+Из файла
+<!-- sitewomen/templates/base.html -->
+
+Необходимо добавить функционал кнопке Войти из главного меню
+
+❌🛠💾
+Из файла
+# sitewomen\women\utils.py
+Были удалены строки
+{'title': "Войти 🚪", 'url_name': "login"}
+
+❌🛠💾
+Из файла
+<!-- sitewomen/templates/base.html -->
+Были удалены строки
+{% if not forloop.last %} <li>
+{% else %} <li class="last">
+{% endif %}
+
+🛠💾
+Был изменён файл
+<!-- sitewomen/templates/base.html -->
+...
+<ul>
+    <li><a href="{% url 'home' %}"> Главная страница 🏠</a></li>
+    {% for m in mainmenu %}
+        <li>
+        <a href="{% url m.url_name %}"> {{ m.title }} </a><br>
+        </li>
+    {% endfor %}
+
+    <li> <a href="{% url 'users:login' %}">Войти🗝</a>
+    </li>
+</ul>
+...
+
+После запуска при нажатии кнопки Войти🗝 происходит переход на адрес
+http://127.0.0.1:8000/users/login/
+
+Необходимо сделать отображение логина вошедшего пользователя в главном меню либо пункт ВЫЙТИ и РЕГИСТРАЦИЯ
+
+🛠💾
+Был изменён файл
+<!-- sitewomen/templates/base.html -->
+...
+<ul>
+    <li><a href="{% url 'home' %}"> Главная страница 🏠</a></li>
+    {% for m in mainmenu %}
+        <li>
+        <a href="{% url m.url_name %}"> {{ m.title }} </a><br>
+        </li>
+    {% endfor %}
+
+    {% if user.is_authenticated %}
+        <li> {{ user.username }}🧠 | <a href="{% url 'users:logout' %}">Выйти❌</a> </li>
+    {% else %}
+        <li> <a href="{% url 'users:login' %}">Войти🗝</a> | <a href="#">Регистрация➕</a>
+    {% endif %}
+        </li>
+</ul>
+...
+
+🧠➕👑🗝🚩🎂💥🚀✅🎉 Всё

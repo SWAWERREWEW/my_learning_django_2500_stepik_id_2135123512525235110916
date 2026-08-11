@@ -13,11 +13,18 @@
 <a href="http://127.0.0.1:8000/admin/"> Неглавнаястраница </a>
 <ul>
     <li><a href="{% url 'home' %}"> Главная страница 🏠</a></li>
-    {% for m in menu %}
-    {% if not forloop.last %} <li> {% else %} <li class="last"> {% endif %}
-        <a href="{% url m.url_name %}"> {{ m.title }} </a>
-    </li>
+    {% for m in mainmenu %}
+        <li>
+        <a href="{% url m.url_name %}"> {{ m.title }} </a><br>
+        </li>
     {% endfor %}
+
+    {% if user.is_authenticated %}
+        <li> {{ user.username }}🧠 | <a href="{% url 'users:logout' %}">Выйти❌</a> </li>
+    {% else %}
+        <li> <a href="{% url 'users:login' %}">Войти🗝</a> | <a href="#">Регистрация➕</a>
+    {% endif %}
+        </li>
 </ul>
 
 

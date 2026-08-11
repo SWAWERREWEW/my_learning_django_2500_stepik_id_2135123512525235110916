@@ -4,8 +4,16 @@ from women.views import cats_db
 from women.models import Category, TagPost
 from django.db.models import Count
 
+from women.utils import menu
+
 # Регистрация новых тегов
 register = template.Library()
+
+
+@register.simple_tag
+def get_menu():
+    return menu
+
 
 @register.simple_tag(name='g')
 def get_categories():
