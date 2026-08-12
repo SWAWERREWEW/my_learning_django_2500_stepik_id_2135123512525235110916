@@ -1,0 +1,119 @@
+63 day = 9.5 Декоратор login_required и класс LoginRequiredMixin
+
+Необходимо добавить ограничение посещения сайта для пользователей без авторизации
+
+🛠💾
+Был изменён файл
+# sitewomen\women\views.py
+...
+from django.contrib.auth.decorators import login_required
+...
+@login_required
+def about(request):
+...
+
+Адрес стал недоступен
+http://127.0.0.1:8000/about/
+для неавторизованных пользователей с автоматическим перенаправлением на адрес
+http://127.0.0.1:8000/accounts/login/?next=/about/
+
+Изменить автоматическое перенаправление можно с помощью параметра
+
+🛠💾
+Был изменён файл
+# sitewomen\sitewomen\settings.py
+...
+LOGIN_URL = "users:login"
+
+Но тоже самое можно сделать конкретно в декораторе @login_required с помощью параметра login_url
+@login_required(login_url='/users/login/')
+
+💾🛠
+Был изменён файл
+# sitewomen\women\views.py
+...
+from django.contrib.auth.mixins import LoginRequiredMixin
+...
+class AddPage(LoginRequiredMixin, DataMixin, CreateView):
+...
+
+У класса LoginRequiredMixin тоже есть параметр login_url
+class AddPage(LoginRequiredMixin, DataMixin, CreateView):
+    ...
+    login_url='/users/login/'
+
+Необходимо связать каждую статью со своим автором
+
+
+💾🛠
+Был изменён файл
+# sitewomen\women\models.py
+...
+from django.contrib.auth import get_user_model
+...
+class Women(models.Model):
+    ...
+    author = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, related_name="posts", null=True,
+        default=None)
+...
+
+Осталось сделать и применить миграции
+python manage.py makemigrations
+python manage.py migrate
+
+(.venv) D:\...\sitewomen>python manage.py makemigrations
+Migrations for 'women':
+  women\migrations\0012_uploadfiles_alter_category_options_and_more.py
+    - Create model UploadFiles
+    - Change Meta options on category
+    - Change Meta options on women
+    - Add field author to women
+    - Add field photo to women
+    - Alter field name on category
+    - Alter field slug on category
+    - Alter field cat on women
+    - Alter field content on women
+    - Alter field husband on women
+    - Alter field is_published on women
+    - Alter field slug on women
+    - Alter field tags on women
+    - Alter field time_create on women
+    - Alter field time_update on women
+    - Alter field title on women
+
+(.venv) D:\...\sitewomen>python manage.py migrate
+Operations to perform:
+  Apply all migrations: admin, auth, contenttypes, sessions, women
+Running migrations:
+  No migrations to apply.
+
+(.venv) D:\...\sitewomen>
+
+(Если начали возникать ошибки, стоит просто вернуть код до прежнего рабочего состояния и повторить миграции, а потом
+снова дописать и повторить миграции. Может помочь.)
+
+Нужно присвоить в поле author текущего пользователя, а также сделать механизм автоматической фиксации авторства новой
+добавленной статьи
+
+💾🛠
+Был изменён файл
+# sitewomen\women\views.py
+...
+class AddPage(LoginRequiredMixin, DataMixin, CreateView):
+    form_class = AddPostForm
+    template_name = 'women/addpage.html'
+    title_page = 'Добавление статьи➕'
+
+    def form_valid(self, form):
+        w = form.save(commit=False)
+        w.author = self.request.user
+        return super().form_valid(form)
+
+Осталось отобразить автора для поста
+
+💾🛠
+Был изменён файл
+<!-- sitewomen\women\templates\women\index.html -->
+...
+<p> дата {{p.time_update}} | автор: {{p.author.username|default:"неизвестен"}}</p>
+...

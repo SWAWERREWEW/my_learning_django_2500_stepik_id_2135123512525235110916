@@ -53,7 +53,7 @@
 {% endblock %}
 
 {% block content %}
-<h1> {{ title|capfirst }}</h1>
+<h1> {{ title|capfirst }} </h1>
 
 {% include 'women/includes/nav.html' only with title2='what❓'%}
 
@@ -62,7 +62,7 @@
     <li>
         <h2> {{ p.title }} 🗝 {{ p.cat.name }} </h2>
         <p> {{ p.content|truncatewords:30 }} 📝 </p>
-        <p> дата {{p.time_update}} </p>
+        <p> дата {{p.time_update}} | автор: {{p.author.username|default:"неизвестен"}}</p>
         <p><a href="{{ p.get_absolute_url }}"> Читать пост 📖 </a></p>
         {% if not forloop.last %}
         <hr>

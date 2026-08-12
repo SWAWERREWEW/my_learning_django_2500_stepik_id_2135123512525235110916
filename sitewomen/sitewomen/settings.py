@@ -136,6 +136,10 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
+# задает URL-адрес, на который следует перенаправлять пользователя после успешной авторизации;
 LOGIN_REDIRECT_URL = "/"
+# задает URL-адрес, на который перенаправляется пользователь после выхода.
 LOGOUT_REDIRECT_URL = "users:login"
+# определяет URL-адрес, на который следует перенаправить неавторизованного пользователя при попытке посетить закрытую
+# страницу сайта или просто страница для авторизации.
+LOGIN_URL = "users:login"

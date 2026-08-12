@@ -1,4 +1,6 @@
 # sitewomen\women\views.py
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls.base import reverse_lazy
 from .models import Women, Category, TagPost, UploadFiles
 from .forms import AddPostForm, UploadFileForm
@@ -30,6 +32,7 @@ cats_db = [
 ]
 
 
+@login_required
 def about(request):
     contact_list = Women.published.all()
     paginator = Paginator(contact_list, 3)
@@ -104,10 +107,15 @@ class EditPage(DataMixin, UpdateView):
     title_page = "Редактирование статьи 🛠"
 
 
-class AddPage(DataMixin, CreateView):
+class AddPage(LoginRequiredMixin, DataMixin, CreateView):
     form_class = AddPostForm
     template_name = 'women/addpage.html'
     title_page = 'Добавление статьи➕'
+
+    def form_valid(self, form):
+        w = form.save(commit=False)
+        w.author = self.request.user
+        return super().form_valid(form)
 
 
 class WomenHome(DataMixin, ListView):
