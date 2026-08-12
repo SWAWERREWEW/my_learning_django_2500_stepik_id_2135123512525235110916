@@ -31,6 +31,8 @@ DEBUG = True
 # http://x.x.x.x:8000
 # Например
 # http://192.167.2.222:8000
+# А запускать с помощью команды
+# python manage.py runserver 0.0.0.0:8000
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 INTERNAL_IPS = ["127.0.0.1"]
 
