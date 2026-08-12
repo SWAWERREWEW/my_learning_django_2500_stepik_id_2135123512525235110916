@@ -26,7 +26,12 @@ SECRET_KEY = 'django-insecure-(a97@^+-b0k3!*9k$+sdffe0pt$!83*c(b(#j-6ciocc58)7z)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1']
+# Можно добаить в переменную ALLOWED_HOSTS ip адрес устройства, на котором запускается сервер с помощью cmd и команды
+# ipconfig, чтобы на других устройствах открывать по адресу
+# http://x.x.x.x:8000
+# Например
+# http://192.167.2.222:8000
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 INTERNAL_IPS = ["127.0.0.1"]
 
 # Application definition

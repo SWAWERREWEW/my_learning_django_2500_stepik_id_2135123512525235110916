@@ -28,6 +28,7 @@
     {% endfor %}
 
     <br>
+    <br>
     {% if page_obj.has_previous %}
     ..<a href="?page={{ page_obj.previous_page_number }}"> [←] </a>..
     {% else %}
@@ -40,6 +41,7 @@
     .. [❌] ..
     {% endif %}
 
+    <br>
     <br>
     {% for pagan in paginator.page_range %}
         {% if forloop.first %}
