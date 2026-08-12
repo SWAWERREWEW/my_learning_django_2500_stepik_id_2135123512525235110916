@@ -5,7 +5,15 @@
 login🛠📥🌎
 <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
+    <input type="hidden" name="next" value="{{ next }}" />
+    <div> {{ form.non_field_errors }} </div>
+    {% for f in form %}
+        <p style="color: darkgreen;">
+            ⚠ {{ f.label }} ⚠ <br>
+            {{ f }}
+            <div> {{ f.errors }} </div>
+        </p>
+    {% endfor %}
     <p><button type="submit">🚀Го🚀</button></p>
 </form>
 

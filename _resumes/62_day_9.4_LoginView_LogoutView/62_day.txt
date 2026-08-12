@@ -1,0 +1,206 @@
+62 day = 9.4 Классы LoginView, LogoutView и AuthenticationForm
+
+LoginView – класс представления для авторизации пользователей
+LogoutView – класс представления для выхода пользователя из системы
+AuthenticationForm – класс формы обработки аутентификации пользователя
+
+Необходимо заменить функции представления на классы представления
+
+💾🛠
+Был изменён файл
+# sitewomen/users/views.py
+...
+from django.contrib.auth.views import LoginView
+from django.contrib.auth.forms import AuthenticationForm
+
+class LoginUser(LoginView):
+    form_class = AuthenticationForm
+    template_name = "users/login.html"
+    extra_context = {"title": "авторизация"}
+
+
+def logout_user(request):
+    logout(request)
+    return HttpResponseRedirect(reverse("users:login"))
+
+🛠💾❌
+И была удалена функция login_user из файла
+# sitewomen/users/views.py
+
+В новом классе представления нельзя использовать собственный класс в параметре form_class, потому что
+Нужно использовать AuthenticationForm
+
+💾🛠
+Был изменён файл
+# sitewomen\users\urls.py
+...
+urlpatterns = [
+    # users:
+    # users:login
+    path('login/', views.LoginUser.as_view(), name='login'),
+    path('logout/'...
+]
+
+Везде, где имеется ввиду адрес
+http://127.0.0.1:8000/
+Нужно прописываться слово home.
+После авторизации происходит автоматическое перенаправление на адрес по умолчанию, которая не была прописана
+http://127.0.0.1:8000/accounts/profile/
+Необходимо прописать нужный адрес
+http://127.0.0.1:8000/
+
+💾🛠
+Был изменён файл
+# sitewomen/users/views.py
+...
+from django.urls.base import reverse_lazy
+class LoginUser(LoginView):
+    extra_context = ...
+
+    def get_absolute_url(self):
+        return reverse_lazy('home')
+...
+
+LOGIN_REDIRECT_URL – задает URL-адрес, на который следует перенаправлять пользователя после успешной авторизации;
+LOGIN_URL – определяет URL-адрес, на который следует перенаправить неавторизованного пользователя при попытке посетить
+закрытую страницу сайта или просто страница для авторизации.
+LOGOUT_REDIRECT_URL – задает URL-адрес, на который перенаправляется пользователь после выхода.
+При необходимости такие настройки прописываются в файле
+# sitewomen\sitewomen\settings.py
+
+💾🛠
+Был изменён файл
+# sitewomen\sitewomen\settings.py
+...
+LOGIN_REDIRECT_URL = "home"
+
+❌💾🛠
+За счёт этого можно удалить функцию get_success_url из файла
+# sitewomen/users/views.py
+
+Нужно изменить внешний вид формы авторизации
+💾🛠
+Был изменён файл
+<!-- sitewomen/users/templates/users/login.html -->
+...
+{% block content %}
+login🛠📥🌎
+<form method="post">
+    {% csrf_token %}
+    <div> {{ form.non_field_errors }} </div>
+    {% for f in form %}
+        <p style="color: darkgreen;">
+            ⚠ {{ f.label }} ⚠ <br>
+            {{ f }}
+            <div> {{ f.errors }} </div>
+        </p>
+    {% endfor %}
+    <p><button type="submit">🚀Го🚀</button></p>
+</form>
+{% endblock %}
+
+Но желательно использовать свои поля, вместо полей по умолчанию
+
+💾🛠
+Был изменён файл
+# sitewomen/users/forms.py
+...
+from django.contrib.auth.forms import AuthenticationForm
+class LoginUserForm(AuthenticationForm):
+    username = ...
+    password = ...
+
+💾🛠
+Был изменён файл
+# sitewomen/users/views.py
+...
+from sitewomen.users.forms import LoginUserForm
+...
+class LoginUser(LoginView):
+    form_class = LoginUserForm
+    template_name = "users/login.html"
+    extra_context = {"title": "авторизация"}
+
+❌🛠💾
+Из файла
+# sitewomen/users/views.py
+Были удалены строки
+from django.contrib.auth.forms import AuthenticationForm
+from django.urls.base import reverse_lazy
+
+Существует рекомендуемая практика для классов авторизации
+
+💾🛠
+Был изменён файл
+# sitewomen/users/forms.py
+...
+from django.contrib.auth import get_user_model
+
+class LoginUserForm(AuthenticationForm):
+    ...
+    class Meta:
+        model = get_user_model()
+        fields = ["username", "password"]
+
+Из файла
+# sitewomen/users/forms.py
+Можно удалены строки
+username = forms.CharField(label="🏠Погин", widget=forms.TextInput(attrs={"class": "form-input"}))
+password = forms.CharField(label="🗝Ларопь", widget=forms.PasswordInput(attrs={"class": "form-input"}))
+За счёт функции get_user_model в классе Meta
+
+🛠💾
+Был изменён файл
+<!-- sitewomen/users/templates/users/login.html -->
+...
+<form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}" />
+...
+
+Чтобы потом можно было в адресной строке указать
+?next=/addpage/
+Например
+http://127.0.0.1:8000/users/login/?next=/addpage/
+После этого произойдёт автоматическое перенаправление на адрсе
+http://127.0.0.1:8000/users/login/
+Но в коде странице изменится параметр value и после авторизации произойдет автоматическое перенаправление на указанный
+адрес
+http://127.0.0.1:8000/addpage/
+Вместе с этим существуют приоритеты
+Параметр next имеет меньший приоритет, чем удалённая функция get_success_url, но больший, чем LOGIN_REDIRECT_URL
+Приоритеты
+get_success_url
+name="next"
+LOGIN_REDIRECT_URL
+
+Необходимо заменить функцию представления logout_user на класс представления, даже прям в urls.py
+
+🛠💾
+Был изменён файл
+# sitewomen\users\urls.py
+...
+from django.contrib.auth.views import LogoutView
+...
+urlpatterns = [
+    ...
+    path('logout/', LogoutView.as_view(), name='logout'),
+]
+
+💾🛠❌
+Из файла
+# sitewomen/users/views.py
+Была удалена функция logout_user
+
+Встроенный класс LogoutView при выходе из аккаунта автоматически перенаправляет на адрес и страницу по умолчанию
+http://127.0.0.1:8000/users/logout/
+
+Необходимо изменить адрес для автоматического перенаправления после выхода из аккаунта
+
+🛠💾
+Был изменён файл
+# sitewomen\sitewomen\settings.py
+...
+LOGOUT_REDIRECT_URL = "users:login"
+
+🎉✅🎂🚀🌎🍌🧠Всё
