@@ -10,7 +10,7 @@
     <link type="text/css" href="{% static 'women/css/styles.css' %}" rel="stylesheet" />
 </head>
 <body>
-<a href="http://127.0.0.1:8000/admin/"> Неглавнаястраница </a>
+<a href="http://127.0.0.1:8000/admin/"> 💾 Неглавнаястраница 💾 </a>
 <ul>
     <li><a href="{% url 'home' %}"> Главная страница 🏠</a></li>
     {% for m in mainmenu %}
@@ -22,7 +22,7 @@
     {% if user.is_authenticated %}
         <li> {{ user.username }}🧠 | <a href="{% url 'users:logout' %}">Выйти❌</a> </li>
     {% else %}
-        <li> <a href="{% url 'users:login' %}">Войти🗝</a> | <a href="#">Регистрация➕</a>
+        <li> <a href="{% url 'users:login' %}">Войти🗝</a> | <a href="{% url 'users:register' %}">Регистрация➕</a>
     {% endif %}
         </li>
 </ul>
@@ -30,9 +30,9 @@
 
 
 {% if cat_selected == 0 %}
-<h1>Все категории</h1>
+<h1>Все категории📊📝📖</h1>
 {% else %}
-<h1> <a href="{% url 'home' %}"> Все категории </a> </h1>
+<h1> <a href="{% url 'home' %}"> Все категории 📐📦📁 </a> </h1>
 {% endif %}
 
 {% show_categories cat_selected %}

@@ -25,7 +25,7 @@ class AddPostForm(forms.ModelForm):
     class Meta:
         model = Women
         # Импортированные поля
-        fields = ['title', 'slug', 'content', 'is_published', 'cat', 'husband', 'tags', 'photo']
+        fields = ['title', 'content', 'is_published', 'cat', 'husband', 'tags', 'photo']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-input'}),
             'content': forms.Textarea(attrs={'cols': 50, 'rows': 3})

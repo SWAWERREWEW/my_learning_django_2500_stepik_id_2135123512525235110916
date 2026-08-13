@@ -1,0 +1,131 @@
+64 day = 9.6 Регистрация пользователей через функции представления
+
+Необходимо сделать авторизацию
+
+💾🛠➕
+Был создан файл
+<!-- sitewomen\users\templates\users\register.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<h1> 💲🏠 Регистрация </h1>
+<form method="POST">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}"/>
+    {{ form.as_p }}
+    <p> <button type="submit"> 🏠💲Регистрация💲🏠 </button> </p>
+</form>
+{% endblock %}
+
+🌎📖🔍
+Для подробной информации можно обратиться к документации
+https://docs.djangoproject.com/en/4.2/topics/auth/default/
+
+💾🛠
+Был изменён файл
+# sitewomen/users/forms.py
+...
+class RegisterUserForm(forms.ModelForm):
+    username = forms.CharField(label="🏠Погин")
+    password = forms.CharField(label="🗝Ларопь", widget=forms.PasswordInput())
+    password2 = forms.CharField(label="🗝Снова Ларопь", widget=forms.PasswordInput())
+
+    class Meta:
+        model = get_user_model()
+        fields = ["username", "email", "first_name", "last_name", "password", "password2"]
+        label = {
+            "username": "Погин🏠",
+            "email": "Почта📦",
+            "first_name": "Имечко📐",
+            "last_name": "Фамилия🍀"
+        }
+
+💾🛠
+Был изменён файл
+# sitewomen/users/views.py
+...
+from .forms import LoginUserForm, RegisterUserForm
+...
+def register(request):
+    form = RegisterUserForm()
+    return render(request, "users/register.html", {"form": form})
+
+💾🛠
+Был изменён файл
+# sitewomen\users\urls.py
+...
+urlpatterns = [
+    ...
+    path('register/', views.register, name='register'),
+]
+
+💾🛠
+Был изменён файл
+<!-- sitewomen/templates/base.html -->
+...
+<li> <a href="{% url 'users:login' %}">Войти🗝</a> | <a href="{% url 'users:register' %}">Регистрация➕</a>
+...
+
+✅🚀🎉
+После запуска появляется нерабочая форма регистрации
+
+💾🛠➕
+Был создан файл
+<!-- sitewomen/users/template/users/register_done.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Добро пожаловать❗🏠🎉🚀✅</h1>
+
+<p>Вы успешно зарегистрировались на сайте❗✅🚀🎉🚩 Для входа в систему необходимо авторизоваться по этой
+    <a href="{% url 'users:login' %}">ссылке📤📐</a>
+</p>
+
+{% endblock %}
+
+💾🛠
+Был изменён файл
+# sitewomen/users/forms.py
+...
+class RegisterUserForm(forms.ModelForm):
+    ...
+    # Проверка паролей
+    def clean_password2(self):
+        cd = self.cleaned_data
+        if cd["password"] != cd["password2"]:
+            raise forms.ValidationError("❌⚠🗝Пароли без совпадения🗝⚠❌")
+        return cd["password"]
+
+    # Проверка уникальности передаваемых почт
+    def clean_email(self):
+        email = self.cleaned_data["email"]
+        if get_user_model().objects.filter(email=email).exists():
+             raise forms.ValidationError("⚠🏠🔍Обнаружена зарегистрированная почта🔍🏠⚠")
+        return email
+
+💾🛠
+Был изменён файл
+# sitewomen/users/views.py
+...
+def register(request):
+    if request.method == "POST":
+        form = RegisterUserForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.set_password(form.cleaned_data["password"])
+            user.save()
+            return render(request, 'users/register_done.html')
+    else:
+        form = RegisterUserForm()
+    return render(request, "users/register.html", {"form": form})
+
+💾🛠
+Был изменён файл
+# sitewomen\women\forms.py
+...
+class AddPostForm(forms.ModelForm):
+    ...
+    fields = ['title', 'content', 'is_published', 'cat', 'husband', 'tags', 'photo']
+...
+
+✅🚀🏠📊🍌🎂👑🍀 Всё
