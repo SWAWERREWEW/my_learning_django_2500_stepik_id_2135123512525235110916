@@ -1,0 +1,113 @@
+65 day = 9.7 Класс UserCreationForm
+
+Необходимо заменить функцию представления register на класс представления
+
+💾🛠
+Был изменён файл
+# sitewomen/users/forms.py
+...
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+...
+class RegisterUserForm(UserCreationForm):
+    ...
+    password1 = forms.CharField(label="🗝Ларопь", widget=forms.PasswordInput())
+    password2 = forms.CharField(label="🗝Снова Ларопь", widget=forms.PasswordInput())
+
+    class Meta:
+        ...
+        fields = ["username", "email", "first_name", "last_name", "password1", "password2"]
+...
+
+
+
+✅🚀☕
+После запуска формы отображается как и прежде
+
+Изменение внешнего вида через стили, которые могли быть прописаны в файлах sitewomen/static/css/...
+
+💾🛠
+Был изменён файл
+# sitewomen/users/forms.py
+...
+class RegisterUserForm(UserCreationForm):
+    username = forms.CharField(label="🏠Погин", widget=forms.TextInput(attrs={"class": "form-input"}))
+    password1 = forms.CharField(label="🗝Ларопь", widget=forms.PasswordInput(attrs={"class": "form-input"}))
+    password2 = forms.CharField(label="🗝Снова Ларопь", widget=forms.PasswordInput(attrs={"class": "form-input"}))
+
+    class Meta:
+        ...
+        labels = {
+            ...
+        }
+        widgets = {
+            "email": forms.TextInput(attrs={"class": "form-input"}),
+            "first_name": forms.TextInput(attrs={"class": "form-input"}),
+            "last_name": forms.TextInput(attrs={"class": "form-input"})
+        }
+...
+
+Изменение отображения формы на странице
+
+💾🛠
+Был изменён файл
+<!-- sitewomen\users\templates\users\register.html -->
+...
+<form method="POST">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}"/>
+    <div> {{ form.non_field_errors }} </div>
+    {% for f in form %}
+        <p style="color: darkgreen;">
+            ⚠ {{ f.label }} ⚠ <br>
+            {{ f }}
+            <div> {{ f.errors }} </div>
+        </p>
+    {% endfor %}
+    <p> <button type="submit"> 🏠💲Регистрация💲🏠 </button> </p>
+</form>
+{% endblock %}
+
+Замена функции на класс
+
+💾🛠
+Был изменён файл
+# sitewomen/users/views.py
+...
+from django.views.generic import CreateView
+...
+class RegisterUser(CreateView):
+    form_class = RegisterUserForm
+    template_name = "users/register.html"
+    extra_context = {"title": "Регистрейшон🎂🎂🎂"}
+...
+
+❌🛠💾
+Была удалена функция clean_password2
+Из файла
+# sitewomen/users/forms.py
+
+💾🛠
+Был изменён файл
+# sitewomen/users/views.py
+...
+class RegisterUser(CreateView):
+    ...
+    success_url = reverse_lazy('users:login')
+
+💾🛠
+Был изменён файл
+# sitewomen\users\urls.py
+...
+urlpatterns = [
+    ...
+    path('register/', views.RegisterUser.as_view(), name='register'),
+]
+
+✅🚀☕
+После запуска всё работает как прежде
+
+❌🛠💾
+Была удалена функция register из файла
+# sitewomen/users/views.py
+
+☕🚀✅🎂👑🎉🚩🗝⚡🧠💼 Всё

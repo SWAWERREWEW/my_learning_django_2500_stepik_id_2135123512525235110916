@@ -6,7 +6,14 @@
 <form method="POST">
     {% csrf_token %}
     <input type="hidden" name="next" value="{{ next }}"/>
-    {{ form.as_p }}
+    <div> {{ form.non_field_errors }} </div>
+    {% for f in form %}
+        <p style="color: darkgreen;">
+            ⚠ {{ f.label }} ⚠ <br>
+            {{ f }}
+            <div> {{ f.errors }} </div>
+        </p>
+    {% endfor %}
     <p> <button type="submit"> 🏠💲Регистрация💲🏠 </button> </p>
 </form>
 {% endblock %}
