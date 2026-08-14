@@ -1,0 +1,121 @@
+67 day = 9.9 Классы PasswordChangeView и PasswordChangeDoneView
+
+Добавление смены пароля
+
+PasswordChangeView – для обработки формы изменения пароля;
+PasswordChangeDoneView – для отображения результата успешного изменения пароля.
+
+💾🛠
+Был изменён файл
+# sitewomen\users\urls.py
+...
+from django.contrib.auth.views import LogoutView, PasswordChangeView, PasswordChangeDoneView
+...
+urlpatterns = [
+    ...
+    path('password-change/', PasswordChangeView.as_view(), name='password_change'),
+    path('password-change/done', PasswordChangeDoneView.as_view(), name='password_change_done')
+]
+
+💾🛠
+Был изменён файл
+<!-- sitewomen/templates/base.html -->
+...
+<hr>
+{% if cat_selected ...
+...
+
+💾🛠
+Был изменён файл
+<!-- sitewomen/users/templates/users/profile.html -->
+...
+<hr>
+<p>
+<a href="{% url 'users:password_change' %}"> 🛠 Смена пароля 🗝 </a>
+</p>
+{% endblock %}
+
+✅🚀📶
+После запуска по адресу
+http://127.0.0.1:8000/users/profile/
+по кнопке Смена пароля происходит перенаправление на адрес
+http://127.0.0.1:8000/users/password-change/
+отображается форма от Django по смене пароля
+
+Можно создать свою форму для смены пароля
+
+💾🛠➕
+Был создан файл
+<!-- sitewomen/users/templates/users/password_change_form.html -->
+{% extends 'base.html' %}
+{% block content %}
+<h1>♻💾 Изменение пароля 🗝🛠</h1>
+<form method="post">
+    {% csrf_token %}
+    <div class="form-error">{{ form.non_field_errors }}</div>
+    {% for f in form %}
+        <p style="color: darkgreen;">
+            <label class="form-label" for="{{ f.id_for_label }}">{{f.label}}: </label>{{ f }}
+        </p>
+        <div class="form-error" style="color: red;">{{ f.errors }}</div>
+    {% endfor %}
+    <p><button type="submit">♻💬 Сменить пароль 🛠🧠</button></p>
+</form>
+{% endblock %}
+
+💾🛠
+Был изменён файл
+# sitewomen/users/forms.py
+...
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm, PasswordChangeForm
+...
+class UserPasswordChangeForm(PasswordChangeForm):
+    old_password = forms.CharField(label="📦Старый пароль", widget=forms.PasswordInput(attrs={'class': 'form-input'}))
+    new_password1 = forms.CharField(label="➕Новый пароль", widget=forms.PasswordInput(attrs={'class': 'form-input'}))
+    new_password2 = forms.CharField(label="📝Подтверждение пароля",
+        widget=forms.PasswordInput(attrs={'class': 'form-input'}))
+
+💾🛠
+Был изменён файл
+# sitewomen/users/views.py
+...
+from .forms import LoginUserForm, RegisterUserForm, ProfileUserForm, UserPasswordChangeForm
+from django.contrib.auth.views import LoginView, PasswordChangeView
+...
+class UserPasswordChange(PasswordChangeView):
+    form_class = UserPasswordChangeForm
+    success_url = reverse_lazy("users:password_change_done")
+    template_name = "users/password_change_form.html"
+
+✅🚀🎉🎂
+После запуска по адресу
+http://127.0.0.1:8000/users/profile/
+по кнопке смена пароля отображается собственная форма из файла
+<!-- sitewomen/users/templates/users/password_change_form.html -->
+После смены пароля происходит перенаправление на адрес со страницей по умолчанием
+http://127.0.0.1:8000/users/password-change/done/
+
+💾🛠➕
+Был создан файл
+<!-- sitewomen/users/templates/users -->
+{% extends 'base.html' %}
+{% block content %}
+<h1>✅Пароль успешно изменен❗♻</h1>
+<h3>Вы успешно изменили пароль🛠💾
+    <br>
+    <br>
+    <a href="{% url 'users:profile' %}">Вернуться в профиль🧠💼</a>
+</h3>
+{% endblock %}
+
+💾🛠
+Был изменён файл
+# sitewomen\users\urls.py
+...
+urlpatterns = [
+    ...
+    path('password-change/done', PasswordChangeDoneView.as_view(template_name="users/password_change_done.html"),
+         name='password_change_done')
+]
+
+✅🎉🎂🚀🍌👑🚩🍀🌎 Всё
