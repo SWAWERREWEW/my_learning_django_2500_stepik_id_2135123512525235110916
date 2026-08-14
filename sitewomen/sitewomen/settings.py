@@ -150,3 +150,8 @@ LOGOUT_REDIRECT_URL = "users:login"
 # определяет URL-адрес, на который следует перенаправить неавторизованного пользователя при попытке посетить закрытую
 # страницу сайта или просто страница для авторизации.
 LOGIN_URL = "users:login"
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'users.authentication.EmailAuthBackend',
+]

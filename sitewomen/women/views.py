@@ -56,7 +56,7 @@ class ShowPost(DataMixin, DetailView):
 
 
 def contact(request):
-    return HttpResponse(f"Обратная связь 💬")
+    return render(request,'women/contact.html',{'title': '📶Контакты🛠', 'menu': menu})
 
 
 def login(request):

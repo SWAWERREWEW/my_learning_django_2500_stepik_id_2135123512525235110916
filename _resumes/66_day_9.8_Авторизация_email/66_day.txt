@@ -1,0 +1,186 @@
+66 day = 9.8 Авторизация через email. Профиль пользователя
+
+Реализация способа авторизации через почту
+
+💾🛠➕
+Был создан файл
+# sitewomen/users/authentication.py
+from django.contrib.auth import get_user_model
+from django.contrib.auth.backends import BaseBackend
+class EmailAuthBackend(BaseBackend):
+    def authenticate(self, request, username=None, password=None, **kwargs):
+        user_model = get_user_model()
+        try:
+            user = user_model.objects.get(email=username)
+            if user.check_password(password):
+                return user
+            return None
+        except (user_model.DoesNotExist, user_model.MultipleObjectsReturned):
+            return None
+    def get_user(self, user_id):
+        user_model = get_user_model()
+        try:
+            return user_model.objects.get(pk=user_id)
+        except user_model.DoesNotExist:
+            return None
+
+🛠💾
+Был изменён файл
+# sitewomen\sitewomen\settings.py
+...
+from django.contrib.auth.backends import ModelBackend
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'users.authentication.EmailAuthBackend',
+]
+
+🚀✅🎂🎉
+После запуска работает авторизация и по почте и по логину
+Нужно добавить страницу профиля
+
+💾🛠➕
+Был создан файл
+<!-- sitewomen/users/templates/users/profile.html -->
+{% extends 'base.html' %}
+{% block content %}
+<h1>📊🏠Профиль🧠💼</h1>
+<form method="post">
+    {% csrf_token %}
+    <div class="form-error">{{ form.non_field_errors }}</div>
+    {% for f in form %}
+        <p>
+            <label class="form-label" for="{{ f.id_for_label }}">{{f.label}}: </label>{{ f }}
+        </p>
+        <div class="form-error">{{ f.errors }}</div>
+    {% endfor %}
+    <p><button type="submit">📁➕Сохранить📥💾</button></p>
+</form>
+{% endblock %}
+
+Параметр disabled=True заблокирует возможность изменеия этого поля.
+(Хотя на уровне базы данных их не получится изменить)
+
+🛠💾
+Был изменён файл
+# sitewomen/users/forms.py
+...
+class ProfileUserForm(forms.ModelForm):
+    username = forms.CharField(disabled=True, label='Логин', widget=forms.TextInput(attrs={'class': 'form-input'}))
+    email = forms.CharField(disabled=True, label='E-mail', widget=forms.TextInput(attrs={'class': 'form-input'}))
+
+    class Meta:
+        model = get_user_model()
+        fields = ['username', 'email', 'first_name', 'last_name']
+        labels = {
+        'first_name': 'Имя',
+        'last_name': 'Фамилия',
+        }
+        widgets = {
+        'first_name': forms.TextInput(attrs={'class': 'form-input'}),
+        'last_name': forms.TextInput(attrs={'class': 'form-input'}),
+        }
+
+🛠💾
+Был изменён файл
+# sitewomen/users/views.py
+...
+from .forms import LoginUserForm, RegisterUserForm, ProfileUserForm
+from django.contrib.auth import authenticate, login, logout, get_user_model
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic.edit import UpdateView
+...
+class ProfileUser(LoginRequiredMixin, UpdateView):
+    model = get_user_model()
+    form_class = ProfileUserForm
+    template_name = 'users/profile.html'
+    extra_context = {'title': "Ваш профиль👑"}
+
+    def get_success_url(self):
+        return reverse_lazy('users:profile', args=[self.request.user.pk])
+
+🛠💾
+Был изменён файл
+# sitewomen\users\urls.py
+...
+urlpatterns = [
+    ...
+    path('profile/<int:pk>/', views.ProfileUser.as_view(), name='profile'),
+]
+
+✅🚀🚩
+После запуска по адресу
+http://127.0.0.1:8000/users/profile/1
+отображается форма для изменения имени и фамилии
+Необходимо изменить способ открытия профиля
+
+🛠💾
+Был изменён файл
+# sitewomen\users\urls.py
+...
+urlpatterns = [
+    ...
+    path('profile/', views.ProfileUser.as_view(), name='profile'),
+]
+
+🛠💾
+Был изменён файл
+# sitewomen/users/views.py
+...
+class ProfileUser(LoginRequiredMixin, UpdateView):
+    ...
+    def get_success_url(self):
+        return reverse_lazy('users:profile')
+    def get_object(self, queryset=None):
+        return self.request.user
+
+✅🚀📶
+После запуска по адресу
+http://127.0.0.1:8000/users/profile/
+отображается профиль определённого пользователя
+
+Можно сделать логин на главной панели ссылкой на профиль
+
+🛠💾
+Был изменён файл
+<!-- sitewomen/templates/base.html -->
+...
+<li>
+    <a href="{% url 'users:profile' %}">{{ user.username }}🧠</a>
+    | <a href="{% url 'users:logout' %}">Выйти❌</a>
+</li>
+...
+
+Можно добавить страницу контактов
+
+🛠💾➕
+Был создан файл
+<!-- sitewomen/women/templates/women/contact.html -->
+{% extends 'base.html' %}
+{% block content %}
+<h1> ❌📶 Без контактов 📶❌ </h1>
+{% endblock %}
+
+🛠💾
+Был изменён файл
+# sitewomen\women\views.py
+...
+def contact(request):
+    return render(request,'women/contact.html',{'title': '📶Контакты🛠', 'menu': menu})
+...
+
+Ещё можно добавить пробелов на главной панели меню
+
+🛠💾
+Был изменён файл
+<!-- sitewomen/templates/base.html -->
+...
+<li><a href="{% url 'home' %}"> Главная страница 🏠</a></li>
+    <br>
+    {% for m in mainmenu %}
+        <li>
+        <a href="{% url m.url_name %}"> {{ m.title }} </a><br>
+        </li><br>
+    {% endfor %}
+...
+
+🚀✅🚩👑🍌🎉🎂 Всё
