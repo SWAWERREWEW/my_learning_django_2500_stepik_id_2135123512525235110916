@@ -17,16 +17,9 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 # sitewomen/.env
+# пример
+# IP=192.168.1.100
 ENV_FILE = BASE_DIR / '.env'
-
-# 1. Читаем файл .env "руками", если он существует
-if ENV_FILE.exists():
-    with open(ENV_FILE, 'r') as f:
-        for line in f:
-            # Игнорируем пустые строки и комментарии
-            if line.strip() and not line.startswith('#'):
-                key, value = line.strip().split('=', 1)
-                os.environ[key] = value  # Записываем в память процесса
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -46,9 +39,18 @@ DEBUG = True
 # python manage.py runserver 0.0.0.0:8000
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
-ip = os.environ.get('IP', 'localhost')
-if ip:
-    ALLOWED_HOSTS.append(ip)
+
+if ENV_FILE.exists():
+    with open(ENV_FILE, 'r', encoding='utf-8-sig') as f:
+        for line in f:
+            line = line.strip()
+            # Ищем строку, которая начинается именно с IP=
+            if line.startswith('IP='):
+                # Разделяем по первому знаку равно и берем правую часть
+                parsed_ip = line.split('=', 1)[1].strip()
+                if parsed_ip:
+                    ALLOWED_HOSTS.append(parsed_ip)
+                break  # Нашли IP — останавливаем цикл, дальше искать не нужно
 
 INTERNAL_IPS = ["127.0.0.1"]
 
