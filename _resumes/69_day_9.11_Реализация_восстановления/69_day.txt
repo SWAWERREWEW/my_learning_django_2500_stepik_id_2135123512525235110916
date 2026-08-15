@@ -1,0 +1,240 @@
+69 day = 9.11 Реализация алгоритма восстановления пароля
+
+🌎📖🔍
+Для информации можно обратиться в оборотня
+docs.djangoproject.com/en/4.2/topics/auth/default/
+
+Там прописана вся реализация схемы
+Сначала нужно прописать форму ввода почты
+
+💾🛠➕
+Был создан файл
+<!--sitewomen/users/templates/users/password_reset_form.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>⚡🗝Восстановление пароля🛠🏠</h1>
+
+<form method="post">
+    {% csrf_token %}
+    {% for f in form %}
+        <p>
+            <label class="form-label" for="{{ f.id_for_label }}">{{f.label}}: </label>{{ f }}
+        </p>
+        <div class="form-error">{{ f.errors }}</div>
+    {% endfor %}
+    <p><button type="submit">❌💥Сбросить по почте🗝🏠</button></p>
+</form>
+
+{% endblock %}
+
+Ещё необходима форма для отображения сообщения об отправке письма на почту
+
+В папке
+.venv\Lib\site-packeges\django\contrib\admin\templates\registration
+Можно найти шаблоны, используемые по умолчанию.
+Нужно создать такой же, но собственный
+
+💾🛠➕
+Был создан файл
+<!-- sitewomen/users/templates/users/password_reset_done.html -->
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+<h1>💥❌🗝🏠Сброс пароля</h1>
+<p >{% translate 'We’ve emailed you instructions for setting your password, if an account exists with the email you entered. You should receive them shortly.' %}</p>
+<p >{% translate 'If you don’t receive an email, please make sure you’ve entered the address you registered with, and check your spam folder.' %}</p>
+{% endblock %}
+
+Нужно прописать маршруты для этих двух шаблонов
+
+💾🛠
+Был изменён файл
+# sitewomen\users\urls.py
+...
+from django.contrib.auth.views import (LogoutView, PasswordChangeView, PasswordChangeDoneView, PasswordResetDoneView,
+    PasswordResetView)
+...
+urlpatterns = [
+    ...
+    # Названия этих маршрутов в параметре name нельзя менять
+    path('password-reset/',
+        PasswordResetView.as_view(template_name = "users/password_reset_form.html"),
+        name='password_reset'),
+    path('password-reset/done/',
+        PasswordResetDoneView.as_view(template_name = "users/password_reset_done.html"),
+        name='password_reset_done'),
+]
+
+Нужна возможность формировать одноразовую ссылку
+
+💾🛠➕
+Был создан файл
+<!-- sitewomen\users\templates\users\password_reset_confirm.html -->
+
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>➕🗝Новый пароль🧠🏠</h1>
+
+<form method="post">
+    {% csrf_token %}
+    <div class="form-error">{{ form.non_field_errors }}</div>
+    {% for f in form %}
+    <p><label class="form-label" for="{{ f.id_for_label }}">{{f.label}}: </label>{{ f }}</p>
+    <div class="form-error">{{ f.errors }}</div>
+    {% endfor %}
+    <p><button type="submit">♻🛠Сохранить📦📥</button></p>
+</form>
+<hr>
+<hr>
+<hr>
+<hr>
+{% endblock %}
+
+Ещё нужна страница для сообщения об успешном изменении пароля
+
+💾🛠➕
+Был создан файл
+<!-- sitewomen\users\templates\users\password_reset_complete.html -->
+
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>💥💥💥Пароль изменен✅✅✅</h1>
+
+<h3>
+    🎉Поздравляем❗🚩👑 Вы успешно изменили пароль своего аккаунта🎂☕. Можете использовать его для <br>
+    <a href="{% url 'users:login' %}">Входа</a>.
+</h3>
+
+{% endblock %}
+
+Нужно соединить сайт с этими шаблонами с помощью маршрутизации
+
+🛠💾
+Был изменён файл
+# sitewomen\users\urls.py
+...
+urlpatterns = [
+...
+    # Названия этих маршрутов в параметре name нельзя менять
+    ...
+    path('password-reset/<uidb64>/<token>/',
+        PasswordResetConfirmView.as_view(template_name="users/password_reset_confirm.html"),
+        name='password_reset_confirm'),
+    path('password-reset/complete/',
+        PasswordResetCompleteView.as_view(template_name="users/password_reset_complete.html"),
+        name='password_reset_complete'),
+]
+
+Нужно переопределить ещё одну страницу, которая вызывается после шаблона password_reset_complete.
+Этот шаблон вызывается по умолчанию, но в нём прописан путь password_reset_email , а нужен users:password_reset_email
+
+Было скопировано содержимое файла
+.venv\Lib\site-packeges\django\contrib\admin\templates\registration\password_reset_email.html
+
+💾🛠
+Был создан файл
+<!-- sitewomem\users\templates\users\password_reset_email.html -->
+
+{% load i18n %}{% autoescape off %}
+{% blocktranslate %}You're receiving this email because you requested a password reset for your user account at {{ site_name }}.{% endblocktranslate %}
+
+{% translate "Please go to the following page and choose a new password:" %}
+{% block reset_link %}
+{{ protocol }}://{{ domain }}{% url 'users:password_reset_confirm' uidb64=uid token=token %}
+{% endblock %}
+{% translate 'Your username, in case you’ve forgotten:' %} {{ user.get_username }}
+
+{% translate "Thanks for using our site!" %}
+
+{% blocktranslate %}The {{ site_name }} team{% endblocktranslate %}
+
+{% endautoescape %}
+
+Этот файл регистрируется в маршрутизаторе вместе с PasswordResetView
+
+🛠💾
+Был изменён файл
+# sitewomen\users\urls.py
+...
+from django.contrib.auth.views import (LogoutView, PasswordChangeView, PasswordChangeDoneView, PasswordResetDoneView,
+    PasswordResetView, PasswordResetConfirmView, PasswordResetCompleteView)
+from django.urls import reverse_lazy
+...
+urlpatterns = [
+    ...
+    path('password-reset/',
+        PasswordResetView.as_view(
+        template_name = "users/password_reset_form.html",
+        email_template_name = "users/password_reset_email.html",
+        success_url = reverse_lazy("users:password_reset_done")),
+        name = 'password_reset'),
+    ...
+    path('password-reset/<uidb64>/<token>/',
+        PasswordResetConfirmView.as_view(
+        template_name = "users/password_reset_confirm.html",
+        success_url = reverse_lazy("users:password_reset_complete")),
+        name = 'password_reset_confirm'),
+]
+
+После запуска и кнопки Забыли Пароль было перенаправление на страницу
+http://192.168.1.100:8000/users/password-reset/
+После ввода почты и кнопки Сбросить По Почте происходит перенаправление на страницу
+http://192.168.1.100:8000/users/password-reset/done/
+В консоли появляется письмо
+
+System check identified no issues (0 silenced).
+August 15, 2026 - 15:53:01
+Django version 4.2.1, using settings 'sitewomen.settings'
+Starting development server at http://0.0.0.0:8000/
+Quit the server with CTRL-BREAK.
+
+[15/Aug/2026 15:53:12] "GET /users/login/ HTTP/1.1" 200 2450
+[15/Aug/2026 15:53:12] "GET /static/women/css/styles.css HTTP/1.1" 404 1822
+[15/Aug/2026 15:53:15] "GET /users/password-reset/ HTTP/1.1" 200 2184
+[15/Aug/2026 15:53:15] "GET /static/women/css/styles.css HTTP/1.1" 404 1822
+Content-Type: text/plain; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+Subject:
+ =?utf-8?b?0KHQsdGA0L7RgSDQv9Cw0YDQvtC70Y8g0L3QsCAxOTIuMTY4LjEuMzc6ODAwMA==?=
+From: webmaster@localhost
+To: lol@gmail.com
+Date: Sat, 15 Aug 2026 10:53:28 -0000
+Message-ID: <178679120843.16280.15431014692202673781@УСТРОСТВО>
+
+<!-- sitewomem\users\templates\users\password_reset_email.html -->
+
+
+Вы получили это письмо, потому что вы (или кто-то другой) запросили восстановление пароля от учётной записи на сайте
+0.0.0.0:8000, которая связана с этим адресом электронной почты.
+
+Пожалуйста, перейдите на эту страницу и введите новый пароль:
+
+http://192.168.1.100:8000/users/password-reset/MQ/ddd054-27ac60d7b27abf5ec1c2f48c2740a4c2/
+
+Ваше имя пользователя (на случай, если вы его забыли): artko
+
+Спасибо, что используете наш сайт!
+
+Команда сайта 192.168.1.100:8000
+
+
+
+-------------------------------------------------------------------------------
+[15/Aug/2026 15:53:29] "POST /users/password-reset/ HTTP/1.1" 302 0
+[15/Aug/2026 15:53:29] "GET /users/password-reset/done/ HTTP/1.1" 200 2291
+[15/Aug/2026 15:53:29] "GET /static/women/css/styles.css HTTP/1.1" 404 1822
+
+При переходе по ссылке
+http://192.168.1.100:8000/users/password-reset/MQ/ddd054-27ac60d7b27abf5ec1c2f48c2740a4c2/
+Происходит перенаправление на страницу для создания нового пароля.
+http://192.168.1.100:8000/users/password-reset/MQ/set-password/
+После кнопки сохранить происходит переход на страницу с сообщением об успешном изменении пароля
+http://192.168.1.100:8000/users/password-reset/complete/
+После кнопки Войти, но с новым паролем, авторизация успешно проходит.
+
+⚠❗🧠💥💾🛠➕♻📦⚡🚩👑🎉🎂☕Всё

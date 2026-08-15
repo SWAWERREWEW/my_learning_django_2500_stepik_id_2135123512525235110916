@@ -1,4 +1,4 @@
 ﻿djvenv/
 .venv/
 .idea/
-.env
+sitewomen/.env
