@@ -44,4 +44,46 @@ Message-ID: <178677627689.14816.18322476600849879551@DESKTOP-021C8EE>
 
 Подготовительный этап окончен
 
+Можно добавить IP адрес в скрытый файл .env для запуска в локальной сети
+
+💬💾🛠➕
+Можно создать файл
+sitewomen/.env
+IP=ip_адрес_без_ковычек
+Пример ip_адрес_без_ковычек
+192.168.1.100
+
+💬💾🛠
+Можно изменить файл
+# sitewomen\sitewomen\settings.py
+...
+from pathlib import Path
+import os
+BASE_DIR = Path(__file__).resolve().parent.parent
+# sitewomen/.env
+ENV_FILE = BASE_DIR / '.env'
+
+# 1. Читаем файл .env "руками", если он существует
+if ENV_FILE.exists():
+    with open(ENV_FILE, 'r') as f:
+        for line in f:
+            # Игнорируем пустые строки и комментарии
+            if line.strip() and not line.startswith('#'):
+                key, value = line.strip().split('=', 1)
+                os.environ[key] = value  # Записываем в память процесса
+
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ip = os.environ.get('IP', 'localhost')
+if ip:
+    ALLOWED_HOSTS.append(ip)
+...
+SECRET_KEY = ...
+DEBUG = True
+...
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ip = os.environ.get('IP', 'localhost')
+if ip:
+    ALLOWED_HOSTS.append(ip)
+...
+
 🎂🎉🚀✅🗝📦💼🏠 Всё

@@ -1,3 +1,4 @@
 ﻿djvenv/
 .venv/
 .idea/
+.env

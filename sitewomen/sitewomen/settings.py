@@ -12,10 +12,21 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+# sitewomen/.env
+ENV_FILE = BASE_DIR / '.env'
 
+# 1. Читаем файл .env "руками", если он существует
+if ENV_FILE.exists():
+    with open(ENV_FILE, 'r') as f:
+        for line in f:
+            # Игнорируем пустые строки и комментарии
+            if line.strip() and not line.startswith('#'):
+                key, value = line.strip().split('=', 1)
+                os.environ[key] = value  # Записываем в память процесса
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -33,7 +44,12 @@ DEBUG = True
 # http://192.167.2.222:8000
 # А запускать с помощью команды
 # python manage.py runserver 0.0.0.0:8000
+
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ip = os.environ.get('IP', 'localhost')
+if ip:
+    ALLOWED_HOSTS.append(ip)
+
 INTERNAL_IPS = ["127.0.0.1"]
 
 # Application definition
