@@ -1,0 +1,138 @@
+﻿70 day = 9.12 Настройка почтового сервера по SMTP-протоколу
+
+В учебных целях будет использоваться посторонний почтовый сервер
+https://mail.yandex.ru/?from=tableau_yabro&uid=754853458#setup/client
+
+Была открыта яндекс почта , ⚙ , все настройки , Почтовые программы :
+✅ С сервера imap.yandex.ru по протоколу IMAP
+Способ авторизации по IMAP
+✅ Пароли приложений и OAuth-токены
+
+Необходим пароль
+Настройки , безопасность , пароли приложений , почта
+https://id.yandex.ru/security/app-passwords?retpath=https%3A%2F%2Fmail.yandex.ru%2F%3Ffrom%3Dtableau_yabro%26uid%3D754853458&uid=754853458&scope=mail
+Любое имя пароля, потом скопировать пароль
+
+В настройки нужно добавить параметр EMAIL_HOST_PASSWORD и присвоить строчное значение пароля
+
+🛠💾
+Был изменён файл
+sitewomen\.env
+IP=...
+EMAIL_HOST_PASSWORD=пароль_без_ковычек
+SECRET_KEY=django-insecure-секретный-ключ
+
+🛠💾
+Был изменён файл
+# sitewomen\sitewomen\settings.py
+...
+SECRET_KEY = None
+if ENV_FILE.exists():
+    with open(ENV_FILE, 'r', encoding='utf-8-sig') as f:
+        for line in f:
+            line = line.strip()
+            if line.startswith('SECRET_KEY='):
+                parsed_elem = line.split('=', 1)[1].strip()
+                if parsed_elem:
+                    SECRET_KEY = parsed_elem
+                break
+...
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+if ENV_FILE.exists():
+    with open(ENV_FILE, 'r', encoding='utf-8-sig') as f:
+        for line in f:
+            line = line.strip()
+            # Ищем строку, которая начинается именно с IP=
+            if line.startswith('IP='):
+                # Разделяем по первому знаку равно и берем правую часть
+                parsed_elem = line.split('=', 1)[1].strip()
+                if parsed_elem:
+                    ALLOWED_HOSTS.append(parsed_elem)
+                break  # Нашли IP — останавливаем цикл, дальше искать не нужно
+...
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST_PASSWORD = None
+if ENV_FILE.exists():
+    with open(ENV_FILE, 'r', encoding='utf-8-sig') as f:
+        for line in f:
+            line = line.strip()
+            if line.startswith('EMAIL_HOST_PASSWORD='):
+                parsed_elem = line.split('=', 1)[1].strip()
+                if parsed_elem:
+                    EMAIL_HOST_PASSWORD = parsed_elem
+                break
+
+Нужны настройки исходящей почты
+https://yandex.ru/support/yandex-360/customers/mail/ru/mail-clients/others
+
+Исходящая почта
+Адрес почтового сервера — smtp.yandex.ru.
+Защита соединения — SSL.
+Порт — 465. Если почтовый клиент начинает соединение без шифрования — 587.
+
+🛠💾
+Был изменён файл
+# sitewomen\sitewomen\settings.py
+...
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_PORT = '465'
+EMAIL_HOST_USER = None
+EMAIL_HOST_PASSWORD = None
+EMAIL_USE_SSL = True
+# Список обязательных ключей, которые мы ХОТИМ найти
+required_keys = {'EMAIL_HOST_PASSWORD', 'EMAIL_HOST_USER', 'IP', 'SECRET_KEY'}
+loaded_keys = set()
+if ENV_FILE.exists():
+    with open(ENV_FILE, 'r', encoding='utf-8-sig') as f:
+        for line in f:
+            line = line.strip()
+            # Игнорируем комментарии и пустые строки
+            if not line or line.startswith('#') or '=' not in line:
+                continue
+            key, value = line.split('=', 1)
+            key, value = key.strip(), value.strip()
+            if key in required_keys and value:
+                loaded_keys.add(key)  # Запоминаем, что ключ успешно прочитан
+                # Распределяем переменные
+                if key == 'IP':
+                    ALLOWED_HOSTS.append(value)
+                elif key == 'SECRET_KEY':
+                    SECRET_KEY = value
+                elif key == 'EMAIL_HOST_USER':
+                    EMAIL_HOST_USER = value
+                elif key == 'EMAIL_HOST_PASSWORD':
+                    EMAIL_HOST_PASSWORD = value
+# Проверяем, все ли нужные ключи мы смогли загрузить
+if loaded_keys == required_keys:
+    print("File .env successfully is was read🔍💾✅")
+else:
+    # Если чего-то не хватает, код сразу скажет, чего именно!
+    missing = required_keys - loaded_keys
+    print(f"⚠️ Warning! Missing or empty keys in .env: {', '.join(missing)}")
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+SERVER_EMAIL = EMAIL_HOST_USER
+EMAIL_ADMIN = EMAIL_HOST_USER
+
+❌🛠💾
+Из файла
+# sitewomen\sitewomen\settings.py
+Были удалены все проверки if ENV_FILE.exists() кроме последней после loaded_keys = set()
+
+🛠💾
+Был изменён файл
+# sitewome\.env
+...
+EMAIL_HOST_USER=просто_почта@yandex.ru
+
+После этих настроек этот сайт стал привязан к указанной почте
+
+При переходе по кнопке войти
+http://192.168.1.213:8000/users/login/
+При нажатии кнопки Забыли Пароль
+http://192.168.1.213:8000/users/password-reset/
+И при вводе почты какаято@gmail.com происходит переход
+http://192.168.1.213:8000/users/password-reset/done/
+А на почту (не яндекса, а указанной) приходит письмо с нужной ссылкой
+Ссылка переносит на страницу со сбросом пароля и он сбрасывается. Всё работает как нужно.
+
+✅💥🔥💣⚡⭐🎉☕💻 Всё

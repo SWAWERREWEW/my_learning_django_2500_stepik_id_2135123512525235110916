@@ -25,7 +25,7 @@ ENV_FILE = BASE_DIR / '.env'
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-(a97@^+-b0k3!*9k$+sdffe0pt$!83*c(b(#j-6ciocc58)7z)'
+SECRET_KEY = None
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -39,18 +39,6 @@ DEBUG = True
 # python manage.py runserver 0.0.0.0:8000
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
-
-if ENV_FILE.exists():
-    with open(ENV_FILE, 'r', encoding='utf-8-sig') as f:
-        for line in f:
-            line = line.strip()
-            # Ищем строку, которая начинается именно с IP=
-            if line.startswith('IP='):
-                # Разделяем по первому знаку равно и берем правую часть
-                parsed_ip = line.split('=', 1)[1].strip()
-                if parsed_ip:
-                    ALLOWED_HOSTS.append(parsed_ip)
-                break  # Нашли IP — останавливаем цикл, дальше искать не нужно
 
 INTERNAL_IPS = ["127.0.0.1"]
 
@@ -174,4 +162,52 @@ AUTHENTICATION_BACKENDS = [
     'users.authentication.EmailAuthBackend',
 ]
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_PORT = '465'
+EMAIL_HOST_USER = None
+EMAIL_HOST_PASSWORD = None
+EMAIL_USE_SSL = True
+
+
+# Список обязательных ключей, которые мы ХОТИМ найти
+required_keys = {'EMAIL_HOST_PASSWORD', 'EMAIL_HOST_USER', 'IP', 'SECRET_KEY'}
+loaded_keys = set()
+
+if ENV_FILE.exists():
+    with open(ENV_FILE, 'r', encoding='utf-8-sig') as f:
+        for line in f:
+            line = line.strip()
+            # Игнорируем комментарии и пустые строки
+            if not line or line.startswith('#') or '=' not in line:
+                continue
+
+            key, value = line.split('=', 1)
+            key, value = key.strip(), value.strip()
+
+            if key in required_keys and value:
+                loaded_keys.add(key)  # Запоминаем, что ключ успешно прочитан
+
+                # Распределяем переменные
+                if key == 'IP':
+                    ALLOWED_HOSTS.append(value)
+                elif key == 'SECRET_KEY':
+                    SECRET_KEY = value
+                elif key == 'EMAIL_HOST_USER':
+                    EMAIL_HOST_USER = value
+                elif key == 'EMAIL_HOST_PASSWORD':
+                    EMAIL_HOST_PASSWORD = value
+
+# Проверяем, все ли нужные ключи мы смогли загрузить
+if loaded_keys == required_keys:
+    print("File .env successfully is readed🔍💾✅")
+else:
+    # Если чего-то не хватает, код сразу скажет, чего именно!
+    missing = required_keys - loaded_keys
+    print(f"⚠️ Warning! Missing or empty keys in .env: {', '.join(missing)}")
+
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+SERVER_EMAIL = EMAIL_HOST_USER
+EMAIL_ADMIN = EMAIL_HOST_USER
