@@ -1,0 +1,182 @@
+﻿70 day = 9.13 Расширение модели User. Класс AbstractUser
+
+Бывает необходимость расширить существующую модель пользователей.
+Это можно сделать либо добавление новой модели, либо изменением старой.
+
+🔍🌎📖
+Для подробной информации можно обратиться к документации
+https://docs.djangoproject.com/en/4.2/topics/auth/customizing/#extending-the-existing-user-model
+
+Расширение модели
+
+💾🛠
+Был изменён файл
+# sitewomen/users/models.py
+from django.contrib.auth.models import AbstractUser
+from django.db import models
+# Create your models here.
+class User(AbstractUser):
+    photo = models.ImageField(upload_to="users/%Y/%m/%d/", blank=True, null=True, verbose_name="Фотография")
+    date_birth = models.DateTimeField(blank=True, null=True, verbose_name="Дата рождения")
+
+💾🛠
+Был изменён файл
+# sitewomen/users/admin.py
+from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
+from .models import User
+admin.site.register(User, UserAdmin)
+
+Для создания миграции нужно подключить файл моделей
+По умолчанию стоило значение
+AUTH_USER_MODEL = 'auth.User'
+
+💾🛠
+Был изменён файл
+# sitewomen\sitewomen\settings.py
+...
+AUTH_USER_MODEL = 'users.User'
+
+❌♻📂💾
+Необходимо удалить всё мз папки migrations и переименовать файл
+sitewomen\db.sqlite3
+И назвать
+sitewomen\db_old.sqlite3
+
+➕📂💾
+Создать папку с пустым файлом
+sitewomen\users\migrations\__init__.py
+
+🛠📊📝
+После этого можно создать миграции и применить
+python manage.py makemigrations
+python manage.py migrate
+
+(.venv) C:\...\sitewomen>python manage.py makemigrations
+File .env successfully is readed🔍💾✅
+Migrations for 'users':
+  users\migrations\0001_initial.py
+    - Create model User
+
+(.venv) C:\...\sitewomen>python manage.py migrate
+File .env successfully is readed🔍💾✅
+Operations to perform:
+  Apply all migrations: admin, auth, contenttypes, sessions, users
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0001_initial... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying auth.0012_alter_user_first_name_max_length... OK
+  Applying users.0001_initial... OK
+  Applying admin.0001_initial... OK
+  Applying admin.0002_logentry_remove_auto_add... OK
+  Applying admin.0003_logentry_add_action_flag_choices... OK
+  Applying sessions.0001_initial... OK
+
+(.venv) C:\...\sitewomen>
+
+Если в модели в классе Meta было прописано model = User, то лучше прописать model = get_user_model()
+
+После перезагрузки компьютера всё сработало
+
+🔍📂🚀
+После запуска отображается главная страница с пустыми данными из базы данных, потому что она была удалена
+
+➕🧠📝
+Необходимо создать суперпользователя
+python manage.py createsuperuser
+
+Вход по данным нового пользователя спокойно проходит
+
+💥💥💥💥🕒🕒🕒🕒🕒🔥🔥🔥💣💣💣💣💣⚡⚡⚡⚡🥀🥀🥀☠☠☠☠
+Расширить модель auth_user в старой базе данных невозможно из-за системных ограничений и поэтому было принято
+единственное решение её убрать
+
+В админ панели была создана категория
+Была добавлена новая статья
+
+Нужно добавить новые поля в форму редактирования профиля
+
+💾🛠
+Был изменён файл
+# sitewomen/users/forms.py
+...
+import datetime
+...
+class ProfileUserForm(forms.ModelForm):
+    ...
+    this_year = datetime.date.today().year
+    date_birth = forms.DateField(widget=forms.SelectDateWidget(years=tuple(range(this_year-100, this_year-5))))
+
+    class Meta:
+        ...
+        fields = ['photo', 'username', 'date_birth', 'email', 'first_name', 'last_name']
+...
+
+💾🛠
+Был изменён файл
+<!-- sitewomen/users/templates/users/profile.html -->
+...
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% if user.photo %}
+        <p><img src="{{ user.photo.url }}">
+    {% else %}
+        <p><img src="/media/users/default.png">
+    {% endif %}
+    <div class="form-error">...
+...
+
+Была создана папка
+sitewomen/media/users/
+Было перемещено какое-то изображение и переименовано как default.png
+
+После выбора картинки по адресу
+http://192.168.0.41:8000/users/profile/
+Картинка сразу появляется и в папке
+sitewomen/media/users/2026/08/16/
+Однако лучше прописывать путь к хранению картинок в классе профиля
+
+💾🛠
+Был изменён файл
+# sitewomen/users/views.py
+...
+from sitewomen.settings import DEFAULT_USER_IMAGE
+...
+class ProfileUser(LoginRequiredMixin, UpdateView):
+    ...
+    extra_context = {'title': "Профиль пользователя", 'default_image': DEFAULT_USER_IMAGE}
+...
+
+💾🛠
+Был изменён файл
+# sitewomen\sitewomen\settings.py
+...
+DEFAULT_USER_IMAGE = MEDIA_URL + 'users/default.png'
+
+
+💾🛠
+Был изменён файл
+<!-- sitewomen/users/templates/users/profile.html -->
+...
+<form method="post" enctype="multipart/form-data">
+    ...
+    {% if user.photo %}
+        <p>...
+    {% else %}
+        <p><img src="{{ default_image }}">
+
+✅🚀☕
+После запуска у всех пользователей по умолчанию отображается картинка default.png в профиле
+
+✅🚀💣🔥⚡🕒💥❌🔍🌎☠🥀♻💾🛠 Всё
