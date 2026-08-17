@@ -1,0 +1,102 @@
+73 day = 10.1 Протокол OAuth 2.0. Установка пакета Python-Social-Auth
+
+В мире есть возможность авторизоваться на сайтах через другие аккаунты.
+
+Например, на не связанном с google сайте для творчества можно зарегистрироваться через аккаунт google
+Этот метод называется социальной аутентификации или авторизации через социальные сети.
+
+Для реализации авторизации через социальные сети нужен протокол OAuth 2.0 (Open Authorization)
+Ход его работы начинается с кнопки авторизации через социальные сети на сайте для творчества
+
+💬🚀📝🏠 Сайт для творчества отправляет запрос на аутентификацию
+✅🚀📦🗝 Социальная сеть выдаёт разрешение на аутентификацию
+
+💬🚀🗝🏠 Сайт для творчества использует разрешение на аутентификацию
+✅🚀💾📦 Социальная сеть выдаёт токен доступа
+
+💬🚀💾🏠 Сайт для творчества использует токен доступа для получения данных
+✅🚀📦📊 Социальная суть отправляет все нужные данные ✅💼🎉
+
+❌⚙🛠💾📁
+Реализации всего протокола вручную не будет, но маленькие детали будут меняться в зависимости от социальной сети
+
+📝💼💾
+Для использования протокола нужны технологии или библиотеки
+Django-Allauth
+Dajngo-Social-Auth
+Python-Social-Auth
+
+🔍📖🌎 Документация
+https://python-social-auth.readthedocs.io/en/latest/index.html
+
+💾🛠
+Был изменён файл в корне проекта
+req.txt
+...
+social-auth-app-django==5.3.0
+
+pip install -r req.txt
+
+Можно было использовать команду
+pip install social-auth-app-django==5.3.0
+
+Нужно подключить эту библиотеку к сайту
+
+💾🛠
+Был изменён файл
+# sitewomen\sitewomen\settings.py
+...
+INSTALLED_APPS = [
+    ...
+    'social_django'
+]
+
+Необходимо выполнить миграции
+python manage.py migrate
+
+(.venv) D:\...\sitewomen>python manage.py migrate
+File .env successfully is readed🔍💾✅
+Operations to perform:
+  Apply all migrations: admin, auth, contenttypes, sessions, social_django, users, women
+Running migrations:
+  Applying social_django.0001_initial... OK
+  Applying social_django.0002_add_related_name... OK
+  Applying social_django.0003_alter_email_max_length... OK
+  Applying social_django.0004_auto_20160423_0400... OK
+  Applying social_django.0005_auto_20160727_2333... OK
+  Applying social_django.0006_partial... OK
+  Applying social_django.0007_code_timestamp... OK
+  Applying social_django.0008_partial_timestamp... OK
+  Applying social_django.0009_auto_20191118_0520... OK
+  Applying social_django.0010_uid_db_index... OK
+  Applying social_django.0011_alter_id_fields... OK
+  Applying social_django.0012_usersocialauth_extra_data_new... OK
+  Applying social_django.0013_migrate_extra_data... OK
+  Applying social_django.0014_remove_usersocialauth_extra_data... OK
+  Applying social_django.0015_rename_extra_data_new_usersocialauth_extra_data... OK
+
+(.venv) D:\...\sitewomen>
+
+Необходимо подключить backend авторизации
+
+💾🛠
+Был изменён файл
+# sitewomen\sitewomen\settings.py
+...
+AUTHENTICATION_BACKENDS = [
+    'social_core.backends.github.GithubOAuth2',
+    ...
+]
+
+Нужно создать маршрут для новой авторизации
+
+💾🛠
+Был изменён файл
+# sitewomen\sitewomen\urls.py
+...
+urlpatterns = [
+    ...
+    path('social-auth/', include('social_django.urls', namespace='social')),
+]
+
+✅🎉👑💥🎂🧠🚩🚀📦🎈🌎🏠 Всё
