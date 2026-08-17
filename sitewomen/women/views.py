@@ -1,24 +1,18 @@
 # sitewomen\women\views.py
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required, permission_required
 from django.urls.base import reverse_lazy
 from .models import Women, Category, TagPost, UploadFiles
 from .forms import AddPostForm, UploadFileForm
 from .utils import DataMixin, menu
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 
 from django.core.paginator import Paginator
-from gc import get_objects
-from django.views import View
 from django.views.generic import TemplateView, ListView, DetailView, FormView, CreateView, UpdateView
 from django.http import HttpResponse, HttpResponseNotFound, Http404
 from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse
-from django.template.loader import render_to_string
-from django.template.defaultfilters import slugify
-
 
 data_db = [
-    {'id': 1, 'title': 'Анджелина Джоли', 'content': 'Биография Анджелина Джоли начинается с далёких 1700 годов,' +
+    {'id': 1, 'title': 'Анджелина Джоли', '                     content': 'Биография Анджелина Джоли начинается с далёких 1700 годов,' +
     ' когда мы не знали, что происходит в мире и когда мы интересовались этой личностью, у нас закардывалась мысль о' +
     ' том, что мы делаем всё неправильно и некрасиво, потому что мы забили зонтик', 'is_published': True},
     {'id': 2, 'title': 'Марго Робби', 'content': 'Биография Марго Робби', 'is_published': False},
@@ -54,7 +48,7 @@ class ShowPost(DataMixin, DetailView):
     def get_object(self, queryset=None):
         return get_object_or_404(Women.published, slug=self.kwargs[self.slug_url_kwargs])
 
-
+@permission_required(perm='women.view_women', raise_exception=True)
 def contact(request):
     return render(request,'women/contact.html',{'title': '📶Контакты🛠', 'menu': menu})
 
@@ -99,18 +93,20 @@ class TagPostList(DataMixin, ListView):
         return Women.published.filter(tags__slug=self.kwargs['tag_slug']).select_related('cat')
 
 
-class EditPage(DataMixin, UpdateView):
+class EditPage(PermissionRequiredMixin, DataMixin, UpdateView):
     model = Women
     fields = "__all__"
     template_name = 'women/addpage.html'
     success_url = reverse_lazy('home')
     title_page = "Редактирование статьи 🛠"
+    permission_required = 'women.change_women'
 
 
-class AddPage(LoginRequiredMixin, DataMixin, CreateView):
+class AddPage(PermissionRequiredMixin, LoginRequiredMixin, DataMixin, CreateView):
     form_class = AddPostForm
     template_name = 'women/addpage.html'
     title_page = 'Добавление статьи➕'
+    permission_required = 'women.add_women'
 
     def form_valid(self, form):
         w = form.save(commit=False)

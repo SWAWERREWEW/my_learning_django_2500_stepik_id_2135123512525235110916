@@ -1,5 +1,5 @@
-{% extends 'base.html' %}
 <!-- sitewomen\women\templates\women\index.html -->
+{% extends 'base.html' %}
 
 
 {% block navigation %}
@@ -65,7 +65,11 @@
         <h2> {{ p.title }} 🗝 {{ p.cat.name }} </h2>
         <p> {{ p.content|truncatewords:30 }} 📝 </p>
         <p> дата {{p.time_update}} | автор: {{p.author.username|default:"неизвестен"}}</p>
-        <p><a href="{{ p.get_absolute_url }}"> Читать пост 📖 </a></p>
+        <p><a href="{{ p.get_absolute_url }}"> Читать пост 📖 </a>
+        {% if perms.women.change_women %}
+        __ __ __
+        <a href="{{ p.get_edit_url }}"> Редактирование 🛠 </a></p>
+        {% endif %}
         {% if not forloop.last %}
         <hr>
         {% endif %}

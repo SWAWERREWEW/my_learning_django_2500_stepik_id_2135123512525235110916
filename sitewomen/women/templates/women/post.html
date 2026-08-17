@@ -8,9 +8,13 @@
 <p><img class="img-article-left" src="{{post.photo.url}}"/></p>
 {% endif %}
 
+{% if perms.women.change_women %}
+<h1><a href="{% url 'edit_page' post.slug %}"> Редактировать 🛠 </a></h1>
+{% endif %}
+
 {% with post.tags.all as tags %}
 {% if tags %}
-    <p>Теги:
+<p>Теги:
     {% for t in tags %}
     <a href="{{ t.get_absolute_url }}">{{t.tag}}</a>
     {% endfor %}
@@ -20,3 +24,4 @@
 
 {{post.content|linebreaks}}
 {% endblock %}
+

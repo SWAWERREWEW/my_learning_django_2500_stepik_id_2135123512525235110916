@@ -37,6 +37,8 @@ class Women(models.Model):
         self.slug = slugify(cyrillic_to_latin(self.title))
         super().save(*args, **kwargs)
 
+    def get_edit_url(self):
+        return reverse('edit_page', kwargs={'slug': self.slug})
 
     objects = models.Manager()
     published = PublishedManager()

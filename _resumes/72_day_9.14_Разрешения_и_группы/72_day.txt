@@ -1,0 +1,207 @@
+72 day = 9.14 Разрешения и группы (Permissions & Groups)
+
+В django есть группы и права. При редактировании любого пользователя можно просмотреть его права для каждой таблицы в
+админ панели. Можно запретить пользователю менять любые таблицы базы данных, однако нужен функционал ограничивающий
+форму редактирования.
+
+🌎🔍📖
+Документация
+https://docs.djangoproject.com/en/4.2/topics/auth/default/#permissions-and-authorization
+
+Для проверки был зарегистрирован новый пользователь kikidon
+и был ещё один зарегистрированный новый пользователь employee
+Открыта админ панель
+Перенесена строчка из таблицы Доступные права в таблицу Выбранные права
+women | Известные женщины | Can add Известная женщина
+Сохранить
+Однако это не ограничит для этого пользователя bez_prav пользование формой редактирования и поэтому нужен класс для
+установки прав пользования и указать требуемые разрешения
+Синтаксис
+permission_required = 'приложение.действие_таблица'
+
+🛠💾
+Был изменён файл
+# sitewomen\women\views.py
+...
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+...
+class AddPage(PermissionRequiredMixin, LoginRequiredMixin, DataMixin, CreateView):
+    ...
+    permission_required = 'women.add_women'
+...
+
+✅🚩🚀
+После запуска у пользователя employee как обычно открывается форма добавления новой статьи, как и у суперпользователя
+Однако у пользователя kikidon лишь возвращается сообщение 403 Forbidden
+
+Можно сделать ограничение на редактирование постов
+
+🛠💾
+Был изменён файл
+# sitewomen\women\views.py
+...
+class EditPage(PermissionRequiredMixin, DataMixin, UpdateView):
+    ...
+    permission_required = 'women.change_women'
+
+Можно добавить кнопку редактирования для более удобной проверки либо сразу перейти по адресу
+Сначала на адрес существующей статьи по кнопке
+http://127.0.0.1:8000/post/70day/
+А потом изменить ссылку на
+http://127.0.0.1:8000/edit/70day/
+
+🛠💾
+Можно изменить файл
+<!-- sitewomen\women\templates\women\post.html -->
+...
+{% if post.photo %}
+<p><img ...
+{% endif %}
+
+<h1> <a href="{% url 'edit_page' slug=post.slug %}"> Редактирование этой статьи </a> </h1>
+
+{% with post.tags.all as tags %}
+...
+
+🛠💾
+Можно изменить файл
+# sitewomen\women\models.py
+...
+class Women(models.Model):
+    ...
+    def get_edit_url(self):
+        return reverse('edit_page', kwargs={'slug': self.slug})
+...
+
+🛠💾
+Можно изменить файл
+<!-- sitewomen\women\templates\women\index.html -->
+...
+<p><a href="{{ p.get_absolute_url }}"> Читать пост 📖 </a>
+__ __ __
+<a href="{{ p.get_edit_url }}"> Редактирование 🛠 </a></p>
+...
+
+После этого появляется кнопка для редактирования на главной странице и на странице просмотра поста
+Редактирование для пользователя kikidon заблокировано и лишь выдаёт сообщение 403 Forbidden, однако для
+суперпользователя эта страница будет доступна и функциональна
+
+Можно добавить права
+women | Известные женщины | Can Change Известная женщина
+на редактирование для пользователя employee, то для него эта страница тоже станет
+доступна
+
+Если нужно поставить ограничение прав для функции представления, то нужно использовать декоратор
+В данном случае декоратор запретит использовать функцию без права на чтение таблицы women
+
+💾🛠
+Был изменён файл
+# sitewomen/users/views.py
+...
+from django.contrib.auth.decorators import login_required, permission_required
+...
+@permission_required(perm='women.view_women', raise_exception=True)
+def contact(request):
+    ...
+
+✅🚀
+После запуска кнопка Обратная связь будет заблокирована
+
+Нужно сделать кнопку редактирования постов доступной только для авторов этих постов.
+django по умолчанию передаёт в html страницы параметр {{ perms }} с правами текущего пользователя
+
+💾🛠
+В файле
+<!-- sitewomen\women\templates\women\post.html -->
+Строка
+<h1> <a href="{% url 'edit_page' slug=post.slug %}"> Редактирование этой статьи </a> </h1>
+Была заменена на строки
+{% if perms.women.change_women %}
+<p ><a href="{% url 'edit_page' post.slug %}">Редактировать</a></p>
+{% endif %}
+
+💾🛠
+Был изменён файл
+<!-- sitewomen\women\templates\women\index.html -->
+...
+<p><a..."> Читать пост 📖 </a>
+{% if perms.women.change_women %}
+__ __ __
+<a href="{{ p.get_edit_url }}"> Редактирование 🛠 </a></p>
+{% endif %}
+{% if not forloop.last %}
+...
+
+Можно создать группу, в ней настроить права на редактирование и добавить в неё всех сотрудников или пользователей,
+которым нужно разрешить редактирование.
+
+🛠⚙🧠
+Была создана группа moderator_for_women_table со всеми правами над таблицей women
+Потом у пользователя employee были удалены добавленые ранее права доступа:
+women | Известные женщины | Can add Известная женщина
+women | Известные женщины | Can Change Известная женщина
+Потом добавить пользователя employee в группу moderator_for_women_table
+
+✅🎂🧠
+Теперь пользователь employee без прав, но он получает их от группы moderator_for_women_table
+
+Можно выполнить подобные действия через команды в консоли django
+python manage.py shell
+
+myuser.groups.set([group_list])
+myuser.groups.add(group, group, ...)
+myuser.groups.remove(group, group, ...)
+myuser.groups.clear()
+myuser.user_permissions.set([permission_list])
+myuser.user_permissions.add(permission, permission, ...)
+myuser.user_permissions.remove(permission, permission, ...)
+myuser.user_permissions.clear()
+myuser.has_perm(permission)
+
+Пример
+Импортирование модели
+from users.models import User
+Создание переменной с пользователем
+employee = User.objects.get(username='employee')
+Просмотр текущих прав
+employee.user_permissions.all()
+Просмотр групп, в которые входит пользователь
+employee.groups.all()
+Проверка права у пользователя
+employee.has_perm('women.add_women')
+
+Можно открыть базу данных и найти таблицу auth_permission, то можно найти все возможные разрешения для пользователей и
+их идентификаторы, которые можно указать при добавлении
+
+Можно добавить разрешение по идентификатору 1
+user1.user_permissions.add(1)
+
+Можно поместить выбранное разрешение в переменную
+
+from django.contrib.auth.models import Permission
+p = Permission.objects.get(codename='add_category')
+user1.user_permissions.add(p)
+
+В базе данных хранится и таблица auth_group со всеми группами
+
+Можно группу поместить в переменную
+from django.contrib.auth.models import Group
+grup = Group.objects.get(name='moderator_for_women_table')
+employee.groups.add(grup)
+
+Для удаления используется метод remove(permission, permission, ...)
+Для очищения, опустошения или удаления сразу всего метод clear()
+
+Можно создать собственное разрешение
+
+Например
+
+выбрать объект для настройки доступа
+from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
+content_type = ContentType.objects.get_for_model(User)
+
+И создать разрешение под названием social_auth
+permission = Permission.objects.create(codename="social_auth", name="Social Auth", content_type=content_type)
+
+✅🎂💥🎉👑❗🔍🚀☕🌎📖 Всё
