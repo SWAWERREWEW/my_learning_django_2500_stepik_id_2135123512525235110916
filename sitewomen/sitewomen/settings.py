@@ -172,10 +172,11 @@ EMAIL_PORT = '465'
 EMAIL_HOST_USER = None
 EMAIL_HOST_PASSWORD = None
 EMAIL_USE_SSL = True
-
+SOCIAL_AUTH_GITHUB_KEY = None
+SOCIAL_AUTH_GITHUB_SECRET = None
 
 # Список обязательных ключей, которые мы ХОТИМ найти
-required_keys = {'EMAIL_HOST_PASSWORD', 'EMAIL_HOST_USER', 'IP', 'SECRET_KEY'}
+required_keys = {'EMAIL_HOST_PASSWORD', 'EMAIL_HOST_USER', 'IP', 'SECRET_KEY', 'SOCIAL_AUTH_GITHUB_SECRET', 'SOCIAL_AUTH_GITHUB_KEY'}}
 loaded_keys = set()
 
 if ENV_FILE.exists():
@@ -201,6 +202,10 @@ if ENV_FILE.exists():
                     EMAIL_HOST_USER = value
                 elif key == 'EMAIL_HOST_PASSWORD':
                     EMAIL_HOST_PASSWORD = value
+                elif key == 'SOCIAL_AUTH_GITHUB_KEY':
+                    SOCIAL_AUTH_GITHUB_KEY = value
+                elif key == 'SOCIAL_AUTH_GITHUB_SECRET':
+                    SOCIAL_AUTH_GITHUB_SECRET = value
 
 # Проверяем, все ли нужные ключи мы смогли загрузить
 if loaded_keys == required_keys:
@@ -217,3 +222,16 @@ EMAIL_ADMIN = EMAIL_HOST_USER
 AUTH_USER_MODEL = 'users.User'
 
 DEFAULT_USER_IMAGE = MEDIA_URL + 'users/default.png'
+
+SOCIAL_AUTH_PIPELINE = (
+    'social_core.pipeline.social_auth.social_details',
+    'social_core.pipeline.social_auth.social_uid',
+    'social_core.pipeline.social_auth.auth_allowed',
+    'social_core.pipeline.social_auth.social_user',
+    'social_core.pipeline.user.get_username',
+    'social_core.pipeline.user.create_user',
+    'users.pipeline.new_users_handler',
+    'social_core.pipeline.social_auth.associate_user',
+    'social_core.pipeline.social_auth.load_extra_data',
+    'social_core.pipeline.user.user_details',
+)

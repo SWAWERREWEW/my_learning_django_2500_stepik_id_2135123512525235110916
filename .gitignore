@@ -2,3 +2,4 @@
 .venv/
 .idea/
 sitewomen/.env
+sitewomen/db.sqlite3

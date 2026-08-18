@@ -34,4 +34,3 @@ git commit -c ORIG_HEAD
 
     # отправка на github
 git push origin main --force
-

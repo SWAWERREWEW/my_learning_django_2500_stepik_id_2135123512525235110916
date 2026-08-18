@@ -22,9 +22,11 @@
     {% endfor %}
     <p><button type="submit">📁➕Сохранить📥💾</button></p>
 </form>
+
+{% if not perms.users.social_auth %}
 <hr>
-<p>
-<a href="{% url 'users:password_change' %}"> 🛠 Смена пароля 🗝 </a>
-</p>
+<p><a href="{% url 'users:password_change' %}"> 🛠 Смена пароля 🗝 </a></p>
+{% endif %}
+{% endblock %}
 
 {% endblock %}

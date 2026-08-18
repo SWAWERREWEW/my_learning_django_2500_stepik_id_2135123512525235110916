@@ -1,0 +1,141 @@
+73 day = 10.2 github-аутентификация
+
+🌎🔍📖
+Документация
+https://python-social-auth.readthedocs.io/en/latest/backends/github.html#github-apps
+https://python-social-auth.readthedocs.io/en/latest/use_cases.html#signup-by-oauth-access-token
+
+Для создания авторизации через github нужно создать приложение python-algorithms на github по адресу
+https://github.com/settings/developers
+Выбор пункта OAuth Apps
+Заполнение
+GitHub App name: sitewomen
+Homepage URL: http://127.0.0.1:8000/
+Не все соц сети позволяют использовать локальный сервер
+Redirect URI: http://127.0.0.1:8000/social-auth/complate/github/
+social-auth взято из файла
+# sitewomen/sitewomen/urls
+После кнопки Register Applications переход на адрес
+https://github.com/settings/applications/случайные_цифры
+С ключом от приложения
+Нужно ещё сгенерировать секретный ключ по кнопке Generate a new client secret
+
+🛠💾
+Был изменён файл
+sitewomen\.env
+...
+SOCIAL_AUTH_GITHUB_KEY=клиент_айди_из_гитхаба_лол_козявки
+SOCIAL_AUTH_GITHUB_SECRET=секретный_клиент_из_гитхаба_жаба_осёл
+
+🛠💾
+Был изменён файл
+# sitewomen\sitewomen\settings.py
+...
+EMAIL_USE_SSL = ...
+SOCIAL_AUTH_GITHUB_KEY = None
+SOCIAL_AUTH_GITHUB_SECRET = None
+...
+required_keys = {..., 'SOCIAL_AUTH_GITHUB_SECRET', 'SOCIAL_AUTH_GITHUB_KEY'}
+...
+if ENV_FILE.exists():
+    with open(ENV_FILE, 'r', encoding='utf-8-sig') as f:
+        for line in f:
+            ...
+            if key in required_keys and value:
+                ...
+                elif key == 'SOCIAL_AUTH_GITHUB_KEY':
+                    SOCIAL_AUTH_GITHUB_KEY = value
+                elif key == 'SOCIAL_AUTH_GITHUB_SECRET':
+                    SOCIAL_AUTH_GITHUB_SECRET = value
+...
+
+Подключение маршрута на страницу авторизации через github
+
+🛠💾
+Был изменён файл
+# sitewomen/sitewomen/urls
+...
+urlpatterns = [
+    ...
+    path('social-auth/', include('social_django.urls', namespace='social')),
+]
+...
+
+Нужна картинка
+
+📦🛠
+Была перемещена картинка в папку сайта
+sitewomen\media\social-auth\github.png
+
+Необходимо отобразить кнопку ссылку на авторизацию через github
+
+🛠💾
+Был изменён файл
+<!-- sitewomen/users/templates/users/login.html -->
+...
+<hr>
+<p><a href="{% url 'social:begin' 'github' %}"><img src="/media/social-auth/github.png"></a></p>
+{% endblock %}
+
+🚀✅🎉
+После запуска появляется кликабельная картинка, которая может авторизовать через github
+После входа отсутствуют какие-либо права на редактирование и добавление
+После входа присутствует кнопка Смена Пароля, которая не должна отображаться после авторизации через github
+
+🛠⚙📊
+Была создана группа social и настроено в ней разрешение под названием users | Пользователь | Social Auth
+
+Осталось сделать автоматический перенос в эту группу для пользователей, вошедших через github с помощью особых настроек
+и файла pipeline, который будет хранить план действий
+
+🛠💾
+Был изменён файл
+# sitewomen\sitewomen\settings.py
+...
+SOCIAL_AUTH_PIPELINE = (
+    'social_core.pipeline.social_auth.social_details',
+    'social_core.pipeline.social_auth.social_uid',
+    'social_core.pipeline.social_auth.auth_allowed',
+    'social_core.pipeline.social_auth.social_user',
+    'social_core.pipeline.user.get_username',
+    'social_core.pipeline.user.create_user',
+    'users.pipeline.new_users_handler',
+    'social_core.pipeline.social_auth.associate_user',
+    'social_core.pipeline.social_auth.load_extra_data',
+    'social_core.pipeline.user.user_details',
+)
+
+🛠💾➕
+Был создан файл
+# sitewomen\users\pipeline.py
+from django.contrib.auth.models import Group
+def new_users_handler(backend, user, response, *args, **kwargs):
+    group = Group.objects.filter(name='social')
+    if len(group):
+        user.groups.add(group[0])
+
+🛠💾
+Был изменён файл
+<!-- sitewomen/users/templates/users/profile.html -->
+...
+{% if not perms.users.social_auth %}
+<hr>
+<p><a href="{% url 'users:password_change' %}"> 🛠 Смена пароля 🗝 </a></p>
+{% endif %}
+{% endblock %}
+
+✅🚀🎉
+После перезапуска и повтороного входа через github кнопка смены пароля действительно пропадает
+Однако ссылка на смену пароля до сих пор доступна для пользователей, вошедших через github
+Изменение профиля недоступно из-за обязательного незаполняемого поля email.
+
+🛠💾
+Был изменён файл
+# sitewomen/users/forms.py
+...
+class ProfileUserForm(forms.ModelForm):
+    ...
+    email = forms.CharField(disabled=True, required=False, label='E-mail', widget=forms.TextInput(attrs={'class': 'form-input'}))
+...
+
+🚩💥🌎🎉🚀✅👑🎂🍌 Всё
