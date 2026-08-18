@@ -1,0 +1,124 @@
+75 day = 10.3 Добавляем поддержку https протокола и домен sitewomen.ru
+
+Для настройки домена нужен файл hosts и в нём нужно указать, что 127.0.0.1 и sitewomen.ru это одно и тоже
+
+Был изменён файл
+C:\Windows\System32\drives\etc\hosts
+...
+127.0.0.1 sitewomen.ru
+
+Для проверки можно выполнить комадну
+ping sitewomen.ru
+
+(.venv) D:\...\sitewomen>ping sitewomen.ru
+
+Обмен пакетами с sitewomen.ru [127.0.0.1] с 32 байтами данных:
+Ответ от 127.0.0.1: число байт=32 время<1мс TTL=128
+Ответ от 127.0.0.1: число байт=32 время<1мс TTL=128
+Ответ от 127.0.0.1: число байт=32 время<1мс TTL=128
+Ответ от 127.0.0.1: число байт=32 время<1мс TTL=128
+
+Статистика Ping для 127.0.0.1:
+    Пакетов: отправлено = 4, получено = 4, потеряно = 0
+    (0% потерь)
+Приблизительное время приема-передачи в мс:
+    Минимальное = 0мсек, Максимальное = 0 мсек, Среднее = 0 мсек
+
+(.venv) D:\...\sitewomen>
+
+Нужно зарегистрировать этот домен в django
+
+💾🛠
+Был изменён файл
+# sitewomen\sitewomen\settings.py
+...
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'sitewomen.ru']
+...
+
+✅🚀🎉
+После запуска сайт открывается по адресу, но перестаёт работать авторизация через github
+http://sitewomen.ru:8000/
+
+Для поддержки протокола https нужен реальный сервер и библиотеки
+Расширение RunServerPlus из библиотеки Django Extensions поможет в тестировании и отладки, однако отладчик содержится
+в библиотеке Werkzeug, а библиотека pyOpenSSL симулирует слой для https
+
+🛠💾
+Был изменён файл
+sitewomen\req.txt
+...
+django-extensions==3.2.3
+werkzeug==2.3.7
+pyOpenSSL==23.2.0
+
+🛠📝
+Была использована команда
+pip install -r req.txt
+
+🔍📝
+Можно было использовать команды
+pip install werkzeug==2.3.7
+pip install django-extensions==3.2.3
+pip install pyOpenSSL==23.2.0
+
+Нужно подключить библиотеку django-extensions в настройки
+
+🛠💾
+Был изменён файл
+# sitewomen\sitewomen\settings.py
+...
+INSTALLED_APPS = [
+    ...
+    'django_extensions',
+]
+
+Команда для запуска
+python manage.py runserver_plus --cert-file cert.crt
+
+📝📊📖
+Вывод консоли
+(.venv) D:\...\sitewomen>python manage.py runserver_plus --cert-file cert.crt
+File .env successfully is readed🔍💾✅
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on https://127.0.0.1:8000
+Press CTRL+C to quit
+ * Restarting with stat
+File .env successfully is readed🔍💾✅
+Performing system checks...
+
+System check identified no issues (0 silenced).
+
+Django version 4.2.1, using settings 'sitewomen.settings'
+Development server is running at https://[127.0.0.1]:8000/
+Using the Werkzeug debugger (https://werkzeug.palletsprojects.com/)
+Quit the server with CTRL-BREAK.
+ * Debugger is active!
+ * Debugger PIN: 149-942-722
+127.0.0.1 - - [18/Aug/2026 19:03:10] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [18/Aug/2026 19:03:10] "GET /static/debug_toolbar/css/toolbar.css HTTP/1.1" 200 -
+127.0.0.1 - - [18/Aug/2026 19:03:10] "GET /static/women/css/styles.css HTTP/1.1" 404 -
+127.0.0.1 - - [18/Aug/2026 19:03:10] "GET /static/debug_toolbar/js/toolbar.js HTTP/1.1" 200 -
+127.0.0.1 - - [18/Aug/2026 19:03:10] "GET /static/debug_toolbar/css/print.css HTTP/1.1" 200 -
+127.0.0.1 - - [18/Aug/2026 19:03:10] "GET /static/debug_toolbar/js/utils.js HTTP/1.1" 200 -
+Not Found: /favicon.ico
+127.0.0.1 - - [18/Aug/2026 19:03:10] "GET /favicon.ico HTTP/1.1" 404 -
+
+✅🎉🚀💥🎂
+Успешный запуск по адресу
+https://sitewomen.ru:8000/
+После сообщения об отсутствии безопасности и перехода на сайт, он открывается с нужным протоколом
+На сайте горит надпись НЕБЕЗОПАСНО из-за того, что сгенерированный сертификат недействительный
+Возможно она могла не отобразиться из-за антивируса или подобных программ и расширений браузера
+Авторизация не стало от этого работать, как минимум потому что в приложении из github стоит протокол http
+После запуска появляются файлы (их нельзя отправлять в удалённый репозиторий)
+sitewomen\cert.crt
+-----BEGIN CERTIFICATE-----
+случайный_набор_символов
+-----END CERTIFICATE-----
+и
+sitewomen\cert.key
+-----BEGIN RSA PRIVATE KEY-----
+случайный_набор_символов
+-----END RSA PRIVATE KEY-----
+
+✅🍌🎉🚀💥🎂🍀☕👑🌎🚩 Всё

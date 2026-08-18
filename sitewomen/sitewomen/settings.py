@@ -38,7 +38,7 @@ DEBUG = True
 # А запускать с помощью команды
 # python manage.py runserver 0.0.0.0:8000
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'sitewomen.ru']
 
 INTERNAL_IPS = ["127.0.0.1"]
 
@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     "debug_toolbar",
     'social_django',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
