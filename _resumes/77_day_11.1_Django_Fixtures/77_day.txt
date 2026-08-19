@@ -1,0 +1,83 @@
+77 day = 11.1 Работа с Django Fixtures
+
+В реальной разработке используют другие субд, кроме sqlite3
+Нужно попробовать переносить данные из одной базы данных в другую в кодировке ANSI 1251
+
+python manage.py dumpdata имя_приложения.имя_модели -o имя_файла_с_данными.json
+python manage.py loaddata путь_к_файлу_с_данными
+
+➕📁
+Была создана директория
+sitewomen\women\fixtures\
+
+➕💾📝
+Была использована команда сохранения данных из модели Women приложения women
+python manage.py dumpdata --indent=2 women.Women -o women/fixtures/women_women.json
+
+➕💾📝
+Была использована команда сохранения данных из приложения women
+python manage.py dumpdata --indent=2 women -o women/fixtures/womens.json
+
+➕💾📝
+Была использована команда сохранения данных из приложения women
+python manage.py dumpdata --indent=2 users -o women/fixtures/users.json
+
+Для сохранения данных в кодировке utf-8 нужно изменить команду
+(far manager может неправильно определить кодировку файла из-за технической особенности невидимых знаков в файлах и
+поэтому он видит файл utf-8 как ansi 1251. Стоит проверить кодировку в PyCharm или просто открыть текст файла)
+
+➕💾📝
+Была использована команда сохранения данных из модели Women приложения women
+python -Xutf8 manage.py dumpdata --indent=2 women.Women -o women/fixtures/women_women.json
+
+➕💾📝
+Была использована команда сохранения данных из приложения women
+python -Xutf8 manage.py dumpdata --indent=2 women -o women/fixtures/womens.json
+
+➕💾📝
+Была использована команда сохранения данных из приложения women
+python -Xutf8 manage.py dumpdata --indent=2 users -o women/fixtures/users.json
+
+Есть возможность сохранить все данные, кроме определённых
+
+python -Xutf8 manage.py dumpdata --indent=2 --exclude таблица_или_модель --exclude таблица_или_модель ... -o db_exclude.json
+
+➕💾📝
+Была использована команда для сохранения всех данных помимо таблицы Category
+python -Xutf8 manage.py dumpdata --indent=2 --exclude women.Category -o women/fixtures/db_exclude.json
+
+Если указать просто имя файла, а не путь, то файл будет сохранён в папку sitewomen
+
+➕💾📝
+Для сохранения всех данных из всех приложений была использована команда
+python -Xutf8 manage.py dumpdata --indent=2 -o women/fixtures/db.json
+
+Для пробы загрузки всех данных из сгенерированных json файлов нужно сначала удалить текущую базу данных, потом создать
+миграции, потом применить миграции, чтобы создать базу данных с пустыми таблицами и потом загрузить в эту базу данных
+все данные из файла json
+
+❌📊💾
+Была удалена база данныхъ
+sitewomen\db.sqlite3
+
+➕📊💾
+Была создана пустая база данных
+python manage.py makemigrations
+python manage.py migrate
+
+🚀💥✅
+После запуска
+python manage.py runserver
+На странице нету никаких данных и даже суперпользователя
+
+Нужна команда для загрузки
+python manage.py loaddata путь_к_файлу_с_данными
+
+➕📊💾
+Была использована команда загрузки
+python manage.py loaddata women/fixtures/db.json
+
+✅🚀🎉🎂
+После перезагрузки страницы сайта все данные отображаются снова
+
+💥🎂🎉🚀✅🍌🚩👑🧠🎈📶🛠🍌 Всё
