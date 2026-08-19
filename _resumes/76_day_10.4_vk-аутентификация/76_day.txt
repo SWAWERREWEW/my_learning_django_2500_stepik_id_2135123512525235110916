@@ -1,0 +1,94 @@
+76 day = 10.4 Авторизация через ВКонтакте
+
+Для авторизации через вк также нужно приложение ♫
+https://dev.vk.com
+
+Название: sitewomen
+Платформа: Сайт
+Адрес сайта: http://sitewomen.ru
+Базовый домен: sitewomen.ru
+
+Код подтверждения
+
+Нужен ID приложения, защищённый ключ и Сервисный ключ доступа
+
+🌎📖🔍
+Подробная информация находится в документации
+https://python-social-auth.readthedocs.io/en/latest/backends/vk.html
+
+Нужно передать в настройки сайта параметры для доступа к приложению в вк
+
+🛠💾
+Был изменён файл
+sitewomen\.env
+...
+SOCIAL_AUTH_VK_OAUTH2_KEY=***
+SOCIAL_AUTH_VK_OAUTH2_SECRET=***
+
+🛠💾
+Был изменён файл
+# sitewomen\sitewomen\settings.py
+...
+SOCIAL_AUTH_GITHUB_SECRET = ...
+SOCIAL_AUTH_VK_OAUTH2_KEY = None
+SOCIAL_AUTH_VK_OAUTH2_SECRET = None
+required_keys = {'EMAIL_HOST_PASSWORD', 'EMAIL_HOST_USER', 'IP', 'SECRET_KEY', 'SOCIAL_AUTH_GITHUB_SECRET',
+    'SOCIAL_AUTH_GITHUB_KEY', 'SOCIAL_AUTH_VK_OAUTH2_KEY', 'SOCIAL_AUTH_VK_OAUTH2_SECRET'}
+if ENV_FILE.exists():
+    with open(ENV_FILE, 'r', encoding='utf-8-sig') as f:
+        for line in f:
+            ...
+            if key in required_keys and value:
+                ...
+                elif key == 'SOCIAL_AUTH_VK_OAUTH2_KEY':
+                    SOCIAL_AUTH_VK_OAUTH2_KEY = value
+                elif key == 'SOCIAL_AUTH_VK_OAUTH2_SECRET':
+                    SOCIAL_AUTH_VK_OAUTH2_SECRET = value
+...
+
+Ещё нужно читать параметры у пользователя, указанные в SOCIAL_AUTH_VK_OAUTH2_SCOPE. То есть если человек зашёл через вк,
+то программа собирает и хранит его почту.
+
+🛠💾
+Был изменён файл
+# sitewomen\sitewomen\settings.py
+...
+SOCIAL_AUTH_VK_OAUTH2_SCOPE = ['email']
+
+Также нужно указать backend авторизации
+
+🛠💾
+Был изменён файл
+# sitewomen\sitewomen\settings.py
+...
+AUTHENTICATION_BACKENDS = [
+    ...
+    'social_core.backends.vk.VKOAuth2',
+]
+...
+
+Осталось сделать кнопку входа через вк в шаблоне
+
+🛠💾
+Был изменён файл
+<!-- sitewomen/users/templates/users/login.html -->
+...
+<p>
+    <a href="{% url 'social:begin' 'github' %}"><img src="/media/social-auth/github.png"></a>
+    <a href="{% url 'social:begin' 'vk-oauth2' %}"><img src="/media/social-auth/vk.png"></a>
+</p>
+{% endblock %}
+
+🚀⚠🎂
+Запуск по https протоколу
+python manage.py runserver_plus --cert-file cert.crt
+
+Так как выдавалась ошибка из того, что старая возможность создания приложения веб-сайта был перенесён в бизнес профиль
+{"error":"invalid_request","error_description":"invalid scope"}
+
+Ссылка на бизнес профиль для создания приложения веб-сайта с требованием подключать госуслуги
+https://id.vk.ru/about/business/go
+
+Авторизация была подготовлена, но не было создано приложение.
+
+🥀💥🌎🚩👑🌎🎉🎂🏠🗝💼📊🍌⚡ Всё

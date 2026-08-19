@@ -23,7 +23,9 @@ login🛠📥🌎
 
 <hr>
 
-<p><a href="{% url 'social:begin' 'github' %}"><img src="/media/social-auth/github.png"></a></p>
-{% endblock %}
+<p>
+    <a href="{% url 'social:begin' 'github' %}"><img src="/media/social-auth/github.png"></a>
+    <a href="{% url 'social:begin' 'vk-oauth2' %}"><img src="/media/social-auth/vk.png"></a>
+</p>
 
 {% endblock %}

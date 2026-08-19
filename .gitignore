@@ -3,3 +3,4 @@
 .idea/
 sitewomen/.env
 sitewomen/db.sqlite3
+# sitewomen/media

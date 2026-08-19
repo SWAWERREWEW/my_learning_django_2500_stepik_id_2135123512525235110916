@@ -1,17 +1,47 @@
 # my_learning_django_2500_stepik_id_2135123512525235110916
 
-# Запуск
-py -3.12 -m venv .venv
+# Изучаемый курс
+https://stepik.org/lesson/1089289/step/1?auth=login&unit=1099867
+
+### Подготовка секретов
+Нужно создать файл
+sitewomen\.env
+и прописать в нем переменные окружения
+IP=***
+EMAIL_HOST_PASSWORD=***пароль_от_почтовой_программы
+EMAIL_HOST_USER=***Почта_с_настройками_почтовой_программой
+SECRET_KEY=***секретный_ключ_django
+SOCIAL_AUTH_GITHUB_KEY=***публичный_ключ_приложения_на_github
+SOCIAL_AUTH_GITHUB_SECRET=***секретный_ключ_приложения_на_github
+SOCIAL_AUTH_VK_OAUTH2_KEY=***id_приложения_на_vk
+SOCIAL_AUTH_VK_OAUTH2_SECRET=***защищённый_ключ_приложения_на_github
+
+### Подготовка данных
+Нужно переместить папку media и базу данных db.sqlite3 в папку sitewomen
+
+### Подготовка домена
+Нужно в файл
+C:\Windows\System32\drives\etc\hosts
+Добавить строку
+127.0.0.1 sitewomen.ru
+
+### Подготовка виртуального окружения и технологий
+python -m venv .venv
 .\.venv\Scripts\activate.bat
 pip install -r req.txt
 pip list
+
+### Запуск
 cd sitewomen
 python manage.py makemigrations
 python manage.py migrate
 python manage.py runserver
 
-# Изучаемый курс
-https://stepik.org/lesson/1089289/step/1?auth=login&unit=1099867
+### Запуск с доступом для других устройств в локальной сети
+python manage.py runserver 0.0.0.0:8000
+
+### Запуск с протоколом https
+python manage.py runserver_plus --cert-file cert.crt
 
 
     # Удаление файлов и папки из отслеживаемых

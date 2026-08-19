@@ -163,6 +163,7 @@ AUTHENTICATION_BACKENDS = [
     'social_core.backends.github.GithubOAuth2',
     'django.contrib.auth.backends.ModelBackend',
     'users.authentication.EmailAuthBackend',
+    'social_core.backends.vk.VKOAuth2',
 ]
 
 # EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
@@ -175,9 +176,12 @@ EMAIL_HOST_PASSWORD = None
 EMAIL_USE_SSL = True
 SOCIAL_AUTH_GITHUB_KEY = None
 SOCIAL_AUTH_GITHUB_SECRET = None
+SOCIAL_AUTH_VK_OAUTH2_KEY = None
+SOCIAL_AUTH_VK_OAUTH2_SECRET = None
 
 # Список обязательных ключей, которые мы ХОТИМ найти
-required_keys = {'EMAIL_HOST_PASSWORD', 'EMAIL_HOST_USER', 'IP', 'SECRET_KEY', 'SOCIAL_AUTH_GITHUB_SECRET', 'SOCIAL_AUTH_GITHUB_KEY'}}
+required_keys = {'EMAIL_HOST_PASSWORD', 'EMAIL_HOST_USER', 'IP', 'SECRET_KEY', 'SOCIAL_AUTH_GITHUB_SECRET',
+    'SOCIAL_AUTH_GITHUB_KEY', 'SOCIAL_AUTH_VK_OAUTH2_KEY', 'SOCIAL_AUTH_VK_OAUTH2_SECRET'}
 loaded_keys = set()
 
 if ENV_FILE.exists():
@@ -207,6 +211,10 @@ if ENV_FILE.exists():
                     SOCIAL_AUTH_GITHUB_KEY = value
                 elif key == 'SOCIAL_AUTH_GITHUB_SECRET':
                     SOCIAL_AUTH_GITHUB_SECRET = value
+                elif key == 'SOCIAL_AUTH_VK_OAUTH2_KEY':
+                    SOCIAL_AUTH_VK_OAUTH2_KEY = value
+                elif key == 'SOCIAL_AUTH_VK_OAUTH2_SECRET':
+                    SOCIAL_AUTH_VK_OAUTH2_SECRET = value
 
 # Проверяем, все ли нужные ключи мы смогли загрузить
 if loaded_keys == required_keys:
@@ -236,3 +244,7 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.load_extra_data',
     'social_core.pipeline.user.user_details',
 )
+
+SOCIAL_AUTH_VK_OAUTH2_SCOPE = ['email']
+
+SOCIAL_AUTH_VK_OAUTH2_IGNORE_DEFAULT_SCOPE = True
