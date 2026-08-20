@@ -1,0 +1,161 @@
+﻿79 day = 11.3 Использование капчи (Captcha)
+
+На сайте не хватает защиты от ботов или капчи
+
+💾🛠❌
+Был изменён файл (Удалена функция contact и вместо неё пишется класс ContactFormView)
+# sitewomen\women\views.py
+...
+from .forms import AddPostForm, UploadFileForm, ContactForm
+...
+class ContactFormView(LoginRequiredMixin, DataMixin, FormView):
+    form_class = ContactForm
+    template_name = 'women/contact.html'
+    success_url = reverse_lazy('contact')
+    title_page = "📞Контукты🌌☕"
+    def form_valid(self, form):
+        print(form.cleaned_data)
+        return super().form_valid(form)
+...
+
+💾🛠
+Был изменён файл
+# sitewomen\women\forms.py
+...
+class ContactForm(forms.Form):
+    name = forms.CharField(label='🔳Имя', max_length=255)
+    email = forms.EmailField(label='📦Почта')
+    content = forms.CharField(label='📝Содержимое', widget=forms.Textarea(attrs={'cols': 60, 'rows': 10}))
+...
+
+💾🛠
+Был изменён файл
+<!-- sitewomen/women/templates/women/contact.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1>{{title}}</h1>
+
+<form method="post">
+    {% csrf_token %}
+
+    <div style="color: red;" class="form-error">{{ form.non_field_errors }}</div>
+
+    {% for f in form %}
+        <p>
+            <label class="form-label" for="{{ f.id_for_label }}">{{f.label}}: </label>{{ f }}
+        </p>
+        <div style="color: red;" class="form-error">{{ f.errors }}</div>
+    {% endfor %}
+
+    <h1> <button type="submit">🚀🚗Кинуть💣💥</button> </h1>
+</form>
+
+{% endblock %}
+
+💾🛠
+Был изменён файл
+# sitewomen\women\urls.py
+...
+urlpatterns = [
+    ...
+    path('contact/', views.ContactFormView.as_view(), name='contact'),
+]
+
+✅🚀🎉
+После запуска по кнопке Обратная Связь происходит перенаправление на форму заполнения. После заполнения данные
+появляются в консоли.
+
+Для создания капчи используется библиотека django-simple-captcha
+
+🛠💾
+Был изменён файл
+req.txt
+...
+django-simple-captcha==0.5.18
+
+📝📥
+Была использована команда
+pip install -r req.txt
+
+🔍🌎📖
+Подробная информация в документации
+https://django-simple-captcha.readthedocs.io/en/latest/
+
+Подключение библиотеки и самой капчи к сайту
+
+🛠💾
+Был изменён файл
+# sitewomen\sitewomen\settings.py
+...
+INSTALLED_APPS = [
+    ...
+    'captcha',
+]
+
+📝📥📊📦
+Перенос капчи в базу данных
+python manage.py migrate
+
+(.venv) C:\...\sitewomen>python manage.py migrate
+File .env successfully is readed🔍💾✅
+Operations to perform:
+  Apply all migrations: admin, auth, captcha, contenttypes, sessions, social_django, users, women
+Running migrations:
+  Applying captcha.0001_initial... OK
+  Applying captcha.0002_alter_captchastore_id... OK
+
+(.venv) C:\...\sitewomen>
+
+
+🛠💾
+Был изменён файл
+# sitewomen/sitewomen/urls
+...
+urlpatterns = [
+    ...
+    path('captcha/', include('captcha.urls')),
+]
+
+🛠💾
+Был изменён файл
+# sitewomen\women\forms.py
+...
+from captcha.fields import CaptchaField
+...
+class ContactForm(forms.Form):
+    ...
+    captcha = CaptchaField()
+
+🛠💾
+Был изменён файл
+<!-- sitewomen/women/templates/women/contact.html -->
+...
+<form method="post">
+    ...
+    {% for f in form %}
+        {% if form.captcha == f %}
+            <p>
+                <label class="form-label" for="{{ f.id_for_label }}">{{f.label}}: <br>
+                </label>
+                {{ f }}
+            </p>
+            <div style="color: red;" class="form-error">{{ f.errors }}</div>
+        {% else %}
+            <p>
+                <label class="form-label" for="{{ f.id_for_label }}">{{f.label}}: </label>{{ f }}
+            </p>
+            <div style="color: red;" class="form-error">{{ f.errors }}</div>
+        {% endif %}
+    {% endfor %}
+
+    <h1> <button type="submit">🚀🚗Кинуть💣💥</button> </h1>
+</form>
+
+{% endblock %}
+
+✅🚀🎉
+После запуска отображается капча, а данные отправляются в консоль только после правильного заполнения капчи
+
+🚗🔳⭐🕒⚡🌌🌎💣💥🔥📦✅🚀🎉 Всё

@@ -7,3 +7,4 @@ django-extensions==3.2.3
 werkzeug==2.3.7
 pyOpenSSL==23.2.0
 psycopg2-binary==2.9.10
+django-simple-captcha==0.5.18

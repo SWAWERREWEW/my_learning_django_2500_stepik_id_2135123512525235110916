@@ -26,6 +26,24 @@ SOCIAL_AUTH_VK_OAUTH2_SECRET=***защищённый_ключ_приложени
 
 ### Подготовка данных
 Нужно переместить папку media и базу данных db.sqlite3 в папку sitewomen
+Прописать в настройках либо базу данных по умолчанию
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+либо PostgreSQL
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'sitewomen_db',
+        'USER': 'sitewomen_user',
+        'PASSWORD': PASSWORD_DB,
+        'HOST': 'localhost',
+        'PORT': 5433,
+    }
+}
 
 ### Подготовка домена
 Нужно в файл <br>

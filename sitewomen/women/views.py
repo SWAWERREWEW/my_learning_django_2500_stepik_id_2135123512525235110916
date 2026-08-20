@@ -2,14 +2,13 @@
 from django.contrib.auth.decorators import login_required, permission_required
 from django.urls.base import reverse_lazy
 from .models import Women, Category, TagPost, UploadFiles
-from .forms import AddPostForm, UploadFileForm
 from .utils import DataMixin, menu
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-
 from django.core.paginator import Paginator
 from django.views.generic import TemplateView, ListView, DetailView, FormView, CreateView, UpdateView
 from django.http import HttpResponse, HttpResponseNotFound, Http404
 from django.shortcuts import render, redirect, get_object_or_404
+from .forms import AddPostForm, UploadFileForm, ContactForm
 
 data_db = [
     {'id': 1, 'title': 'Анджелина Джоли', '                     content': 'Биография Анджелина Джоли начинается с далёких 1700 годов,' +
@@ -48,9 +47,16 @@ class ShowPost(DataMixin, DetailView):
     def get_object(self, queryset=None):
         return get_object_or_404(Women.published, slug=self.kwargs[self.slug_url_kwargs])
 
-@permission_required(perm='women.view_women', raise_exception=True)
-def contact(request):
-    return render(request,'women/contact.html',{'title': '📶Контакты🛠', 'menu': menu})
+
+class ContactFormView(LoginRequiredMixin, DataMixin, FormView):
+    form_class = ContactForm
+    template_name = 'women/contact.html'
+    success_url = reverse_lazy('contact')
+    title_page = "📞Контукты🌌☕"
+
+    def form_valid(self, form):
+        print(form.cleaned_data)
+        return super().form_valid(form)
 
 
 def login(request):

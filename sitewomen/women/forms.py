@@ -3,7 +3,7 @@ from django import forms
 from django.utils.deconstruct import deconstructible
 from .models import Husband, Category, Women
 from django.core.validators import MinLengthValidator, MaxLengthValidator, ValidationError
-
+from captcha.fields import CaptchaField
 
 @deconstructible
 class RussianValidator:
@@ -44,28 +44,8 @@ class UploadFileForm(forms.Form):
     file = forms.ImageField(label="Файл")
 
 
-"""
-class AddPostForm(forms.Form):
-    title = forms.CharField(max_length=255, min_length=3, label="🔳Зугаловок", error_messages={
-    'min_length': 'БОЛЬШЕ БУКАВ',
-    'required': 'СУПЕР НУЖНОЕ ПОЛЕ'})
-    # title = forms.CharField(max_length=255, min_length=3, label="🔳Зугаловок", error_messages={
-    # 'min_length': 'БОЛЬШЕ БУКАВ',
-    # 'required': 'СУПЕР НУЖНОЕ ПОЛЕ'}, validators=[RussianValidator(),])
-    slug = forms.SlugField(max_length=300, label="🔳Слаг")
-    # slug = forms.SlugField(max_length=300, label="🔳Слаг", validators=[
-    #     MinLengthValidator(5),
-    #     MaxLengthValidator(100)])
-    content = forms.CharField(widget=forms.Textarea(attrs={"cols": 50, "rows": 3}), required=False,
-        label="🔳КАНТЕНТсодержимое")
-    is_published = forms.BooleanField(required=False, initial=True, label="🔳Публикованность")
-    cat = forms.ModelChoiceField(queryset=Category.objects.all(), empty_label="Что❓", label="🔳Котигорька")
-    husband = forms.ModelChoiceField(queryset=Husband.objects.all(), required=False, empty_label="Что❓", label="🔳мУж")
-
-    def clean_title(self):
-        title = self.cleaned_data['title']
-        ALLOWED_CHARS = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЬЫЪЭЮЯабвгдеёжзийклмнопрстуфхцчшщбыъэюя0123456789- "
-        if not (set(title) <= set(ALLOWED_CHARS)):
-            raise ValidationError("РОССИЯ СВЯЩЕННАЯ НАША ДЕРЖВА, РОССИЯ ОЧЕНЬ ЛЮБИТ РУССКИЕ СЛОВА")
-        return title
-"""
+class ContactForm(forms.Form):
+    name = forms.CharField(label='🔳Имя', max_length=255)
+    email = forms.EmailField(label='📦Почта')
+    content = forms.CharField(label='📝Содержимое', widget=forms.Textarea(attrs={'cols': 60, 'rows': 10}))
+    captcha = CaptchaField(label='💥💣🔥ЗАЩИТА_ОТ_ТРАНСФОРМЕРОВ🔥💣💥')

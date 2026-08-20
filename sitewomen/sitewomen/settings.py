@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     "debug_toolbar",
     'social_django',
     'django_extensions',
+    'captcha',
 ]
 
 MIDDLEWARE = [
@@ -252,7 +253,7 @@ DATABASES = {
         'USER': 'sitewomen_user',
         'PASSWORD': PASSWORD_DB,
         'HOST': 'localhost',
-        'PORT': 5432,
+        'PORT': 5433,
     }
 }
 

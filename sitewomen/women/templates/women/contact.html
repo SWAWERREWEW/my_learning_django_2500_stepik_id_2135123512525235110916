@@ -3,6 +3,30 @@
 
 {% block content %}
 
-<h1> ❌📶 Без контактов 📶❌ </h1>
+<h1>{{title}}</h1>
+
+<form method="post">
+    {% csrf_token %}
+
+    <div style="color: red;" class="form-error">{{ form.non_field_errors }}</div>
+
+    {% for f in form %}
+        {% if form.captcha == f %}
+            <p>
+                <label class="form-label" for="{{ f.id_for_label }}">{{f.label}}: <br>
+                </label>
+                {{ f }}
+            </p>
+            <div style="color: red;" class="form-error">{{ f.errors }}</div>
+        {% else %}
+            <p>
+                <label class="form-label" for="{{ f.id_for_label }}">{{f.label}}: </label>{{ f }}
+            </p>
+            <div style="color: red;" class="form-error">{{ f.errors }}</div>
+        {% endif %}
+    {% endfor %}
+
+    <h1> <button type="submit">🚀🚗Кинуть💣💥</button> </h1>
+</form>
 
 {% endblock %}

@@ -10,11 +10,9 @@ register_converter(converters.FourDigitYearConverter, "year4")
 """Не забывать в конце пути ставить слеш /"""
 urlpatterns = [
     path('', views.WomenHome.as_view(), name='home'),
-    # path('', views.index, name='home'),
     path('about/', views.about, name='about'),
-    # path('addpage/', views.addpage, name='add_page'),
     path('addpage/', views.AddPage.as_view(), name='add_page'),
-    path('contact/', views.contact, name='contact'),
+    path('contact/', views.ContactFormView.as_view(), name='contact'),
     path('login', views.login, name='login'),
     path('post/<slug:post_slug>/', views.ShowPost.as_view(), name='post'),
     path('category/<slug:cat_slug>/', views.WomenCategory.as_view(), name='category'),
