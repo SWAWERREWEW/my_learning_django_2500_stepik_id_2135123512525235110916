@@ -1,0 +1,153 @@
+78 day = 11.2 Подключаем PostgreSQL к проекту
+
+Текущая база данных в файле db.sqlite3 не подходит для больших данных
+
+Нужно установить программу PostgreSQL
+https://www.postgresql.org
+→ Download → Windows → Download the installer → Любая пред-предпоследняя версия.
+
+Установить СУБД PostgreSQL на компьютер
+Установка стандартная с портом 5432 и любым паролем (его лучше записать в папку с программой)
+Закрыть мастер Stack Builder
+Открыть приложение pgAdmin 4
+
+Создать для этой СУБД базу данных и пользователя-администратора.
+
+📶
+После запуска в программе была нажата открыта папка Servers и введён установленный пароль от программы
+PostgreSQL → Login/Group Roles → Правая кнопка мыши → Create → Login Group Role...
+General: Ввод имени (например sitewomen_user)
+Definition: Ещё один пароль
+Privileges: Все галочки ✅
+→ Save
+
+PostgreSQL → Databases (1) → Правая кнопка мыши → Create → Database...
+General: имя
+Owner: Ввод имени созданного пользователя (sitewomen_user)
+→ Save
+
+Установить пакет psycopg2, связывающий PostgreSQL с Django.
+
+Установка через команду
+pip install psycopg2==2.9.7
+Лишь выдаёт ошибку
+(.venv) D:\...>pip install psycopg2==2.9.7
+Collecting psycopg2==2.9.7
+  Downloading psycopg2-2.9.7.tar.gz (383 kB)
+  Installing build dependencies ... done
+  Getting requirements to build wheel ... done
+  Preparing metadata (pyproject.toml) ... done
+Building wheels for collected packages: psycopg2
+  Building wheel for psycopg2 (pyproject.toml) ... error
+  error: subprocess-exited-with-error
+
+  × Building wheel for psycopg2 (pyproject.toml) did not run successfully.
+  │ exit code: 1
+  ╰─> [31 lines of output]
+      C:\Users\artko\AppData\Local\Temp\pip-build-env-38b0xxtc\overlay\Lib\site-packages\setuptools\dist.py:765:
+      SetuptoolsDeprecationWarning: License classifiers are deprecated.
+      !!
+
+              ********************************************************************************
+              Please consider removing the following classifiers in favor of a SPDX license expression:
+
+              License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)
+
+              See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#license for details.
+              ********************************************************************************
+
+      !!
+        self._finalize_license_expression()
+      running bdist_wheel
+      running build
+      running build_py
+      creating build\lib.win-amd64-cpython-312\psycopg2
+      copying lib\errorcodes.py -> build\lib.win-amd64-cpython-312\psycopg2
+      copying lib\errors.py -> build\lib.win-amd64-cpython-312\psycopg2
+      copying lib\extensions.py -> build\lib.win-amd64-cpython-312\psycopg2
+      copying lib\extras.py -> build\lib.win-amd64-cpython-312\psycopg2
+      copying lib\pool.py -> build\lib.win-amd64-cpython-312\psycopg2
+      copying lib\sql.py -> build\lib.win-amd64-cpython-312\psycopg2
+      copying lib\tz.py -> build\lib.win-amd64-cpython-312\psycopg2
+      copying lib\_ipaddress.py -> build\lib.win-amd64-cpython-312\psycopg2
+      copying lib\_json.py -> build\lib.win-amd64-cpython-312\psycopg2
+      copying lib\_range.py -> build\lib.win-amd64-cpython-312\psycopg2
+      copying lib\__init__.py -> build\lib.win-amd64-cpython-312\psycopg2
+      running build_ext
+      building 'psycopg2._psycopg' extension
+      error: Microsoft Visual C++ 14.0 or greater is required. Get it with "Microsoft C++ Build Tools":
+      https://visualstudio.microsoft.com/visual-cpp-build-tools/
+      [end of output]
+
+  note: This error originates from a subprocess, and is likely not a problem with pip.
+  ERROR: Failed building wheel for psycopg2
+Failed to build psycopg2
+
+[notice] A new release of pip is available: 25.0.1 -> 26.2.1
+[notice] To update, run: python.exe -m pip install --upgrade pip
+ERROR: Failed to build installable wheels for some pyproject.toml based projects (psycopg2)
+
+(.venv) D:\...>
+
+Было принято решение установить бинарный аналог библиотеки
+psycopg2-binary==2.9.10
+
+🛠💾
+Был изменён файл
+sitewomen\.env
+...
+psycopg2-binary==2.9.10
+
+📝📥
+Была использована команда
+pip install -r req.txt
+
+Подключить к проекту СУБД PostgreSQL.
+
+🛠💾
+Был изменён файл (Переменная DATABASES была закомментирована и перенесена в конец файла)
+# sitewomen\sitewomen\settings.py
+...
+SOCIAL_AUTH_VK_OAUTH2_SECRET = ...
+PASSWORD_DB = None
+...
+required_keys = {'EMAIL_HOST_PASSWORD', 'EMAIL_HOST_USER', 'IP', 'SECRET_KEY', 'SOCIAL_AUTH_GITHUB_SECRET',
+    'SOCIAL_AUTH_GITHUB_KEY', 'SOCIAL_AUTH_VK_OAUTH2_KEY', 'SOCIAL_AUTH_VK_OAUTH2_SECRET', 'PASSWORD_DB'}
+...
+if ENV_FILE.exists():
+    with open(ENV_FILE, 'r', encoding='utf-8-sig') as f:
+        for line in f:
+            ...
+            if key in required_keys and value:
+                ...
+                elif key == 'PASSWORD_DB':
+                    PASSWORD_DB = value
+
+...
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'sitewomen_db',
+        'USER': 'sitewomen_user',
+        'PASSWORD': PASSWORD_DB,
+        'HOST': 'localhost',
+        'PORT': 5432,
+    }
+}
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
+Выполнить миграции для создания необходимых таблиц.
+
+python manage.py migrate
+
+Загрузить в таблицы данные из ранее сохраненных фикстур.
+
+python manage.py loaddata women/fixtures/db.json
+
+✅💥🎂🎉🚀🚩👑🧠🎈📊🌎☕ Всё

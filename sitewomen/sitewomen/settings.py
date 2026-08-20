@@ -97,13 +97,6 @@ WSGI_APPLICATION = 'sitewomen.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -178,10 +171,11 @@ SOCIAL_AUTH_GITHUB_KEY = None
 SOCIAL_AUTH_GITHUB_SECRET = None
 SOCIAL_AUTH_VK_OAUTH2_KEY = None
 SOCIAL_AUTH_VK_OAUTH2_SECRET = None
+PASSWORD_DB = None
 
 # Список обязательных ключей, которые мы ХОТИМ найти
 required_keys = {'EMAIL_HOST_PASSWORD', 'EMAIL_HOST_USER', 'IP', 'SECRET_KEY', 'SOCIAL_AUTH_GITHUB_SECRET',
-    'SOCIAL_AUTH_GITHUB_KEY', 'SOCIAL_AUTH_VK_OAUTH2_KEY', 'SOCIAL_AUTH_VK_OAUTH2_SECRET'}
+    'SOCIAL_AUTH_GITHUB_KEY', 'SOCIAL_AUTH_VK_OAUTH2_KEY', 'SOCIAL_AUTH_VK_OAUTH2_SECRET', 'PASSWORD_DB'}
 loaded_keys = set()
 
 if ENV_FILE.exists():
@@ -215,6 +209,8 @@ if ENV_FILE.exists():
                     SOCIAL_AUTH_VK_OAUTH2_KEY = value
                 elif key == 'SOCIAL_AUTH_VK_OAUTH2_SECRET':
                     SOCIAL_AUTH_VK_OAUTH2_SECRET = value
+                elif key == 'PASSWORD_DB':
+                    PASSWORD_DB = value
 
 # Проверяем, все ли нужные ключи мы смогли загрузить
 if loaded_keys == required_keys:
@@ -248,3 +244,21 @@ SOCIAL_AUTH_PIPELINE = (
 SOCIAL_AUTH_VK_OAUTH2_SCOPE = ['email']
 
 SOCIAL_AUTH_VK_OAUTH2_IGNORE_DEFAULT_SCOPE = True
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'sitewomen_db',
+        'USER': 'sitewomen_user',
+        'PASSWORD': PASSWORD_DB,
+        'HOST': 'localhost',
+        'PORT': 5432,
+    }
+}
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
