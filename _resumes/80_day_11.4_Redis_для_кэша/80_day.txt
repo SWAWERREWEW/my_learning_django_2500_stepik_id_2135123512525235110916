@@ -1,0 +1,125 @@
+﻿80 day = 11.4 Установка Redis для кэширования данных
+
+Кеширование позволяет снизить нагрузку на сервер
+
+🔍🌎📖
+Официальная документация
+https://docs.djangoproject.com/en/4.2/#common-web-application-tools
+https://docs.djangoproject.com/en/4.2/topics/cache/
+
+📖🌎🔍
+Существует технология для кеширования данных сайта. Ссылка на его документацию.
+https://redis.io
+
+🛠📦🚀📥🔳
+В командной строке нужно выполнить установку
+win
+cmd
+Запуск от имени администратора
+wsl --install
+Перезапуск компьютера
+Должно появиться окно с консолью. В новой консоли
+Скачивание: Ubuntu
+Установка: Ubuntu
+Дистрибутив успешно установлен. Его можно запустить с помощью "wsl.exe -d Ubuntu"
+Запуск Ubuntu...
+Provisioning the new WSL instance Ubuntu
+This might take a while...
+Create a default Unix user account: xtiso
+New password:
+Retype new password:
+passwd: password updated successfully
+usermod: no changes
+Help improve Ubuntu!
+
+Help us improve Ubuntu features and compatibility by sharing system reports with Canonical.
+Reports are sent anonymously and do not contain any personal data.
+For legal details, please visit: https://ubuntu.com/legal/systems-information-notice
+
+We will save your answer to Windows and will only ask you once.
+
+Would you like to opt-in to platform metrics collection (Y/n)? To see an example of the data collected, enter 'e'.
+[Y/n/e]: n
+xtiso@DESKTOP-AAAAAAA:/mnt/c/Windows/system32$
+запустить консоль можно с помощью
+win
+wsl
+после ввода новых имени и пароля нужны команды (Скопированный текст команд вставляется с помощью правой кнопки мыши)
+
+# 1. Скачиваем официальный GPG-ключ Redis
+curl -fsSL https://packages.redis.io/gpg | sudo gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg
+
+# 2. Добавляем официальный репозиторий (исправленная версия)
+echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/redis.list
+
+# 3. Обновляем списки пакетов и устанавливаем Redis
+sudo apt-get update
+sudo apt-get install redis -y
+
+# 4. Запускаем службу
+sudo service redis-server start
+
+Для проверки (Слово PONG в выводе означает успех)
+redis-cli
+ping
+
+Пример вывода
+xtiso@DESKTOP-AAAAAAA:/mnt/c/Windows/system32$ sudo service redis-server start
+xtiso@DESKTOP-AAAAAAA:/mnt/c/Windows/system32$ redis-cli
+127.0.0.1:6379> ping
+PONG
+127.0.0.1:6379>
+
+# 5. Остановка сервера
+sudo service redis-server stop
+
+Удаление wsl и Redis при необходимости
+sudo service redis-server stop
+sudo apt-get purge redis redis-server -y
+sudo apt-get autoremove -y
+sudo rm /etc/apt/sources.list.d/redis.list
+sudo rm /usr/share/keyrings/redis-archive-keyring.gpg
+Посмотрите имя установленной системы (обычно там написано Ubuntu):
+wsl --list
+Удалите её командой:
+wsl --unregister Ubuntu
+(Внимание: это мгновенно и безвозвратно удалит Linux, Redis и все файлы внутри WSL).
+
+Для работы также нужно установить библиотеку redis 5.0.0
+
+🛠💾
+Был изменён файл
+req.txt
+...
+redis==5.0.0
+hiredis==2.2.3
+
+📝📥📦`
+Была использована команда
+pip install -r req.txt
+
+Осталось подключить всё в настройках
+
+💾🛠
+Был изменён файл
+# sitewomen\sitewomen\settings.py
+...
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379",
+    }
+}
+
+🎃🎃🎃
+После запуска ничего особенного не происходит, потому что правильное использование redis будет на следующем занятии.
+
+Redis довольно удобная при хранении подсчете числа просмотров страниц сайта;
+С помощью Redis достаточно просто имитировать очереди типов LIFO и FIFO с данными.
+Для этого имеются команды lpush()/rpush() и lpop()/rpop().
+Кэширование, которое было использовано, как пример использования Redis.
+Отправка отложенных сообщений с использованием Redis.
+Быстрое создание рейтингов на основе упорядоченных множеств, поддерживаемых Redis.
+Логирование и отслеживание действий в реальном режиме времени также целесообразно делать на базе Redis.
+
+💣⚡🕒⭐🚗🎉🌌✅🔥💣💥🚀Всёё
