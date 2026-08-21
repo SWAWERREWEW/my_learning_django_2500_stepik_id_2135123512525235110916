@@ -9,6 +9,7 @@ from django.views.generic import TemplateView, ListView, DetailView, FormView, C
 from django.http import HttpResponse, HttpResponseNotFound, Http404
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import AddPostForm, UploadFileForm, ContactForm
+from django.core.cache import cache
 
 data_db = [
     {'id': 1, 'title': 'Анджелина Джоли', '                     content': 'Биография Анджелина Джоли начинается с далёких 1700 годов,' +
@@ -128,4 +129,8 @@ class WomenHome(DataMixin, ListView):
     title_page = 'главная страница 🏠'
 
     def get_queryset(self):
-        return Women.published.all().select_related('cat')
+        women_posts_cache = cache.get('women_posts')
+        if not women_posts_cache:
+            women_posts_cache = Women.published.all().select_related('cat')
+            cache.set('women_posts', women_posts_cache, 60)
+        return women_posts_cache

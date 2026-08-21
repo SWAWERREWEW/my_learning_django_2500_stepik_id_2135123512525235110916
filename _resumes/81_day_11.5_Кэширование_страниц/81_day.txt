@@ -1,0 +1,172 @@
+﻿81 day = 11.5 Кэширование страниц сайта
+
+Документация с подробностями о процессе кеширования
+https://docs.djangoproject.com/en/4.2/topics/cache/#the-per-site-cache
+
+💾🛠
+Был изменён файл
+# sitewomen\sitewomen\settings.py
+...
+MIDDLEWARE = [
+    "django.middleware.cache.UpdateCacheMiddleware",
+    ...
+    "django.middleware.cache.FetchFromCacheMiddleware",
+]
+
+🛠💾
+В файле
+# sitewomen\sitewomen\settings.py
+Строка в списке MIDDLEWARE должна быть и была перемещена на первое место
+"debug_toolbar.middleware.DebugToolbarMiddleware",
+
+Другие настройки
+
+CACHE_MIDDLEWARE_ALIAS = 'default'
+
+Время хранения кеша
+CACHE_MIDDLEWARE_SECONDS = 10
+
+Для отсутсвия колизий и разделении кеша для нескольких сайтов
+CACHE_MIDDLEWARE_KEY_PREFIX = 'sitewomen'
+
+🛠💾
+Был изменён файл
+# sitewomen\sitewomen\settings.py
+...
+CACHE_MIDDLEWARE_ALIAS = 'default'
+CACHE_MIDDLEWARE_SECONDS = 10
+CACHE_MIDDLEWARE_KEY_PREFIX = 'sitewomen'
+
+🚀⚙🌌
+Была запущена консоль wsl либо cmd и Windows Subsystem for Linux и служба redis
+sudo service redis-server start
+redis-cli
+ping
+Для выхода нужны клавишы ctrl + c
+
+🚀✅🎉📦📊
+После запуска в панели djdt отображается количество кеша
+Его количество может быть меньше, а количество обращений к базе данных может быть больше, чем у автора курса, потому
+что в django есть защитные механизмы, не позволяющие загружать кеш для авторизованных пользователей, чтобы аноним не
+увидел панель администратора, а авторизованному пользователю не отобразились чужие данные, однако если кеш вообще
+появился даже 1 это уже успех и корректная работа redis в django
+
+Для ручного кеширования страниц, можно прописать дополнительно после {% load static %}
+Кешировать block content и csrf_token или любое содержимое, которое меняется для каждого пользователя ни в коем случае
+нельзя для безопасности и правильной работы сайта
+
+{% load cache %}
+<!-- 500 — это время в секундах, 'sidebar' — уникальное имя ключа -->
+{% cache 500 to_cache %}
+    <div class="to_cache">
+        <!-- данные для кеширования -->
+    </div>
+{% endcache %}
+
+Можно сделать отдельный кеш главной панели для страницы base.html
+
+💾🛠
+Был изменён файл
+<!-- sitewomen/templates/base.html -->
+...
+<body>
+{% load cache %}
+<a href="{% url 'admin:index' %}"> 💾 Неглавнаястраница 💾 </a>
+<ul>
+    {% cache 500 to_cache %}
+    <div class="to_cache">
+        <li><a href="{% url 'home' %}"> Главная страница 🏠</a></li>
+        <br>
+        {% for m in mainmenu %}
+            <li>
+            <a href="{% url m.url_name %}"> {{ m.title }} </a><br>
+            </li><br>
+        {% endfor %}
+    </div>
+    {% endcache %}
+    ...
+</ul>
+...
+
+Для очистки кеша можно использовать команду
+redis-cli
+FLUSHDB
+
+Однако общее кеширование автор не рекомендует и поэтому он закоментировал строки
+CACHE_MIDDLEWARE_ALIAS = 'default'
+CACHE_MIDDLEWARE_SECONDS = 10
+CACHE_MIDDLEWARE_KEY_PREFIX = 'sitewomen'
+...
+"django.middleware.cache.UpdateCacheMiddleware",
+"django.middleware.cache.FetchFromCacheMiddleware",
+В файле
+# sitewomen\sitewomen\settings.py
+То есть фактически отключение кеширования вообще
+
+Существует кеширование функций представления в документации
+https://docs.djangoproject.com/en/4.2/topics/cache/#the-per-view-cache
+
+Необходимо сделать кеширование главной страницы сайта
+
+💾🛠
+Был изменён файл
+# sitewomen\women\urls.py
+...
+from django.views.decorators.cache import cache_page
+...
+urlpatterns = [
+    path('', cache_page(30)(views.WomenHome.as_view()), name='home'),
+    ...
+]
+
+💥✅🚀🎉📦
+После запуска и повторной перезагрузки главной страницы произошло полное исчезновение SQL обращений к базе данных и
+статическим файлам
+
+Автор курса добавил тег {% load cache %} и закешировал блок Категорий, а потом убрал этот тег тоже
+Также был убран кеш для главной странице
+
+
+💾🛠
+Был изменён файл
+# sitewomen\women\urls.py
+...
+urlpatterns = [
+    path('', views.WomenHome.as_view(), name='home'),
+    # path('', cache_page(30)(views.WomenHome.as_view()), name='home'),
+    ...
+]
+
+Существуют различные функции для управления кешом
+cache.set() – сохранение произвольных данных в кэш по ключу;
+cache.get() – выбор произвольных данных из кэша по ключу;
+cache.add() – заносит новое значение в кэш, если его там еще нет (иначе данная операция игнорируется);
+cache.get_or_set() – извлекает данные из кэша, если их нет, то автоматически заносится значение по умолчанию;
+cache.delete() – удаление данных из кэша по ключу;
+cache.clear() – полная очистка кэша.
+
+💾🛠
+Был изменён файл и изменена функция
+# sitewomen\women\views.py
+...
+from django.core.cache import cache
+...
+    def get_queryset(self):
+        women_posts_cache = cache.get('women_posts')
+        if not women_posts_cache:
+            women_posts_cache = Women.published.all().select_related('cat')
+            cache.set('women_posts', women_posts_cache, 60)
+        return women_posts_cache
+
+Кеш всегда делается в последнюю очередь и только после окончания разработки сайта либо его можно прописать, но временно
+отключить с помощью настройки в файле
+# sitewomen\sitewomen\settings.py
+...
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.dummy.DummyCache",
+        ...
+    }
+}
+
+📦🎉🚀✅💥⭐🔥💣🌌🎃⚡📝☕🌎Всё

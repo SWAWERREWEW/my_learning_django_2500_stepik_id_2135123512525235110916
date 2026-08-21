@@ -83,6 +83,7 @@ wsl --install
     Для проверки (Слово PONG в выводе означает успех)
     redis-cli
     ping
+    Для выхода нужны клавишы ctrl + c
     
     5. Остановка сервера
     sudo service redis-server stop
@@ -121,6 +122,18 @@ python -Xutf8 manage.py dumpdata --indent=2 -o women/fixtures/db.json
 
 ### Загрузка данных в базу данных из json файла
 python manage.py loaddata women/fixtures/db.json
+
+## Просле завершения разработки включить кеш
+```
+cmd
+wsl
+sudo service redis-server start
+redis-cli
+ping
+```
+
+### Очистка кеша
+FLUSHDB
 
 # Прочее
     Удаление файлов и папки из отслеживаемых
