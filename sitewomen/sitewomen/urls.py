@@ -17,11 +17,18 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.conf.urls.static import static
-# sitewomen/sitewomen/urls
 from django.contrib import admin
 from django.urls import path, include
 from sitewomen import settings
-# import sitewomen.women.views
+from django.contrib.sitemaps.views import sitemap
+from women.sitemaps import PostSitemap, CategorySitemap
+from django.views.decorators.cache import cache_page
+
+sitemaps = {
+    'posts': PostSitemap,
+    'cats': CategorySitemap,
+}
+
 
 """Не забывать в конце пути ставить слеш /"""
 urlpatterns = [
@@ -31,6 +38,7 @@ urlpatterns = [
     path("__debug__/", include("debug_toolbar.urls")),
     path('social-auth/', include('social_django.urls', namespace='social')),
     path('captcha/', include('captcha.urls')),
+    path('sitemap.xml', cache_page(100)(sitemap), {'sitemaps': sitemaps}, name="django.contrib.sitemaps.views.sitemap"),
 ]
 
 if settings.DEBUG:

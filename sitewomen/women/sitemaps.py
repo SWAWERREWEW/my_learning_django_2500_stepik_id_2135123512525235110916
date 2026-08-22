@@ -1,0 +1,23 @@
+# sitewomen\woman\sitemaps.py
+
+from django.contrib.sitemaps import Sitemap
+from .models import Women, Category
+
+
+class PostSitemap(Sitemap):
+    changefreq = 'monthly'
+    priority = 0.9
+
+    def items(self):
+        return Women.published.all()
+
+    def lastmod(self, obj):
+        return obj.time_update
+
+
+class CategorySitemap(Sitemap):
+    changefreq = 'monthly'
+    priority = 0.9
+
+    def items(self):
+        return Category.objects.all()

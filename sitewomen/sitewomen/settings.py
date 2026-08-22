@@ -57,6 +57,8 @@ INSTALLED_APPS = [
     'social_django',
     'django_extensions',
     'captcha',
+    'django.contrib.sites',
+    'django.contrib.sitemaps',
 ]
 
 MIDDLEWARE = [
@@ -255,7 +257,7 @@ DATABASES = {
         'USER': 'sitewomen_user',
         'PASSWORD': PASSWORD_DB,
         'HOST': 'localhost',
-        'PORT': 5433,
+        'PORT': 5432,
     }
 }
 
@@ -276,3 +278,4 @@ CACHES = {
 # CACHE_MIDDLEWARE_ALIAS = 'default'
 # CACHE_MIDDLEWARE_SECONDS = 10
 # CACHE_MIDDLEWARE_KEY_PREFIX = 'sitewomen'
+SITE_ID = 1

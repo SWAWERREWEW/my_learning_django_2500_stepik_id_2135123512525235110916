@@ -1,0 +1,134 @@
+82 day = 11.6 Добавление карты сайта (sitemap)
+
+Карта сайта это файл xml с актуальными ссылками и их историей изменения на сайте
+
+Документация 🌎🔍📖
+https://docs.djangoproject.com/en/4.2/ref/contrib/sitemaps/
+
+Нужно настроить карту сайта. SITE_ID это идентификатор первой записи в таблице САЙТЫ.
+
+🛠💾
+Был изменён файл
+# sitewomen\sitewomen\settings.py
+...
+INSTALLED_APPS = [
+    ...
+    'django.contrib.sites',
+    'django.contrib.sitemaps',
+]
+...
+SITE_ID = 1
+
+После подключения такого модуля нужно выполнить миграции
+
+(.djvenv) D:\...\sitewomen>python manage.py migrate
+File .env successfully is readed🔍💾✅
+Operations to perform:
+  Apply all migrations: admin, auth, captcha, contenttypes, sessions, sites, social_django, users, women
+Running migrations:
+  Applying sites.0001_initial... OK
+  Applying sites.0002_alter_domain_unique... OK
+
+(.djvenv) D:\...\sitewomen>
+
+🚀✅🎉
+После запуска в админ панели появляется таблица САЙТЫ с одной записью example.com
+
+Нужно сформировать карту сайта. changefreq = частота обновления
+
+🛠💾➕
+Был создан файл
+# sitewomen\woman\sitemaps.py
+
+from django.contrib.sitemaps import Sitemap
+from .models import Women
+
+class PostSitemap(Sitemap):
+    changefreq = 'monthly'
+    priority = 0.9
+
+    def items(self):
+        return Women.published.all()
+
+    def lastmod(self, obj):
+        return obj.time_update
+
+Маршрут остался
+
+💾🛠
+Был изменён файл
+# sitewomen/sitewomen/urls
+...
+from django.contrib.sitemaps.views import sitemap
+from sitewomen.women.sitemaps import PostSitemap
+
+sitemaps = {
+    'posts': PostSitemap,
+}
+...
+urlpatterns = [
+    ...
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name="django.contrib.sitemaps.views.sitemap"),
+]
+...
+
+Добавление кнопки Карта Сайта
+
+
+💾🛠
+Был изменён файл
+<!-- sitewomen/templates/base.html -->
+...
+<a href="{% url 'django.contrib.sitemaps.views.sitemap' %}"> 📊 Карта сайта 🌎 </a>
+...
+
+🌎✅🚀
+После запуска отображается кнопка Карта Сайта, отображающая содержимое файла sitemap.xml по адресу
+http://127.0.0.1:8000/sitemap.xml
+
+С помощью админ панели в таблице САЙТЫ был изменена запись example.com на sitewomen.ru
+
+В карту сайта была добавлена таблицы категорий
+
+💾🛠
+Был изменён файл
+# sitewomen\woman\sitemaps.py
+...
+from .models import Women, Category
+...
+class CategorySitemap(Sitemap):
+    changefreq = 'monthly'
+    priority = 0.9
+
+    def items(self):
+        return Category.objects.all()
+
+💾🛠
+Был изменён файл
+# sitewomen/sitewomen/urls
+...
+from women.sitemaps import PostSitemap, CategorySitemap
+sitemaps = {
+    'posts': PostSitemap,
+    'cats': CategorySitemap,
+}
+...
+
+Так как функция сайта меняетя очень редко её можно закешировать
+
+💾🛠
+Был изменён файл
+# sitewomen/sitewomen/urls
+...
+from django.views.decorators.cache import cache_page
+...
+urlpatterns = [
+    ...
+    path('sitemap.xml', cache_page(100)(sitemap), {'sitemaps': sitemaps}, name="django.contrib.sitemaps.views.sitemap"),
+    ...
+]
+
+Документация 🌎🔍📖
+https://docs.djangoproject.com/en/4.2/ref/contrib/sitemaps/
+
+📖🎉💥🌎🚀✅👑☕🎂⚡🍌 Всё
