@@ -1,0 +1,217 @@
+83 day = 12.1 Первые тесты с Django unittest
+
+Уже готов сайт, остались тесты через файлы tests.py
+
+Подробнее в документации 🔍🌎📖
+https://docs.python.org/3/library/unittest.html
+
+Есть класс для тестирования фрагмента сайта, в нём прописываются первая функция setUp для загрузки элементов фрагмента
+или для фрагмента, которая выполняется перед тестовой функцией, функции для тестирования с названиями начинающимися на
+test_ и функция после выполнения отдельной тестовой функции tearDown
+
+🛠💾
+Был изменён файл
+# sitewomen\women\tests.py
+from django.test import TestCase
+
+# Create your tests here.
+class GetPagesTestCase(TestCase):
+    def setUp(self):
+        "Инициализация перед выполнением каждого теста"
+
+    def test_case_1(self):
+        pass
+
+    def test_case_2(self):
+        pass
+
+    def tearDown(self):
+        "Действия после выполнения каждого теста"
+
+
+Команда для запуска тестов в указанном приложении
+python manage.py test .
+
+(.djvenv) D:\...\sitewomen>python manage.py test .
+File .env successfully is readed🔍💾✅
+Found 2 test(s).
+Creating test database for alias 'default'...
+System check identified no issues (0 silenced).
+..
+----------------------------------------------------------------------
+Ran 2 tests in 0.002s
+
+OK
+Destroying test database for alias 'default'...
+
+(.djvenv) D:\...\sitewomen>
+
+Либо можно вызвать отдельный тест
+python manage.py test women.tests.GetPagesTestCase
+python manage.py test women.tests.GetPagesTestCase.test_case_2
+
+Во время выполнения теста, создаётся временные данные в базе данныхъ
+
+Нужно прописать первый тест на вывод главной страницы сайта.
+В тесте будет подобие обращения к главной странице сайта от лица пользователя.
+Второй тест будет подобием обращением пользователя к админ панели сайта
+Третий тест будет подобием обращения пользователя к странице редактирования статьи
+
+💾🛠
+Был изменён файл
+# sitewomen\women\tests.py
+...
+from django.urls.base import reverse
+class GetPagesTestCase(TestCase):
+    ...
+        def test_mainpage(self):
+        path = reverse('home')
+        response = self.client.get(path)
+        print('🛠🔍📊Созданный тест', response)
+
+    def test_admin(self):
+        path = reverse('admin:index')
+        response = self.client.get(path)
+        print('🛠🔍📊Созданный тест админ панели', response)
+
+    def test_addpage(self):
+        path = reverse('add_page')
+        response = self.client.get(path)
+        print('🛠🔍📊Созданный тест редактирования статьи', response)
+    ...
+
+Вывод консоли
+File .env successfully is readed🔍💾✅
+Creating test database for alias 'default'...
+Found 5 test(s).
+System check identified no issues (0 silenced).
+....🛠🔍📊Созданный тест редактирования статьи <HttpResponseRedirect status_code=302, "text/html; charset=utf-8", url="/users/login/?next=/addpage/">
+🛠🔍📊Созданный тест админ панели <HttpResponseRedirect status_code=302, "text/html; charset=utf-8", url="/admin/login/?next=/admin/">
+.
+----------------------------------------------------------------------
+Ran 5 tests in 0.065s
+
+OK
+Destroying test database for alias 'default'...
+🛠🔍📊Созданный тест <TemplateResponse status_code=200, "text/html; charset=utf-8">
+
+Существует функция для проверки равенства значений. Например, сравнение кода возвращаемой страницы и нужного статуса
+
+self.assertEqual(response.status_code, 200)
+
+Либо можно проверить загрузку определённого шаблона
+
+self.assertIn('women/index.html', response.template_name)
+
+Хотя лучше это делать так
+
+self.assertTemplateUsed(response, 'women/index.html')
+
+Также можно проверить конкретную информацию на получаемой странице. Например, заголовок
+
+self.assertEqual(response.context_data['title'], 'главная страница 🏠')
+
+Существует класс для выбора статуса
+
+from http import HTTPStatus
+self.assertEqual(response.status_code, HTTPStatus.OK)
+
+Существует способ проверить недоступность страницы с автоматическим перенаправлением и проверкой страницы, на которую
+происходит перенаправление. Переменная redirect_uri содержит маршрут на который должно быть перенаправление, а функция
+assertRedirects уже проверяет действительно произошло перенаправление на страницу с маршрутом redirect_uri
+
+def test_redirect_addpage(self):
+    path = reverse('add_page')
+    redirect_uri = reverse('users:login') + '?next=' + path
+    response = self.client.get(path)
+    self.assertEqual(response.status_code, HTTPStatus.FOUND)
+    self.assertRedirects(response, redirect_uri)
+
+🛠💾
+Был изменён файл
+# sitewomen\women\tests.py
+# sitewomen\women\tests.py
+from django.test import TestCase
+from django.urls.base import reverse
+from http import HTTPStatus
+
+# Create your tests here.
+class GetPagesTestCase(TestCase):
+    def setUp(self):
+        "Инициализация перед выполнением каждого теста"
+
+    def test_admin(self):
+        path = reverse('admin:index')
+        response = self.client.get(path)
+        print('🛠🔍📊Созданный тест админ панели', response)
+
+    def test_addpage(self):
+        path = reverse('add_page')
+        response = self.client.get(path)
+        print('🛠🔍📊Созданный тест редактирования статьи', response)
+
+    def test_redirect_addpage(self):
+        path = reverse('add_page')
+        redirect_uri = reverse('users:login') + '?next=' + path
+        response = self.client.get(path)
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+        self.assertRedirects(response, redirect_uri)
+
+    def test_mainpage(self):
+        path = reverse('home')
+        response = self.client.get(path)
+        print('🛠🔍📊Созданный тест', response)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertTemplateUsed(response, 'women/index.html')
+        self.assertEqual(response.context_data['title'], 'главная страница 🏠')
+        self.assertIn('women/base.html', response.template_name)
+
+    def tearDown(self):
+        "Действия после выполнения каждого теста"
+
+Вывод консоли
+File .env successfully is readed🔍💾✅
+Creating test database for alias 'default'...
+Found 4 test(s).
+System check identified no issues (0 silenced).
+..F🛠🔍📊Созданный тест редактирования статьи <HttpResponseRedirect status_code=302, "text/html; charset=utf-8", url="/users/login/?next=/addpage/">
+🛠🔍📊Созданный тест админ панели <HttpResponseRedirect status_code=302, "text/html; charset=utf-8", url="/admin/login/?next=/admin/">
+🛠🔍📊Созданный тест <TemplateResponse status_code=200, "text/html; charset=utf-8">
+.
+======================================================================
+FAIL: test_mainpage (women.tests.GetPagesTestCase.test_mainpage)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\python_programming\for_git_repositories\my_learning_django_2500_stepik_id_2135123512525235110916\sitewomen\women\tests.py", line 35, in test_mainpage
+    self.assertIn('women/base.html', response.template_name)
+AssertionError: 'women/base.html' not found in ['women/index.html', 'women/women_list.html']
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.062s
+
+FAILED (failures=1)
+Destroying test database for alias 'default'...
+
+🛠💾
+Был изменён файл
+# sitewomen\women\tests.py
+...
+# self.assertIn('women/base.html', response.template_name)
+...
+
+Вывод консоли
+File .env successfully is readed🔍💾✅
+Creating test database for alias 'default'...
+Found 4 test(s).
+System check identified no issues (0 silenced).
+🛠🔍📊Созданный тест редактирования статьи <HttpResponseRedirect status_code=302, "text/html; charset=utf-8", url="/users/login/?next=/addpage/">
+🛠🔍📊Созданный тест админ панели <HttpResponseRedirect status_code=302, "text/html; charset=utf-8", url="/admin/login/?next=/admin/">
+....
+----------------------------------------------------------------------
+Ran 4 tests in 0.075s
+
+OK
+Destroying test database for alias 'default'...
+🛠🔍📊Созданный тест <TemplateResponse status_code=200, "text/html; charset=utf-8">
+
+✅👑🔍📊🎂☕🚀✅💥🎉🍌🌎 Всё
