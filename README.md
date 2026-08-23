@@ -118,7 +118,13 @@ python manage.py runserver 0.0.0.0:8000
 python manage.py runserver_plus --cert-file cert.crt
 
 ### Выгрузка данных в json файл
+```
 python -Xutf8 manage.py dumpdata --indent=2 -o women/fixtures/db.json
+python -Xutf8 manage.py dumpdata --indent=2 women.Women -o women/fixtures/women_women.json
+python -Xutf8 manage.py dumpdata --indent=2 women.Category -o women/fixtures/women_category.json
+python -Xutf8 manage.py dumpdata --indent=2 women.TagPost -o women/fixtures/women_tagpost.json
+python -Xutf8 manage.py dumpdata --indent=2 women.Husband -o women/fixtures/women_husband.json
+```
 
 ### Загрузка данных в базу данных из json файла
 python manage.py loaddata women/fixtures/db.json

@@ -1,0 +1,76 @@
+84 day = 12.2 Использование БД в unittest фреймворка Django
+
+Нужны тесты с обращением к базе данных
+
+Была использована команда для выгрузки данных в файл db.json из базы данных
+python -Xutf8 manage.py dumpdata --indent=2 -o women/fixtures/db.json
+
+Был создан тест для проверки доступности главной страницы и загрузки указанных данных
+
+🛠💾
+Был изменён файл
+# sitewomen\women\tests.py
+...
+from women.models import Women
+...
+class GetPagesTestCase(TestCase):
+    fixtures = ['db.json']
+    ...
+    def test_data_mainpage(self):
+        women_posts_cache = Women.published.all().select_related('cat')
+        path = reverse('home')
+        response = self.client.get(path)
+        print(women_posts_cache, response)
+
+    def tearDown(self):
+        ...
+
+Существует способ сравнить два набора данных. Например, ожидаемый и получаемый.
+
+🛠💾
+Был изменён файл
+# sitewomen\women\tests.py
+...
+class GetPagesTestCase(TestCase):
+    ...
+    def test_data_mainpage(self):
+        women_posts_cache = Women.published.all().select_related('cat')
+        path = reverse('home')
+        response = self.client.get(path)
+        print(women_posts_cache, response)
+        self.assertQuerysetEqual(response.context_data['posts'], women_posts_cache)
+        # self.assertQuerysetEqual(response.context_data['posts'], women_posts_cache[:5])
+...
+
+Пересоздание необходимая часть тестов для правильных независимых результатов
+Создание теста для проверки пагинации
+
+🛠💾
+Был изменён файл
+# sitewomen\women\tests.py
+...
+class GetPagesTestCase(TestCase):
+    ...
+    def test_paginate_mainpage(self):
+        path = reverse('home')
+        page = 1
+        paginate_by = 5
+        response = self.client.get(path + f'?page={page}')
+        w = Women.published.all().select_related('cat')
+        self.assertQuerysetEqual(response.context_data['posts'], w[(page - 1) * paginate_by:page * paginate_by])
+...
+
+Можно составить тест для сравнения настоящих данных в базе данных и данных, которые видит пользователь на странице
+указанного поста по идентификатору
+
+🛠💾
+Был изменён файл
+# sitewomen\women\tests.py
+...
+class GetPagesTestCase(TestCase):
+    ...
+    def test_content_post(self):
+        w = Women.published.get(pk=1)
+        path = reverse('post', args=[w.slug])
+        response = self.client.get(path)
+        self.assertEqual(w.content, response.context_data['post'].content)
