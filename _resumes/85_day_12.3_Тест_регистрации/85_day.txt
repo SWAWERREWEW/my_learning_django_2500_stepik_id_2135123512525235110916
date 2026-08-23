@@ -1,0 +1,130 @@
+85 day = 12.3 Тестирование формы регистрации
+
+Нужны тесты форм. Например, формы регистрации.
+Первый тест для проверки статуса кода и возвращаемого шаблона.
+
+💾🛠➕
+Был создан файл
+# sitewomen\users\tests.py
+from django.test import TestCase
+from django.urls.base import reverse
+from http import HTTPStatus
+
+
+class RegisterUserTestCase(TestCase):
+    def test_form_registration_get(self):
+        path = reverse('users:register')
+        response = self.client.get(path)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertTemplateUsed(response, 'users/register.html')
+
+Второй тест первоначальная задача. Проверка регистрации.
+
+🛠💾
+Был изменён файл
+# sitewomen\users\tests.py
+...
+from django.contrib.auth import get_user_model
+
+class RegisterUserTestCase(TestCase):
+    ...
+    def test_user_registration_success(self):
+        data_for_check = {
+            'username': 'koshka',
+            'email': 'koshka@sitewomen.ru',
+            'first_name': 'koshka',
+            'last_name': 'koshka',
+            'password1': 'gugirufi',
+            'password2': 'gugirufi',
+        }
+        user_model = get_user_model()
+
+        path = reverse('users:register')
+        response = self.client.post(path, data_for_check)
+        # Проверка на то, перешёл ли пользователь на переданный путь или его перенаправило на другой
+        self.assertRedirects(response, reverse('users:login'))
+        # Проверка на существование нового пользователя по уникальной почте
+        self.assertTrue(user_model.objects.filter(username=data_for_check['username']).exists())
+        # self.assertTrue(user_model.objects.filter(email=data_for_check['email']).exists())
+
+Проверка на сообщение, получаемое при ошибке ввода неверного пароля. Параметр html проверяет даже точки.
+
+🛠💾
+Был изменён файл
+# sitewomen\users\tests.py
+...
+class RegisterUserTestCase(TestCase):
+    ...
+        def test_user_registration_password_error(self):
+        data_for_check = {
+            'username': 'stone',
+            'email': 'stone@sitewomen.ru',
+            'first_name': 'stone',
+            'last_name': 'stone',
+            'password1': 'wetrter90g',
+            'password2': '4mnpwoitire',
+        }
+
+        path = reverse('users:register')
+        response = self.client.post(path, data_for_check)
+        self.assertContains(response, "Введенные пароли не совпадают.", html=True)
+        self.assertContains(response, "не", html=False)
+
+Для уборки дублирования кода можно воспользоваться методом setUp. То есть начальное создание переменной data для всех
+тестов
+
+🛠💾
+Был изменён файл
+# sitewomen\users\tests.py
+...
+class RegisterUserTestCase(TestCase):
+    def setUp(self):
+        self.data_for_check = {
+            'username': 'koshka',
+            'email': 'koshka@sitewomen.ru',
+            'first_name': 'koshka',
+            'last_name': 'koshka',
+            'password1': 'gugirufi',
+            'password2': 'gugirufi',
+        }
+    ...
+    def test_user_registration_success(self):
+        ...
+        response = self.client.post(path, self.data_for_check)
+        ...
+        self.assertTrue(user_model.objects.filter(username=self.data_for_check['username']).exists())
+    ...
+
+Проверка на сообщение, получаемое при ошибке уникальности поля username
+
+🛠💾
+Был изменён файл
+# sitewomen\users\tests.py
+...
+class RegisterUserTestCase(TestCase):
+    ...
+    def test_user_registration_user_exists_error(self):
+        user_model = get_user_model()
+        user_model.objects.create(username=self.data_for_check['username'])
+
+        path = reverse('users:register')
+        response = self.client.post(path, self.data_for_check)
+        self.assertContains(response, "уже существует", html=False)
+
+После запуска всехъ тестов одинаковый вывод
+
+D:\...\.djvenv\Scripts\python.exe D:\python_programming\for_git_repositories\my_learning_django_2500_stepik_id_2135123512525235110916\sitewomen\manage.py test users.tests.RegisterUserTestCase
+File .env successfully is readed🔍💾✅
+Found 4 test(s).
+Creating test database for alias 'default'...
+System check identified no issues (0 silenced).
+....
+----------------------------------------------------------------------
+Ran 4 tests in 0.263s
+
+OK
+Destroying test database for alias 'default'...
+
+Process finished with exit code 0
+
+🌎🍌🎉💥✅🚀☕🎂🎈🚩 Всё
