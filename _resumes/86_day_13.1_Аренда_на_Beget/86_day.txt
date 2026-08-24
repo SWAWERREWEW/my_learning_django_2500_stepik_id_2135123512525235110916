@@ -38,3 +38,11 @@ https://dnschecker.org/
 cmd
 ping domen.ru
 Должны быть отправлены и получены все 4 пакета
+
+При отсутствии денег можно скачать Oracle Virtual Box
+https://www.virtualbox.org/
+образ debian
+https://www.debian.org/releases/bookworm/debian-installer/
+Создать виртуальную машину
+Выбрать базовая память в 2048 MB и 1 CPU
+Запустить и фактически сымитировать удалённый сервер, хоть и локально

@@ -1,0 +1,69 @@
+87 day = 13.2 Установка необходимого ПО
+
+SSH (Secure Shell) - криптографический протокол сетевого взаимодействия
+
+Для такого взаимодействия с арендованным сервером нужны программы (либо терминал, который не был упомянут):
+PuTTY
+https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html
+WinSCP
+Termius
+MobaXterm
+
+Либо Bitvise SSH Client
+https://bitvise.com/
+
+После запуска программы
+нужно ввести в ip адрес арендованного сервера
+port 22
+Можно сохранить сессию или профиль введённых данных для удобства
+
+ размещение одного сайта на одинаковых серверах у разных хостеров может различаться. Техническая база сервера
+ одинакова, но условия работы зависят от панели управления, скорости сети, качества защиты от атак и правил конкретной
+ площадки.
+ У beget деплой сайта происходит по документации
+ https://beget.com/ru/kb/how-to/vps/razvertyvanie-django-s-pomoshchyu-nginx-postgresql-i-gunicorn
+
+Команды для обновления системы и установки базовых технологий для django
+sudo apt update
+sudo apt install python3-pip python3-dev python3-venv libpq-dev postgresql postgresql-contrib nginx
+sudo apt install build-essential libpython3-dev
+
+Запуск консоли Postgre
+sudo -u postgres psql
+
+Создание базы данных
+CREATE DATABASE sitewomen_db;
+CREATE USER sitewomen WITH PASSWORD '12345678';
+
+Потом настройки созданного пользователя
+ALTER ROLE sitewomen SET client_encoding TO 'utf8';
+ALTER ROLE sitewomen SET default_transaction_isolation TO 'read committed';
+ALTER ROLE sitewomen SET timezone TO 'UTC';
+GRANT ALL PRIVILEGES ON DATABASE sitewomen_db TO sitewomen;
+ALTER DATABASE sitewomen_db OWNER TO sitewomen;
+
+Выход из консоли Postgre
+\q
+
+Создание виртуального окружения в выбранной папке
+cd ..
+mkdir folder1
+
+Например
+cd /var/www
+mkdir sitewomen_project
+
+Существует способ автоматически создать файл со списком всех зависимостей из виртуального окружения
+pip freeze > req.txt
+
+В файле не должно быть библиотек (если они есть, нужно их убрать)
+certifi==2023.7.22
+cffi==1.15.1
+psycopg2==2.9.7
+
+Нужно загрузить все файлы проекта (кроме папки .djvenv) на удалённый сервер.
+Это можно сделать с помощью кнопки 'Загрузить файлы', а создание виртуального окружения реализуется обычными командами
+Активация виртуального окружения происходит другой командой
+source djvenv/bin/activate
+Также нужно будет дополнительно установить библиотеку
+pip install gunicorn
