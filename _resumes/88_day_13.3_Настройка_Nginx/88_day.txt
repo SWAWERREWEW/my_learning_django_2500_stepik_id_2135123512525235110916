@@ -32,8 +32,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 🛠📊📝
 Миграции
-python sitewomen/manage.py makemigrations
-python sitewomen/manage.py migrate
+python3 sitewomen/manage.py makemigrations
+python3 sitewomen/manage.py migrate
 
 📦🛠📝
 Сбор статических файлов
@@ -58,15 +58,20 @@ http://домен:8000
 Либо
 http://ip_адрес_сервера:8000
 
+Создание папки для наборов данных
+mkdir sitewomen/women/fixtures
+
 Заполнение базы данных
-Передача файла db.json на сервер через scp
+Передача файла db.json на сервер через scp на компьютере
+wim
+cmd
 Проверка существования scp
 scp -v
 📤📦📝
 Передача
 scp -P [порт] -r \путь\к\папке\сайта\на\ПК root_или_имя_пользователя@[IP_сервера]:/путь/к/my_project/на/сервере
 Пример
-scp -P 50067 "D:\python\my_django\sitewomen\women\fixtures\db.json" kikidon@192.168.5.55:/home/kikidon/my_django/sitewomen/women/fixtures/
+scp -P 50067 "D:\python_programming\for_git_repositories\my_learning_django_2500_stepik_id_2135123512525235110916\sitewomen\women\fixtures\db.json" kikidon@192.168.56.5:/home/kikidon/my_django/sitewomen/women/fixtures/db.json
 
 📝📦📥📊
 Заполнение базы данных

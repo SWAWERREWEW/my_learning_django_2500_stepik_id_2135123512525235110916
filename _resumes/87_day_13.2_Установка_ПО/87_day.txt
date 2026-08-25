@@ -33,14 +33,14 @@ sudo -u postgres psql
 
 Создание базы данных
 CREATE DATABASE sitewomen_db;
-CREATE USER sitewomen WITH PASSWORD '12345678';
+CREATE USER sitewomen_user WITH PASSWORD '12345678';
 
 Потом настройки созданного пользователя
-ALTER ROLE sitewomen SET client_encoding TO 'utf8';
-ALTER ROLE sitewomen SET default_transaction_isolation TO 'read committed';
-ALTER ROLE sitewomen SET timezone TO 'UTC';
-GRANT ALL PRIVILEGES ON DATABASE sitewomen_db TO sitewomen;
-ALTER DATABASE sitewomen_db OWNER TO sitewomen;
+ALTER ROLE sitewomen_user SET client_encoding TO 'utf8';
+ALTER ROLE sitewomen_user SET default_transaction_isolation TO 'read committed';
+ALTER ROLE sitewomen_user SET timezone TO 'UTC';
+GRANT ALL PRIVILEGES ON DATABASE sitewomen_db TO sitewomen_user;
+ALTER DATABASE sitewomen_db OWNER TO sitewomen_user;
 
 Выход из консоли Postgre
 \q
@@ -65,7 +65,7 @@ psycopg2==2.9.7
 Это можно сделать с помощью кнопки 'Загрузить файлы', а создание виртуального окружения реализуется обычными командами
 python3 --version
 Активация виртуального окружения происходит другой командой
-source djvenv/bin/activate
+source .venv/bin/activate
 Также нужно будет дополнительно установить библиотеку
 pip install gunicorn
 
