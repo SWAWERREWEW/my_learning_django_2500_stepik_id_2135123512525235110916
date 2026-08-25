@@ -141,6 +141,179 @@ ping
 ### Очистка кеша
 FLUSHDB
 
+# Запуск на сервере
+    Команды для обновления системы и установки базовых технологий для django
+    sudo apt update
+    sudo apt install python3-pip python3-dev python3-venv libpq-dev postgresql postgresql-contrib nginx
+    sudo apt install build-essential libpython3-dev gunicorn
+    
+    Запуск консоли Postgre
+    sudo -u postgres psql
+    
+    Создание базы данных
+    CREATE DATABASE sitewomen_db;
+    CREATE USER sitewomen WITH PASSWORD '12345678';
+    
+    Потом настройки созданного пользователя
+    ALTER ROLE sitewomen SET client_encoding TO 'utf8';
+    ALTER ROLE sitewomen SET default_transaction_isolation TO 'read committed';
+    ALTER ROLE sitewomen SET timezone TO 'UTC';
+    GRANT ALL PRIVILEGES ON DATABASE sitewomen_db TO sitewomen;
+    ALTER DATABASE sitewomen_db OWNER TO sitewomen;
+    
+    Выход из консоли Postgre
+    \q
+    
+    Создание виртуального окружения в выбранной папке
+    cd /var/www
+    mkdir sitewomen_project
+    
+    Существует способ автоматически создать файл со списком всех зависимостей из виртуального окружения
+    pip freeze > req.txt
+    
+    В файле не должно быть библиотек (если они есть, нужно их убрать)
+    certifi==2023.7.22
+    cffi==1.15.1
+    psycopg2==2.9.7
+    
+    Нужно загрузить все файлы проекта (кроме папки .djvenv) на удалённый сервер.
+    Это можно сделать с помощью кнопки 'Загрузить файлы', а создание виртуального окружения реализуется обычными командами
+    python3 --version
+    Активация виртуального окружения происходит другой командой
+    source djvenv/bin/activate
+    Отключение или деактивация
+    deactivate
+
+    nano sitewomen\sitewomen\settings.py
+    ...
+    import os
+    ...
+    ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'sitewomen.ru', 'ip_адрес_сервера', 'домен', 'www.домен']
+    # INTERNAL_IPS = ["127.0.0.1"]
+    ...
+    Debug=False
+    ...
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'sitewomen_db',
+            'USER': 'sitewomen_user',
+            'PASSWORD': '12345678',
+            'HOST': 'localhost',
+            'PORT': '',
+        }
+    }
+    ...
+    STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+    # STATICFILES_DIRS (закомментировать)
+
+    sudo apt install ufw
+    sudo ufw allow 8000
+
+    Открытие сайта по адресу
+    http://домен:8000
+    Либо
+    http://ip_адрес_сервера:8000
+    
+    Передача
+    scp -P [порт] -r \путь\к\папке\сайта\на\ПК root_или_имя_пользователя@[IP_сервера]:/путь/к/my_project/на/сервере
+    Пример
+    scp -P 50067 "D:\python\my_django\sitewomen\women\fixtures\db.json" kikidon@192.168.5.55:/home/kikidon/my_django/sitewomen/women/fixtures/
+    
+    📝📦📥📊
+    Заполнение базы данных
+    python3 sitewomen/manage.py loaddata db.json
+
+    nano /etc/systemd/system/gunicorn.service
+    🛠📝📦
+    И записать в него
+    [Unit]
+    Description=gunicorn daemon
+    After=network.target
+    
+    [Service]
+    User=kikidon
+    Group=www-data
+    WorkingDirectory=/home/kikidon/learn
+    ExecStart=/home/kikidon/my_django/.venv/bin/gunicorn --access-logfile - --workers 3 --bind unix:/home/kikidon/my_django/sitewomen.sock sitewomen.wsgi:application
+    Restart=on-failure
+    
+    [Install]
+    WantedBy=multi-user.target
+
+    Запуск gunicorn
+    sudo systemctl enable --now gunicorn
+    После запуска появится файл
+    /home/kikidon/my_django/sitewomen.sock
+    
+    Проверка
+    sudo systemctl status gunicorn
+    
+    Настройка nginx
+    Нужно создать файл
+    nano /etc/nginx/sites-available/myproject
+    🛠📝📦
+    И записать в него
+    server {
+        listen 80;
+        server_name домен.ru *.домен.ru;
+    
+        location = /favicon.ico { access_log off; log_not_found off; }
+        location /static/ { root /home/kikidon/my_django; }
+        location /media/ { root /home/kikodon/my_django; }
+    
+        location / {
+            include proxy_params;
+            proxy_pass http://unix:/home/kikidon/my_django/sitewomen.sock;
+        }
+    }
+    
+    Нужно создать также ярлык
+    sudo ln -s /etc/nginx/sites-available/my_django /etc/nginx/sites-enabled
+    
+    Проверка на синтаксические ошибки
+    sudo nginx -t
+    
+    Перезапуск nginx и gunicorn
+    sudo systemctl restart nginx
+    sudo systemctl restart gunicorn
+    
+    Потом нужно заменить отслеживание порта 8000 на отслеживание nginx
+    sudo ufw delete allow 8000
+    sudo ufw allow 'Nginx Full'
+    
+    Осталось настроить права доступа к папкам static и media
+    sudo chmod 755 /home/kikidon/my_django/static
+    sudo chmod 755 /home/kikidon/my_django/media
+    
+    Сайт можно открыть по адресу без ":8000"
+    http://ip_адрес_сервера
+    http://домен
+
+
+# Запуск на сервере по https
+    Сертификат для https либо платный, либо на 90 дней на
+    https://letsencrypt.org/ru/
+    Для автообновления сертификата была создана программа
+    https://certbot.eff.org/pages/about
+    
+    Установка программы для автообновления сертификата для https
+    sudo apt install certbot python3-certbot-nginx -y
+    
+    Можно получить сертификат для домена по команде, указав почту (настоящую) и согласившись с условиями
+    certbot --nginx -d домен.ru
+    
+    Сертификат создан и активирован, но без автообновления
+    Запуск автообновления с помощью работы демона ☠🥀
+    certbot --nginx -d домен.ru
+    
+    Проверка
+    systemctl status certbot.timer
+    
+    Тест автообновления сертификата
+    certbot renew --dry-run
+    
+    
 # Прочее
     Удаление файлов и папки из отслеживаемых
     git rm --cached .idea/vcs.xml
