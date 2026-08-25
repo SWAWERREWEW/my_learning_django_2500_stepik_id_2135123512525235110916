@@ -1,0 +1,174 @@
+88 day = 13.3 Настройка Nginx для отображения страниц сайта
+
+Нужно изменить настройки сайта на сервере
+
+💾🛠
+Был изменён файл
+nano sitewomen\sitewomen\settings.py
+...
+import os
+...
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'sitewomen.ru', 'ip_адрес_сервера', 'домен', 'www.домен']
+# INTERNAL_IPS = ["127.0.0.1"]
+...
+Debug=False
+...
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'sitewomen_db',
+        'USER': 'sitewomen_user',
+        'PASSWORD': '12345678',
+        'HOST': 'localhost',
+        'PORT': '',
+    }
+}
+...
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+# STATICFILES_DIRS (закомментировать)
+📦✅
+Сохранение файла ctrl + o
+Закрытие файла ctrl + x
+
+🛠📊📝
+Миграции
+python sitewomen/manage.py makemigrations
+python sitewomen/manage.py migrate
+
+📦🛠📝
+Сбор статических файлов
+python sitewomen/manage.py collectstatic
+yes
+
+📶⚙📥
+Разрешить отслеживание порта 8000 внутри сервера
+sudo apt install ufw
+sudo ufw allow 8000
+
+Вывод
+Rules updated
+Rules updated (v6)
+
+🚀📊
+Тестовый запуск
+python sitewomen/manage.py runserver 0.0.0.0:8000
+
+Открытие сайта по адресу
+http://домен:8000
+Либо
+http://ip_адрес_сервера:8000
+
+Заполнение базы данных
+Передача файла db.json на сервер через scp
+Проверка существования scp
+scp -v
+📤📦📝
+Передача
+scp -P [порт] -r \путь\к\папке\сайта\на\ПК root_или_имя_пользователя@[IP_сервера]:/путь/к/my_project/на/сервере
+Пример
+scp -P 50067 "D:\python\my_django\sitewomen\women\fixtures\db.json" kikidon@192.168.5.55:/home/kikidon/my_django/sitewomen/women/fixtures/
+
+📝📦📥📊
+Заполнение базы данных
+python3 sitewomen/manage.py loaddata db.json
+
+Если файла db.json нету его можно создать
+python -Xutf8 manage.py dumpdata --indent=2 -o db.json
+
+База данных заполнена, но после запуска сайта не отображаются картинки и стили. Они загружаются с помощью nginx
+
+🚀📊🚩
+Проверка работы
+gunicorn --bind 0.0.0.0:8000 sitewomen.wsgi
+После этой команды должен произойти обычный запуск, потому что gunicorn пока что не настроен
+
+❌⚙
+Выключение виртуального окружения
+deactivate
+
+🛠💾📝➕
+Для настройки gunicorn нужно создать файл
+sudo vim /etc/systemd/system/gunicorn.service
+либо
+nano /etc/systemd/system/gunicorn.service
+🛠📝📦
+И записать в него
+[Unit]
+Description=gunicorn daemon
+After=network.target
+
+[Service]
+User=kikidon
+Group=www-data
+WorkingDirectory=/home/kikidon/learn
+ExecStart=/home/kikidon/my_django/.venv/bin/gunicorn --access-logfile - --workers 3 --bind unix:/home/kikidon/my_django/sitewomen.sock sitewomen.wsgi:application
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+
+📦✅
+Сохранение файла ctrl + o
+Закрытие файла ctrl + x
+Либо после vim, который устанавливается по команде sudo apt install vim
+esc
+:wq
+Новичкам рекомендуется nano
+
+Restart=on-failure позволяет автоматически запускать Gunicorn при сбоях в работе VPS.
+
+🚀⚙
+Запуск gunicorn
+sudo systemctl enable --now gunicorn
+После запуска появится файл
+/home/kikidon/my_django/sitewomen.sock
+
+Проверка
+sudo systemctl status gunicorn
+
+Настройка nginx
+Нужно создать файл
+nano /etc/nginx/sites-available/myproject
+🛠📝📦
+И записать в него
+server {
+    listen 80;
+    server_name домен.ru *.домен.ru;
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location /static/ { root /home/kikidon/my_django; }
+    location /media/ { root /home/kikodon/my_django; }
+
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/home/kikidon/my_django/sitewomen.sock;
+    }
+}
+
+📦✅
+Сохранение файла ctrl + o
+Закрытие файла ctrl + x
+
+Нужно создать также ярлык
+sudo ln -s /etc/nginx/sites-available/my_django /etc/nginx/sites-enabled
+
+Проверка на синтаксические ошибки
+sudo nginx -t
+
+Перезапуск nginx и gunicorn
+sudo systemctl restart nginx
+sudo systemctl restart gunicorn
+
+Потом нужно заменить отслеживание порта 8000 на отслеживание nginx
+sudo ufw delete allow 8000
+sudo ufw allow 'Nginx Full'
+
+Осталось настроить права доступа к папкам static и media
+sudo chmod 755 /home/kikidon/my_django/static
+sudo chmod 755 /home/kikidon/my_django/media
+
+Сайт можно открыть по адресу без ":8000"
+http://ip_адрес_сервера
+http://домен
+
+📊📥📤✅📶☕🎈🚀📦📝🛠 Всё
