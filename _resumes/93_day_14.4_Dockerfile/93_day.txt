@@ -1,0 +1,96 @@
+93 day = 14.4 Dockerfile. Создание образов
+
+При разработке нужно создать контейнер, поместить в него весь сайт, переместить этот контейнер на dockerhub и
+cклонировать его на сервер, вместо репозитория на github
+
+В Dockerfile (файл с заглавной буквы и без расширения) содержит команды по созданию нового образа для сайта
+
+Можно скачать visual studio code
+https://code.visualstudio.com
+
+Необходимо создать первый простой образ
+В нём должна быть
+команда запуска
+python программа
+Интерпретатор python
+Микро ОС
+
+➕📁🛠💾
+Был создан файл
+# docker/for_first_image.py
+import time
+
+total = 100
+count = 0
+while count < total:
+    count += 1
+    print("kikidon: " + str(count))
+    time.sleep(1)
+
+➕🛠💾
+Был создан файл
+docker/Dockerfile
+FROM python:3.12-alpine
+WORKDIR /python-app
+COPY . .
+CMD ["python", "for_first_image.py"]
+
+Команда для создания образа на основе Dockerfile
+docker build путь\к\Dockerfile\ -t имя_образа
+
+🛠💾➕⚙💼
+Был создан образ
+docker build . -t first_conteiner:first_conteiner
+
+D:\...\docker>docker build . -t first_image:first_image
+[+] Building 0.6s (8/8) FINISHED                                                                   docker:desktop-linux
+ => [internal] load build definition from Dockerfile                                                               0.0s
+ => => transferring dockerfile: 131B                                                                               0.0s
+ => [internal] load metadata for docker.io/library/python:3.12-alpine                                              0.0s
+ => [internal] load .dockerignore                                                                                  0.0s
+ => => transferring context: 2B                                                                                    0.0s
+ => [1/3] FROM docker.io/library/python:3.12-alpine@sha256:d09d15e60962ca365d1cd544a48773bac9d33f2fb1b00f2aa0deec  0.1s
+ => => resolve docker.io/library/python:3.12-alpine@sha256:d09d15e60962ca365d1cd544a48773bac9d33f2fb1b00f2aa0deec  0.0s
+ => [internal] load build context                                                                                  0.0s
+ => => transferring context: 342B                                                                                  0.0s
+ => [2/3] WORKDIR /python-app                                                                                      0.0s
+ => [3/3] COPY . .                                                                                                 0.0s
+ => exporting to image                                                                                             0.2s
+ => => exporting layers                                                                                            0.1s
+ => => exporting manifest sha256:512ee0ad27c03f1e0a73cf9ee9f30f46266bcc82b76bdbd25a19441d2bef0eda                  0.0s
+ => => exporting config sha256:45d6c9e58bb337e7a53954903a42b7df83064af62131b1583572d48691cfee9b                    0.0s
+ => => exporting attestation manifest sha256:4cc331501500afcfb669a45b374a21c7f6d6204537c92e4a8ab0ec5ce52bfeeb      0.0s
+ => => exporting manifest list sha256:314360bf657e4efca89c3900898a833df1cd70339daf0f0247032a96cd699f87             0.0s
+ => => naming to docker.io/library/first_image:first_image                                                         0.0s
+ => => unpacking to docker.io/library/first_image:first_image                                                      0.0s
+
+📝➕📦
+Был создан и произведён запуск контейнера
+docker run -it --name first_conteiner first_conteiner:first_conteiner
+
+Запуск по команде не позволит увидеть вывод, потому что нету буферизации
+docker start -i first_conteiner
+
+Добавление буферизации
+
+💾🛠
+Был изменён файл
+docker/Dockerfile
+FROM ...
+ENV PYTHONUNBUFFERED=1
+WORKDIR ...
+...
+
+💼⚙➕💾🛠
+Создание нового обновлённого образа
+docker build . -t first_image:0.2
+
+➕🛠📦
+Создание нового обновлённого контейнера
+docker run -it --name first_container first_image:0.2
+
+🚀📊
+Повторный запуск с выводом в терминал
+docker start -i first_container
+
+Пересборка образа осуществляется такой же командой, какой создается
