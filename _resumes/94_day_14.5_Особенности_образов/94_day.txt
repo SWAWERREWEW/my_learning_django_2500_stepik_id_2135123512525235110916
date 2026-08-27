@@ -1,0 +1,154 @@
+94 day = 14.5 Особенности создания образов и запуска контейнеров
+
+Установка библиотек в образ.
+Флаг --no-cache-dir позволяет установить библиотеку без дополнительного сохранения в кеше для экономии места
+
+Для скорости лучше прописывать для загрузки отдельные файлы
+COPY req.txt .
+Вместо загрузки сразу всех файлов
+COPY . .
+
+Библиотека tqdm позволяет менять одну строку в выводе
+
+💾🛠
+Был изменён файл
+# docker/for_first_image.py
+import time
+import numpy
+from tqdm import tqdm
+
+total = 10
+iter_tqdm = tqdm(range(total))
+for i in iter_tqdm:
+    iter_tqdm.set_description(f"x = {i/100}, sin = {numpy.sin(i/100):.4f}")
+    time.sleep(1)
+
+🛠💾
+Был изменён файл
+docker/Dockerfile
+FROM python:3.12-alpine
+WORKDIR /python-app
+COPY req.txt .
+RUN pip install --no-cache-dir -r req.txt
+COPY Dockerfile .
+ENV PYTHONUNBUFFERED=1
+COPY for_first_image.py .
+CMD ["python", "for_first_image.py"]
+
+💾🛠➕
+Был создан файл
+docker/req.txt
+numpy
+tqdm
+
+➕💼⚙
+Был пересоздан образ
+docker build . -t first_image:0.2
+
+➕🚀📦
+Был создан и запущен временный контейнер для проверки
+docker run --rm -it --name first_container first_image:0.2
+
+(.djvenv) D:\...\docker>docker build . -t first_image:0.2
+[+] Building 19.4s (9/9) FINISHED                                                                                                                                                                      docker:desktop-linux
+ => [internal] load build definition from Dockerfile                                                                                                                                                                   0.0s
+ => => transferring dockerfile: 200B                                                                                                                                                                                   0.0s
+ => [internal] load metadata for docker.io/library/python:3.12-alpine                                                                                                                                                  0.0s
+ => [internal] load .dockerignore                                                                                                                                                                                      0.0s
+ => => transferring context: 2B                                                                                                                                                                                        0.0s
+ => [1/4] FROM docker.io/library/python:3.12-alpine@sha256:d09d15e60962ca365d1cd544a48773bac9d33f2fb1b00f2aa0deec78ade7dc31                                                                                            0.0s
+ => => resolve docker.io/library/python:3.12-alpine@sha256:d09d15e60962ca365d1cd544a48773bac9d33f2fb1b00f2aa0deec78ade7dc31                                                                                            0.0s
+ => [internal] load build context                                                                                                                                                                                      0.0s
+ => => transferring context: 295B                                                                                                                                                                                      0.0s
+ => CACHED [2/4] WORKDIR /python-app                                                                                                                                                                                   0.0s
+ => [3/4] COPY . .                                                                                                                                                                                                     0.0s
+ => [4/4] RUN pip install --no-cache-dir -r req.txt                                                                                                                                                                   14.5s
+ => exporting to image                                                                                                                                                                                                 4.6s
+ => => exporting layers                                                                                                                                                                                                3.3s
+ => => exporting manifest sha256:33693d622dfd22f7825a0b3116d57e3b7c939fe9d4b22825415c478b90555a68                                                                                                                      0.0s
+ => => exporting config sha256:50834141e3d16244ea75735827ab62f8a812658e51699e8cf827a3b854d4c0af                                                                                                                        0.0s
+ => => exporting attestation manifest sha256:26a372d87ac0a5b19d117cf5e06aa5d9c4cb02a52ad668fc67d3ce69d4064ff7                                                                                                          0.0s
+ => => exporting manifest list sha256:ce2ddb186b68fbad8c919920ca2e9e01796d675b0f036dfd07cdabcb2750a206                                                                                                                 0.0s
+ => => naming to docker.io/library/first_image:0.2                                                                                                                                                                     0.0s
+ => => unpacking to docker.io/library/first_image:0.2                                                                                                                                                                  1.2s
+
+(.djvenv) D:\...\docker>docker run --rm -it --name first_container first_image:0.2
+x = 0.09, sin = 0.0899: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 10/10 [00:10<00:00,  1.00s/it]
+
+ENTRYPOINT выполняет ровно то, что задано в его параметрах, в отличие от CMD
+
+🚀☕
+Запуск контейнера в фоновом режиме
+docker run --rm -it --name first_container -d first_image:0.2
+
+🔍📊☕🚀
+Просмотр запущенных контейнеров (выход ctrl + c)
+docker stats
+
+📝🔍📊
+Просмотр логов запущенного контейнера в реальном времени
+docker logs first_container
+
+🛠💾🚀📊
+Существует возможность вносить изменения даже в работающий контейнер, которые в нём сохранятся
+docker exec first_container pip install matplotlib
+
+💼➕🛠💾📦
+На основе нового контейнера можно создать новый образ
+docker commit first_container second_image:0.3
+
+Существует возможность удалить либо неиспользуемый кеш, либо весь
+
+❌📦💾
+docker очень любит поедать
+большие объёмы места на диске
+чтобы заставить так делать перестать
+и есть команда для очистки
+Которая поможет нам всегда
+docker builder prune -a
+
+(.djvenv) D:\...\docker>docker builder prune
+WARNING! This will remove all build cache. Are you sure you want to continue? [y/N] y
+ID                                              RECLAIMABLE     SIZE            LAST ACCESSED
+igks1f6g04lrbeshe0nyr9q6p*                      true            16.38kB         12 minutes ago
+sh3tctb6x2pi69k45dihgfl5o                       true    190.1MB         38 minutes ago
+f3kt6ahco3pvzyvevv0ipp5fv                       true    12.59kB         21 minutes ago
+min8i1miqcw1zkf0ot3uky19d                       true    8.292kB         39 minutes ago
+s9fjs02l3fd37a1djn563wwjk                       true    21.15kB         49 minutes ago
+uthy9zk9ntokrev3hcgc5gtgp                       true    21.08kB         55 minutes ago
+4lgokbwxt4m6sf6d0xs39cu44                       true    21.14kB         50 minutes ago
+podhoromzv1q5er84gpzy45lp                       true    21.14kB         49 minutes ago
+lcqqzpeqfu5jeosr8b5ordhn8*                      true    8.192kB         12 minutes ago
+hjqhntpoe423c06szkw4mlf1m                       true    12.59kB         31 minutes ago
+secfg4hxvcnxds7zi8m84gwn5                       true    8.292kB         50 minutes ago
+5d0eek5nh3xp56h3v4wzyfkr7                       true    25.28kB         38 minutes ago
+x30b7if9nagituuuqxoptk4qp                       true    8.292kB         49 minutes ago
+m52spojvxxiufc28ttf60ik3v                       true    12.58kB         31 minutes ago
+8l1muy1j1gpsqlvkd8bzr6b2x                       true    16.76kB         6 hours ago
+pnetkgdepuw1onlg0kn9wfxb5*                      true    4.096kB         12 minutes ago
+j8bvtlx5vrzqcaso7uktpwxr0                       true    190.1MB         39 minutes ago
+sacr1mg8hyh9mrnvwdd7u6qck                       true    115.1MB         49 minutes ago
+7xvoe3tbnzvq6e9o7oy57ljpf                       true    21.15kB         39 minutes ago
+0jw2vfzopbbsu6lowdyv2hgbc                       true    14.15MB         55 minutes ago
+coo99docisoheivo7azsdj9ql                       true            12.58kB         13 minutes ago
+zf4qdj9uxtm31vyehorpt9q0y                       true    16.74kB         7 hours ago
+p7cxgcq37arn91ti3oki13vhy                       true    12.59kB         13 minutes ago
+sv1qby0gt2fvisfkfffyk0euq                       true    190.1MB         22 minutes ago
+il5d93z6q4mcqcghhso0inb2x                       true    12.45kB         33 minutes ago
+jr0y2fsahl99281y990asc1l3                       true    8.292kB         Less than a second ago
+uzsez3e0qxnmw6s1xkmo4s11p                       true    247B            Less than a second ago
+kjzgy7fha2775sjejfdmsvgua                       true    13.77MB         Less than a second ago
+hmdr4bawe3d9c989xdx0zij38                       true    408.1kB         Less than a second ago
+mf96olnkj2qji3b7dxzazl8lt                       true    3.846MB         Less than a second ago
+Total: 717.1MB
+(.djvenv) D:\...\docker>
+
+Можно очистить только неиспользуемый кеш
+docker builder prune
+
+Можно очистить от лишнего вообще все данные: остановленные контейнеры, неиспользуемые образы, неиспользуемый кеш, все
+неиспользуемые сети
+docker system prune
+
+Очистка от всего кеша, остановленных контейнеров, неиспользуемых образов и сеьей
+docker system prune -a
