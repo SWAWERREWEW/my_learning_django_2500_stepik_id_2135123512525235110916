@@ -1,0 +1,131 @@
+92 day = 14.3 Базовые команды работы с образами и контейнерами
+
+Для создания контейнера нужен образ.
+https://hub.docker.com/_/hello-world
+
+📶📥📦
+Скачивание
+wim
+cmd
+docker pull hello-world
+
+D:\...\>docker pull hello-world
+Using default tag: latest
+latest: Pulling from library/hello-world
+4f55086f7dd0: Pull complete
+d5e71e642bf5: Download complete
+Digest: sha256:5dd0d3e6e255913fc30f90b9f2b1d359cc2cbdb48090cc4b65f1676e203243cc
+Status: Downloaded newer image for hello-world:latest
+docker.io/library/hello-world:latest
+
+What's next:
+    View a summary of image vulnerabilities and recommendations → docker scout quickview hello-world
+
+📦📊🔍
+Проверка образа
+docker images
+D:\...\>docker images
+                                                                                                    i Info →   U  In Use
+IMAGE                ID             DISK USAGE   CONTENT SIZE   EXTRA
+hello-world:latest   5dd0d3e6e255       25.9kB         9.49kB
+
+D:\...\>
+
+📦🛠📝
+Команда создаёт контейнер
+docker run hello-world
+
+D:\...\>docker run hello-world
+Hello from Docker!
+This message shows that your installation appears to be working correctly.
+To generate this message, Docker took the following steps:
+ 1. The Docker client contacted the Docker daemon.
+ 2. The Docker daemon pulled the "hello-world" image from the Docker Hub.
+    (amd64)
+ 3. The Docker daemon created a new container from that image which runs the
+    executable that produces the output you are currently reading.
+ 4. The Docker daemon streamed that output to the Docker client, which sent it
+    to your terminal.
+To try something more ambitious, you can run an Ubuntu container with:
+ $ docker run -it ubuntu bash
+Share images, automate workflows, and more with a free Docker ID:
+ https://hub.docker.com/
+For more examples and ideas, visit:
+ https://docs.docker.com/get-started/
+D:\...\>
+
+🔍📊
+Проверка контейнера
+docker ps -a
+📊🔍
+Проверка запущенного контейнера
+docker ps
+
+🛠📦📝➕📥📶📊
+Установка образа и создание контейнера на его основе с тегом 3.12-alpine
+docker run python:3.12-alpine
+
+D:\...\>docker run python:3.12-alpine
+Unable to find image 'python:3.12-alpine' locally
+3.12-alpine: Pulling from library/python
+5086b6265f8c: Pull complete
+55afa1ecc21d: Pull complete
+7eec6ed36766: Pull complete
+0021712cb493: Pull complete
+f87f6d5f14fa: Download complete
+36a08adc8779: Download complete
+Digest: sha256:d09d15e60962ca365d1cd544a48773bac9d33f2fb1b00f2aa0deec78ade7dc31
+Status: Downloaded newer image for python:3.12-alpine
+D:\...\>
+
+➕📦📝
+Создание контейнера с выбранным именем
+docker run --name kikidon hello-world
+
+🚀📊📶
+Запуск контейнера
+docker start kikidon
+Запуск с выводом контейнера
+docker start -i kikidon
+
+❌⚡
+Остановка
+docker stop kikidon
+
+❌🥀☠📶
+Убийство при отсутствии возможности остановить
+docker kill hello-world
+
+📝🚀📊
+Запуск контейнера в фоне с выводом в терминале. В данном случае просто запустится python.
+docker run -i -t python:3.12-alpine
+
+📦➕📝
+Создание нового контейнера с названием "it-python" на основе образа Python 3.12 Alpine
+docker run --name it-python -it python:3.12-alpine
+
+Код 137 означает принудительное завершение контейнера
+
+❌📦
+Команда удаления контейнера
+docker rm gallant_goldberg
+
+❌📦💥
+Удаление всех неработающих контейнеров
+docker container prune
+
+❌📊
+Удаление образов
+docker rmi hello-world
+
+Если контейнер, то нельзя удалить образ
+
+➕📦❌
+Команда по созданию одноразового контейнера
+docker run --rm python:3.12-alpine
+
+📊📖🌎🔍
+Помощь
+docker run --help
+
+📝📦➕📊📶📥🛠🔍👑🚀🍌🌎💥 Всё
