@@ -1,3 +1,4 @@
+# docker\first_image\Dockerfile
 FROM python:3.12-alpine
 WORKDIR /python-app
 COPY req.txt .

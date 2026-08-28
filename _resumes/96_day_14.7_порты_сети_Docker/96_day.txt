@@ -1,0 +1,136 @@
+96 day = 14.7 Работа с портами внутренней сети Docker
+
+docker создаёт себе отдельную базу данных, а ещё создаёт свою сеть. К её контейнеры не доступны даже в локальной сети.
+
+📦📥🌎
+Установка nginx
+docker pull nginx
+
+🛠📦💾
+Создание контейнера на основе nginx
+docker run --rm -d --name moscow nginx
+
+🔍📦📊
+Отображение информации о контейнере в виде json файла
+docker container inspect moscow
+
+🛠📦📶
+Контейнер на основе nginx запускается в своём порту 80, а его нужно связать с локальным портом 8000
+docker run --rm -d -p 8000:80 --name moscow nginx
+
+📶📦🛠
+Можно указать адрес
+docker run --rm -d -p 127.0.0.1:8000:80 --name moscow nginx
+
+📖🔍📦
+Команда для открытия содержимого контейнера
+docker exec -it first_container bash
+
+Нужно создать особый образ с нужными технологиями и flask
+Необходим другой python
+
+➕📁
+Была создана папка
+docker\first_image\
+
+Все файлы образа были перемещены в отдельную папку
+docker\first_image
+
+Структура папки docker в корне репозитория
+docker\
+├──first_flask_image\
+│  ├──flask_project\
+│  │  └──site.py
+│  └──Dockerfile
+├──first_image\
+│  ├──Dockerfile
+│  ├──for_first_image.py
+│  └──req.txt
+└──commands.md
+
+💾➕
+Был создан пустой файл
+docker\first_flask_image\Dockerfile
+
+🛠💾➕
+Был создан файл
+# docker\first_flask_image\flask_project\site.py
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    return '<h1>kikidon!</h1>'
+
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0')
+
+🛠💾
+Был изменён файл
+# docker\first_flask_image\Dockerfile
+FROM python:3.12-slim
+RUN pip install flask
+WORKDIR /app
+COPY ./flask_project/site.py .
+ENTRYPOINT ["python", "site.py"]
+
+Был создан образ first_flask_image
+cd docker
+docker build first_flask_image -t first_flask_image:first_flask_image
+
+Был создан контейнер на основе образа first_flask_image с возможностью подключиться через порт 8080 и по
+адресу 127.0.0.1 локальной сети и через порт 5000 сети docker, но можно было указать и другие от 1000
+docker run --rm -d -p 127.0.0.1:8080:5000 --name fliask first_flask_image:first_flask_image
+
+По адресу
+http://127.0.0.1:8080/
+Отображалось сообщение из файла
+
+Можно указать порт в файле
+
+💾🛠
+Был изменён файл
+# docker\first_flask_image\flask_project\site.py
+...
+app.run(debug=True, host='0.0.0.0', port=4000)
+
+Был пересоздан образ
+Был перезапущен контейнер
+docker run --rm -d -p 127.0.0.1:8080:4000 --name fliask first_flask_image:first_flask_image
+Другой порт сети docker больше не работает
+
+Если контейнер будет отключен, то информация о его портах будет отсутствовать.
+Эту информацию модно добавить
+
+💾🛠
+Был изменён файл
+# docker\first_flask_image\Dockerfile
+...
+EXPOSE 4000
+
+флаг -P может автоматически выбрать порт в сети docker для предотвращения конфликтов портов у контейнеров
+docker run --rm -d -P --name fliask first_flask_image:first_flask_image
+
+Команда для отображения информации о контейнере для поиска порта локальной сети и сети docker
+docker ps
+или
+docker port fliask
+
+По адресу с новым автоматически выбранным портом
+http://127.0.0.1:32768/
+открывается сообщение из файла
+
+Нужно добавить пользователя без прав в контейнер и сделать автоматический вход под ним
+
+💾🛠
+Был изменён файл
+# docker\first_flask_image\Dockerfile
+FROM ...
+RUN groupadd -r newgroup && useradd -r -g newgroup kikidon
+...
+USER kikidon
+ENTRYPOINT ...
+...
+
+✅📊🌎🏠🚩🎈🎂🎉👑🍌☕🗝🚀 Всё
