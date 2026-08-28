@@ -1,0 +1,113 @@
+97 day = 14.8 Работа с томами (volumes)
+
+Тома позволяют сохранять информацию из контейнеров, чтобы новые контейнеры могли её использовать
+
+Нужно возможность сохранять данные контейнеров в тома
+Монтирование томов происходит разными способами
+Связывание папки на компьютере с папкой в контейнере
+docker run -v host_dir:container_dir
+Связывание только имени тома в docker и папки в контейнере
+docker run -v name_tom:container_dir
+Создание тома только при помощи контейнера с автоматически созданным именем и привязкой к контейнерам
+docker run -v container_dir
+
+Первый способ через папку компьютера и контейнера
+
+powershell
+docker run --rm -d -p 8000:4000 --name fliask -v ${PWD}/first_flask_image/flask_project/:/app first_flask_image:first_flask_image
+После запуска и перехода по адресу
+http://127.0.0.1:8000/
+Открывается страница, которая меняется в зависимости от текущего файла на самом компьютере
+
+💾🛠
+Был изменён файл
+# docker\first_flask_image\flask_project\site.py
+...
+return '<h1>kikidon! 🚀🗝☕👑🎉</h1>'
+...
+
+После повторного перехода на адрес
+http://127.0.0.1:8000/
+открывается страница, которая автоматически изменилась после редактирования файла
+# docker\first_flask_image\flask_project\site.py
+
+Это означает, что монтирование томов работает и контейнер меняется в зависимости от изменений данных на самом компьютере
+
+После команды
+docker container inspect fliask
+Отображается информация о монтировании
+...
+"Mounts": [
+        {
+            "Type": "bind",
+            "Source": "D:\\python_programming\\for_git_repositories\\my_learning_django_2500_stepik_id_2135123512525235110916\\docker/first_flask_image/flask_project/",
+            "Destination": "/app",
+            "Mode": "",
+            "RW": true,
+            "Propagation": "rprivate"
+        }
+    ],
+...
+
+# Просмотр томов
+docker volume ls
+Он сохраняется даже после удаления контейнера
+
+Второй способ монтирования через папку контейнера
+docker run --rm -d -p 8000:4000 --name fliask -v flask_tom:/app first_flask_image:first_flask_image
+
+PS D:\...\docker> docker volume inspect flask_tom
+[
+    {
+        "CreatedAt": "2026-08-28T12:35:24Z",
+        "Driver": "local",
+        "Labels": null,
+        "Mountpoint": "/var/lib/docker/volumes/flask_tom/_data",
+        "Name": "flask_tom",
+        "Options": null,
+        "Scope": "local"
+    }
+]
+
+Был создан пустой том
+docker volume create new_tom
+
+Был создан временный контейнер и были сохранены данные контейнера в новый пустой том
+docker run --rm -d -p 8000:4000 --name fliask -v new_tom:/app first_flask_image:first_flask_image
+При этой команде в контейнере создаётся всё как указано в образе, но вместо папки app из образа, берётся папка app из
+указанного тома
+
+Команда проверки связки нового контейнера с ранее созданным томом
+docker container inspect fliask
+...
+"Mounts": [
+        {
+            "Type": "volume",
+            "Name": "new_tom",
+            "Source": "/var/lib/docker/volumes/new_tom/_data",
+            "Destination": "/app",
+            "Driver": "local",
+            "Mode": "z",
+            "RW": true,
+            "Propagation": ""
+        }
+    ],
+...
+
+В программме docker desktop можно открыть том и открыть там файл site.py, который можно изменить и отредактировать файл,
+изменения которого сразу отобразятся на странице по адресу
+http://127.0.0.1:8000/
+
+docker run --remove -d -port 8000:4000 --name fliask -volume /app first_flask_image:first_flask_image
+
+В файле
+# docker\first_flask_image\Dockerfile
+Можно прописать дополнительно
+VOLUME /app
+Для автоматического создания тома с этой папкой
+Только третий способ с автоматической генерации именем можно реализовать в файле
+
+Команда для удаления всех томов
+docker volume rm $(docker volume ls -q)
+
+🌎✅🛠💾🎉👑☕🗝🚀🍌🎂🎈🚩🏠 Всё

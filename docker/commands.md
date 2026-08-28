@@ -12,6 +12,9 @@ docker build first_flask_image -t first_flask_image:first_flask_image
 ## -d = запуск в фоновом режиме
 ## -p адрес:host:docker = запуск и подключение к порту docker через порт host
 ## -P = запуск с автоматическим назначением порта
+## -v ${PWD}/folder_from_computer/:/folder_from_container = запуск вместе с созданием тома
+## -v name_tom:/folder_from_container = запуск вместе с созданием тома
+## -v /folder_from_container = запуск вместе с созданием тома
 (в данном случае запуск одноразового контейнера --rm) <br>
 docker run --rm -it --name first_container first_image:0.2
 
@@ -54,7 +57,16 @@ docker images
 docker rmi first_image
 
 # Удаление контейнера
+## -f = предварительная остановка работы контейнера
+## -v = параллельное удаление связанного тома
 docker rm first_container
 
 # Просмотр связок портов локальной сети и сети docker
 docker port first_container
+
+# Тома
+## ls = просмотр томов
+## rm имя_тома = удаление тома
+## inspect имя_тома = подробности тома
+## create имя_тома = создание тома
+docker volume

@@ -5,5 +5,6 @@ RUN pip install --no-cache-dir flask
 WORKDIR /app
 COPY ./flask_project/site.py .
 USER kikidon
+# VOLUME /app
 ENTRYPOINT ["python", "site.py"]
 EXPOSE 4000
