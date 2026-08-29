@@ -1,0 +1,46 @@
+# docker\first_db_image\compose.yaml
+services:
+  # docker run --name postgres_container --network dbnet -e POSTGRES_DB=mydb -e POSTGRES_PASSWORD=1234 -e POSTGRES_USER=postgres -v posgtres_tom:/var/lib/posgresql/data postgres:18-alpine
+  service_load_db:
+    image: postgres:18-alpine
+    container_name: postgres_container
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1234
+      - POSTGRES_DB=mydb
+    volumes:
+      - postgres_tom:/var/lib/posgresql/data
+    networks:
+      - dbnet
+  # docker run --rm -d --network dbnet --name adminer_container --link postgres_container:db -p 8080:8080 adminer
+  service_adminer:
+    image: adminer
+    container_name: adminer_container
+    ports:
+      - "127.0.0.1:8080:8080"
+    links:
+      - "service_load_db:db"
+    networks:
+      - dbnet
+    depends_on:
+      - service_load_db
+  # docker run --rm -d --network dbnet -p 8000:4000 --link postgres_container:dbps --name flask_site_container -v ${PWD}/flask_db_image/flask_project/:/app flask_db_image:flask_db_image
+  service_site:
+    build: ./flask_project
+    image: flask_db_image
+    container_name: flask_site_container
+    links:
+      - "service_load_db:dbps"
+    networks:
+      - dbnet
+    ports:
+      - "127.0.0.1:8000:4000"
+    volumes:
+      - ./flask_project:/app
+    depends_on:
+      - service_load_db
+networks:
+  dbnet:
+    driver: bridge
+volumes:
+  postgres_tom:

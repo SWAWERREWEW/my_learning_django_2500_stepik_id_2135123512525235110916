@@ -1,0 +1,189 @@
+99 day = 14.10 Знакомство с Docker Compose
+
+♻📤 Был перемещён файл
+# docker\flask_db_image\Dockerfile
+📥 в другую папку
+# docker\flask_db_image\flask_project\Dockerfile
+
+💾🛠 Был изменён файл
+# docker\flask_db_image\flask_project\Dockerfile
+...
+COPY site.py .
+...
+
+Необходимо запрограммировани автоматическое создание контейнеров и образов
+
+Очистка
+docker system prune -a
+
+Файл compose.yaml будет описывать автоматическое создание нужных контейнеров и т д
+
+Вместо команды
+
+и команды
+docker network create dbnet
+(Нужно пересоздать всё полностью и даже том, который docker compose не использует и не хочет видеть)
+➕💾🛠 Был создан файл
+# docker\first_db_image\compose.yaml
+services:
+  # docker run --name postgres_container --network dbnet -e POSTGRES_DB=mydb -e POSTGRES_PASSWORD=1234 -e POSTGRES_USER=postgres -v posgtres_tom:/var/lib/posgresql/data postgres:18-alpine
+  service_load_db:
+    image: postgres:18-alpine
+    container_name: postgres_container
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1234
+      - POSTGRES_DB=mydb
+    volumes:
+      - postgres_tom:/var/lib/posgresql/data
+    networks:
+      - dbnet
+networks:
+  dbnet:
+    driver: bridge
+volumes:
+  postgres_tom:
+
+📁📖 Была открыта папка с compose.yaml
+cd flask_db_image
+
+🚀 команда запуска
+docker compose up
+
+PS D:\...\docker\flask_db_image> docker compose up
+[+] up 3/3
+ ✔ Network flask_db_image_dbnet       Created 0.0s
+ ✔ Volume flask_db_image_postgres_tom Created 0.0s
+ ✔ Container postgres_container       Created 0.1s
+Attaching to postgres_container
+postgres_container  | The files belonging to this database system will be owned by user "postgres".
+postgres_container  | This user must also own the server process.
+postgres_container  |
+postgres_container  | The database cluster will be initialized with locale "en_US.utf8".
+postgres_container  | The default database encoding has accordingly been set to "UTF8".
+postgres_container  | The default text search configuration will be set to "english".
+postgres_container  |
+postgres_container  | Data page checksums are enabled.
+postgres_container  |
+postgres_container  | fixing permissions on existing directory /var/lib/postgresql/18/docker ... ok
+postgres_container  | creating subdirectories ... ok
+postgres_container  | selecting dynamic shared memory implementation ... posix
+postgres_container  | selecting default "max_connections" ... 100
+postgres_container  | selecting default "shared_buffers" ... 128MB
+postgres_container  | selecting default time zone ... UTC
+postgres_container  | creating configuration files ... ok
+postgres_container  | running bootstrap script ... ok
+postgres_container  | sh: locale: not found
+postgres_container  | 2026-08-29 10:48:52.624 UTC [41] WARNING:  no usable system locales were found
+postgres_container  | performing post-bootstrap initialization ... ok
+postgres_container  | initdb: warning: enabling "trust" authentication for local connections
+postgres_container  | initdb: hint: You can change this by editing pg_hba.conf or using the option -A, or --auth-local and --auth-host, the next time you run initdb.
+postgres_container  | syncing data to disk ... ok
+postgres_container  |
+postgres_container  |
+postgres_container  | Success. You can now start the database server using:
+postgres_container  |
+postgres_container  |     pg_ctl -D /var/lib/postgresql/18/docker -l logfile start
+postgres_container  |
+postgres_container  | waiting for server to start....2026-08-29 10:48:53.002 UTC [47] LOG:  starting PostgreSQL 18.6 on x86_64-pc-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit
+postgres_container  | 2026-08-29 10:48:53.005 UTC [47] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+postgres_container  | 2026-08-29 10:48:53.013 UTC [53] LOG:  database system was shut down at 2026-08-29 10:48:52 UTC
+postgres_container  | 2026-08-29 10:48:53.017 UTC [47] LOG:  database system is ready to accept connections
+postgres_container  |  done
+postgres_container  | server started
+postgres_container  | CREATE DATABASE
+postgres_container  |
+postgres_container  |
+postgres_container  | /usr/local/bin/docker-entrypoint.sh: ignoring /docker-entrypoint-initdb.d/*
+postgres_container  |
+postgres_container  | waiting for server to shut down....2026-08-29 10:48:53.152 UTC [47] LOG:  received fast shutdown request
+postgres_container  | 2026-08-29 10:48:53.154 UTC [47] LOG:  aborting any active transactions
+postgres_container  | 2026-08-29 10:48:53.156 UTC [47] LOG:  background worker "logical replication launcher" (PID 56) exited with exit code 1
+postgres_container  | 2026-08-29 10:48:53.156 UTC [51] LOG:  shutting down
+postgres_container  | 2026-08-29 10:48:53.158 UTC [51] LOG:  checkpoint starting: shutdown immediate
+postgres_container  | 2026-08-29 10:48:53.209 UTC [51] LOG:  checkpoint complete: wrote 943 buffers (5.8%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.015 s, sync=0.030 s, total=0.053 s; sync files=303, longest=0.007 s, average=0.001 s; distance=4362 kB, estimate=4362 kB; lsn=0/1BA8860, redo lsn=0/1BA8860
+postgres_container  | 2026-08-29 10:48:53.218 UTC [47] LOG:  database system is shut down
+postgres_container  |  done
+postgres_container  | server stopped
+postgres_container  |
+postgres_container  | PostgreSQL init process complete; ready for start up.
+postgres_container  |
+postgres_container  | 2026-08-29 10:48:53.271 UTC [1] LOG:  starting PostgreSQL 18.6 on x86_64-pc-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit
+postgres_container  | 2026-08-29 10:48:53.271 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+postgres_container  | 2026-08-29 10:48:53.271 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+postgres_container  | 2026-08-29 10:48:53.275 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+postgres_container  | 2026-08-29 10:48:53.280 UTC [69] LOG:  database system was shut down at 2026-08-29 10:48:53 UTC
+postgres_container  | 2026-08-29 10:48:53.286 UTC [1] LOG:  database system is ready to accept connections
+
+v View in Docker Desktop   o View Config   w Enable Watch   d Detach
+
+Создан новый терминал
+И остановлен docker compose
+(.djvenv) D:\...\docker\flask_db_image>docker compose stop
+[+] stop 1/1
+ ✔ Container postgres_container Stopped 0.2s
+(.djvenv) D:\...\docker\flask_db_image>
+
+Можно опустить compose
+(.djvenv) D:\...\docker\flask_db_image>docker compose down
+[+] down 2/2
+ ✔ Container postgres_container Removed 0.0s
+ ✔ Network flask_db_image_dbnet Removed 0.2s
+(.djvenv) D:\...\docker\flask_db_image>
+
+Параметр depends_on указывает на службу, после которой должен начаться запуск текущей службы
+
+🛠💾 Был изменён файл
+first_db_image\compose.yaml
+services:
+  ...
+  # docker run --rm -d --network dbnet --name adminer_container --link postgres_container:db -p 8080:8080 adminer
+  service_adminer:
+    image: adminer
+    container_name: adminer_container
+    ports:
+      - "127.0.0.1:8080:8080"
+    links:
+      - "service_load_db:db"
+    networks:
+      - dbnet
+    depends_on:
+      - service_load_db
+networks:
+...
+
+Теперь происходит автоматический запуск сразу двух контейнеров
+Остался контейнер с сайтом
+
+🛠💾 Был изменён файл
+first_db_image\compose.yaml
+services:
+  ...
+  service_site:
+    build: ./flask_project
+    image: flask_db_image
+    container_name: flask_site_container
+    links:
+      - "service_load_db:dbps"
+    networks:
+      - dbnet
+    ports:
+      - "127.0.0.1:8000:4000"
+    volumes:
+      - ./flask_project:/app
+    depends_on:
+      - service_load_db
+networks:
+...
+
+После запуска адрес
+http://127.0.0.1:8080/?pgsql=db&username=postgres&db=mydb&ns=public&select=women
+открывает панель управления
+Адрес
+http://127.0.0.1:8000/
+открывает маленький сайт с записями из таблицы базы данных
+
+Можно произвести запуск в фоновом режиме
+docker compose up -d
+
+🛠💾📖📁🚀📤📥♻➕📶💬🔍🗝 Всё

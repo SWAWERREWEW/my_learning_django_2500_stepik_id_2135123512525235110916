@@ -96,3 +96,28 @@ https://hub.docker.com/_/postgres
 ```shell
 docker pull postgres:18-alpine
 ```
+
+# Очистка
+```shell
+docker builder prune -a
+
+Можно очистить только неиспользуемый кеш
+docker builder prune
+
+Можно очистить от лишнего вообще все данные: остановленные контейнеры, неиспользуемые образы, неиспользуемый кеш, все
+неиспользуемые сети
+docker system prune
+
+Очистка от всего кеша, остановленных контейнеров, неиспользуемых образов и сеьей
+docker system prune -a
+```
+
+# Запуск compose
+## -d = фоновый режим
+docker compose up
+
+# Остановка compose
+```shell
+docker compose down
+docker compose stop
+```
