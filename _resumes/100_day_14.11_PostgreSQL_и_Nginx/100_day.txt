@@ -1,0 +1,251 @@
+100 day = 14.11 Проект Django с PostgreSQL и Nginx
+
+На данном этапе возникла ошибка в контейнере сайта, которую не удалось исправить и выявить точную причину
+django.db.utils.OperationalError: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+Is the server running on that host and accepting TCP/IP connections?
+
+Создание файла для построения нужных отдельных контейнеров
+
+➕💾🛠 Был создан файл в корне проекта
+# compose.yaml
+
+services:
+  service_load_db:
+    image: postgres:18-alpine
+    container_name: postgres_container
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=${DATABASE_NAME}
+      - POSTGRES_USER=${DATABASE_USERNAME}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+    networks:
+      - dbnet
+
+networks:
+  dbnet:
+    driver: bridge
+
+volumes:
+  postgres_data:
+
+Файл для хранения секретных данных
+
+🛠💾➕ Был создан файл в корне репозитория
+.env
+DATABASE_NAME=***
+DATABASE_USERNAME=***
+DATABASE_PASSWORD=***
+DATABASE_HOST=***
+DATABASE_PORT=***
+
+Нужен контейнер для панели управления
+
+💾🛠 Был изменён файл
+# compose.yaml
+services:
+  service_load_db:
+  ...
+  service_adminer:
+    image: adminer
+    container_name: adminer_container
+    ports:
+      - "8080:8080"
+    links:
+      - "service_load_db:db"
+    networks:
+      - dbnet
+    depends_on:
+      - service_load_db
+...
+
+Нужен файл для настройки образа для контейнера сайта
+
+🛠💾➕ Был создан файл
+# sitewomen\Dockerfile
+FROM python:3.12-slim
+RUN groupadd -r newgroup && useradd -r -g newgroup kikidon
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+WORKDIR /app/www/sitewomen
+COPY req.txt .
+RUN pip install -r req.txt
+
+COPY . .
+USER kikidon
+
+Нужны ещё две библиотеки gevent==24.11.1 и gunicorn==23.0.0
+
+💾🛠 Был создан файл
+sitewomen\req.txt
+django==4.2.1
+ipython==9.15.0
+django-debug-toolbar==4.2.0
+pillow==10.0.0
+social-auth-app-django==5.3.0
+django-extensions==3.2.3
+werkzeug==2.3.7
+pyOpenSSL==23.2.0
+psycopg2-binary==2.9.10
+django-simple-captcha==0.5.18
+redis==5.0.0
+# hiredis==2.2.3
+gevent==24.11.1
+gunicorn==23.0.0
+
+
+Остался сервис/служба для работы сайта
+
+💾🛠 Был изменён файл
+# compose.yaml
+services:
+  ...
+  service_site:
+    build: ./sitewomen
+    image: sitewomen_image
+    container_name: sitewomen_container
+    restart: always
+    command: "python manage.py runserver"
+    env_file:
+      - .env
+    links:
+      - "service_load_db:dbps"
+    networks:
+      - dbnet
+    volumes:
+      - ./sitewomen:/app/www/sitewomen
+    ports:
+      - "8000:8000"
+    depends_on:
+      - service_load_db
+...
+
+Полная очистка
+docker system prune -a
+docker volume rm $(docker volume ls -q)
+
+Был произведён запуск
+docker compose up --build
+
+Возникла ошибка
+django.db.utils.OperationalError: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+Is the server running on that host and accepting TCP/IP connections?
+Перевод
+django.db.utils.OperationalError: не удалось подключиться к серверу на «localhost» (::1), порт 5432: в соединении отказано
+Запущен ли сервер на этом хосте и принимает ли он TCP/IP-соединения?
+не удалось подключиться к серверу на «localhost» (127.0.0.1), порт 5432: в соединении отказано
+Запущен ли сервер на этом хосте и принимает ли он TCP/IP-соединения?
+
+Ошибка не пропадала на 17 версии postgres
+Не удаётся даже локальный запуск через runserver
+К базе данных доступа нет вообще никакого
+Создаются все три контейнера, но в базе данных отсутствует указанный пользователь sitewomen_user
+Ошибка остаётся даже после полного стирания всех данных и кеша
+Вся информация из файла .env читается, но ошибка остаётся
+Сайт спокойно запускается без ошибок при обычном запуске без docker compose
+База данных спокойно открывается в pgAdmin
+Создаются два пустых тома
+my_learning_django_2500_stepik_id_2135123512525235110916_postgres_data
+и
+безымянный с пустыми папками
+├──18
+│  └──docker
+└──data
+Ошибка не меняется даже если убрать том из файла compose.yaml вообще
+
+Существует возможность выполнять команды в работающем контейнере после запуска через docker compose
+docker compose exec имя_сервиса команда
+
+Могли быть выполнены миграции
+docker compose exec service_site python manage.py migrate
+
+Мог быть произведён вход по адресу
+127.0.0.1:8080/
+После входа, могла быть открыта база данных со всеми знакомыми пустыми таблицами
+Эти таблицы могли быть заполнены
+docker compose exec service_site python manage.py loaddata db.json
+Мог быть произведён вход по адресу
+127.0.0.1:8000/
+И открыт сайт со всеми данными без стилей
+
+Мог быть изменён файл
+# compose.yaml
+services:
+  ...
+    service_nginx:
+      image: nginx:latest
+      container_name: nginx_server_container
+      restart: always
+      networks:
+        - dbnet
+      expose:
+        - 8088
+      ports:
+        - "80:8088"
+      volumes:
+        - ./sitewomen/static:/app/www/sitewomen/static
+        - ./sitewomen/media:/app/www/sitewomen/media
+        - ./sitewomen/logs:/app/www/sitewomen/logs
+        - ./nginx:/etc/nginx/conf.d
+      depends_on:
+        - service_site
+
+➕🛠💾 Был создан файл
+# nginx\sitewomen.conf
+
+server {
+  listen 8088; # nginx будет слушать этот порт.
+  charset     utf8;
+
+  access_log  /app/www/sitewomen/logs/sitewomen_access.log;
+  error_log   /app/www/sitewomen/logs/sitewomen_error.log error;
+
+    location / {
+        proxy_pass http://sitewomen:8000; # gunicorn запускается в контейнере python и слушает порт 8000
+        proxy_set_header X-Url-Scheme $scheme;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host $http_host;
+        proxy_redirect off;
+    }
+
+    location /favicon.ico { access_log off; log_not_found off; }
+    location /static/ { root /app/www/sitewomen; }
+    location /media/ { root /app/www/sitewomen; }
+}
+
+Мог быть изменён файл
+# compose.yaml
+services:
+  ...
+  service_site:
+    ...
+    command: "gunicorn -c gunicorn.py sitewomen.wsgi"
+...
+
+💾🛠➕ Был создан файл
+# sitewomen\gunicorn.py
+
+from multiprocessing import cpu_count
+from os import environ
+
+def max_workers():
+    return cpu_count()
+
+
+bind = '0.0.0.0:' + environ.get('PORT', '8000')
+max_requests = 1000
+worker_class = 'gevent'
+workers = max_workers()
+
+env = {
+    'DJANGO_SETTINGS_MODULE': 'sitewomen.settings'
+}
+
+reload = True
+name = 'sitewomen'

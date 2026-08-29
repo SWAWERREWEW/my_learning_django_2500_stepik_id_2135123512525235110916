@@ -1,0 +1,184 @@
+101 day = 14.12 Деплой сайта на сервер с помощью Docker
+
+Аренда сервера
+https://beget.com/
+
+Нужен домен
+
+Чтобы развернуть сайт на сервере
+Нужно подключиться к нему и открыть его консоль
+
+Нужно использовать команды для чистого обновления системы в консоли сервера
+apt update
+apt upgrade -y
+enter
+reboot
+
+Нужно повторное подключение и открытие консоли сервера
+
+Нужно использовать команды
+
+Команда установки возможности использования протокола https
+apt install apt-transport-https ca-certificates curl software-properties-common -y
+
+Команда для установки возможности скачивания из dockerhub
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+Команда установщиков для скачивания из dockerhub
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+Команда для применения изменений в систему
+apt update
+
+Команда для установки docker и его основных компонентов
+apt install docker-ce docker-ce-cli containerd.io docker-compose-plugin -y
+
+Команда проверки работы docker
+systemctl status docker
+Выход это ctrl + c либо q
+
+Нужно зарегистрироваться на github
+Создать новый пустой репозиторий
+Найти кнопку < > Code → HTTPS → Скопировать ссылку
+https://github.com/ваш_логин/имя_репозитория.git
+клонировать его на компьютер, например в папку python_programming
+git clone https://github.com/ваш_логин/имя_репозитория.git
+Загрузить весь сайт и его файлы в папку python_programming
+Добавить в отслеживание все файлы либо через pycharm либо командой
+git add .
+Отправить все изменения (в данном случае появление всего сайта)
+git push
+
+Автор курса зачем-то отправил архив на github, но это абсолютное излишество и лишняя морока с разархивацией на сервере
+git clone на сервере просто заставит все файлы появится без нужды архивации
+
+Выбор папки для хранения сайта
+Например домашняя папка пользователя
+cd /home
+
+Команда размещения сайта
+git clone https://github.com/ваш_логин/имя_репозитория.git
+
+Команда просмотра скрытых файлов
+ls -ra
+
+Команда создания и редактирования файла .env
+sudo nano .env
+
+В файле нужно изменить параметр
+DJAGNO_ALLOWED_HOSTS=домен
+ctrl + o
+ctrl + x
+
+После vi или vim
+i для редактирования
+esc для выхода из режима редактирования
+:wq команда для сохранения изменений и выхода
+
+Команда для просмотра содержимого файла
+cat файл.расширение
+
+Нужно всё собрать
+docker compose up --build -d
+
+Нужно открыть терминал сервиса сайта
+docker exec -it service_site bash
+
+В терминале сервиса сайта нужно применить миграции
+python manage.py migrate
+И загрузить все данные
+python manage.py loaddata db.json
+Выход
+exit
+
+Нужно остановить контейнер
+docker compose down
+
+Нужно изменить файл compose.yaml
+sudo nano compose.yaml
+...
+services:
+  service_nginx:
+    ...
+    ports:
+      ...
+      - "443:443"
+    volumes:
+      ...
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+
+  ...
+  certbot:
+      image: certbot/certbot
+      volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+      command: certonly --webroot --webroot-path=/var/www/certbot/ --email почта --agree-tos --no-eff-email -d домен
+      depends_on:
+      - service_nginx
+...
+
+Нужно создать две папки в корне репозитория сайта
+mkdir -p certbot/conf
+mkdir certbot/www
+
+Нужно изменить файл
+sudo nano nginx/sitewomen.conf
+server {
+  ...
+    ...
+    location /static/ ...
+    location /media/ { root /app/www/sitewomen; }
+        location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+}
+
+Нужно полностью изменить содержимое файла
+sudo nano nginx/sitewomen.conf
+# nginx\sitewomen.conf
+
+server {
+  listen 8088; # nginx будет слушать этот порт.
+  charset     utf8;
+
+  access_log  /app/www/sitewomen/logs/sitewomen_access.log;
+  error_log   /app/www/sitewomen/logs/sitewomen_error.log error;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+  location / {
+    return 301 https://$host$request_uri;
+  }
+}
+
+server {
+    listen 443 ssl;
+    ssl_certificate /etc/letsencrypt/live/django-balak.ru/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/django-balak.ru/privkey.pem;
+
+    location / {
+        proxy_pass http://service_site:8000; # gunicorn запускается в контейнере python и слушает порт 8000
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Url-Scheme $scheme;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host $http_host;
+        proxy_redirect off;
+    }
+
+    location /favicon.ico { access_log off; log_not_found off; }
+    location /static/ { root /app/www/sitewomen; }
+    location /media/ { root /app/www/sitewomen; }
+
+    location /adminer/ {
+        proxy_pass http://service_adminer:8080;
+    }
+}
+
+Команда опустошения файла в vim
+:1,$d
+
+Можно всё собирать и запускать
+docker compose up --build

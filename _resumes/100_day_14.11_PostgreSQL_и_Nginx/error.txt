@@ -1,0 +1,102 @@
+sitewomen_container  | File .env successfully is readed🔍💾✅
+sitewomen_container  | File .env successfully is readed🔍💾✅
+sitewomen_container  | Watching for file changes with StatReloader
+sitewomen_container  | Performing system checks...
+sitewomen_container  |                                                                                                                                                                                                      
+sitewomen_container  | System check identified no issues (0 silenced).                                                                                                                                                      
+sitewomen_container  | Exception in thread django-main-thread:
+sitewomen_container  | Traceback (most recent call last):
+sitewomen_container  |   File "/usr/local/lib/python3.12/site-packages/django/db/backends/base/base.py", line 289, in ensure_connection                                                                                     
+sitewomen_container  |     self.connect()                                                                                                                                                                                   
+sitewomen_container  |   File "/usr/local/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner                                                                                                          
+sitewomen_container  |     return func(*args, **kwargs)                                                                                                                                                                     
+sitewomen_container  |            ^^^^^^^^^^^^^^^^^^^^^                                                                                                                                                                     
+sitewomen_container  |   File "/usr/local/lib/python3.12/site-packages/django/db/backends/base/base.py", line 270, in connect                                                                                               
+sitewomen_container  |     self.connection = self.get_new_connection(conn_params)                                                                                                                                           
+sitewomen_container  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+sitewomen_container  |   File "/usr/local/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner                                                                                                          
+sitewomen_container  |     return func(*args, **kwargs)                                                                                                                                                                     
+sitewomen_container  |            ^^^^^^^^^^^^^^^^^^^^^                                                                                                                                                                     
+sitewomen_container  |   File "/usr/local/lib/python3.12/site-packages/django/db/backends/postgresql/base.py", line 275, in get_new_connection                                                                              
+sitewomen_container  |     connection = self.Database.connect(**conn_params)                                                                                                                                                
+sitewomen_container  |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+sitewomen_container  |   File "/usr/local/lib/python3.12/site-packages/psycopg2/__init__.py", line 122, in connect                                                                                                          
+sitewomen_container  |     conn = _connect(dsn, connection_factory=connection_factory, **kwasync)                                                                                                                           
+sitewomen_container  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                                                                                                                           
+sitewomen_container  | psycopg2.OperationalError: connection to server at "localhost" (::1), port 5432 failed: Connection refused                                                                                           
+sitewomen_container  |  Is the server running on that host and accepting TCP/IP connections?                                                                                                                                
+sitewomen_container  | connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+sitewomen_container  |  Is the server running on that host and accepting TCP/IP connections?                                                                                                                                
+sitewomen_container  |                                                                                                                                                                                                      
+sitewomen_container  |                                                                                                                                                                                                      
+sitewomen_container  | The above exception was the direct cause of the following exception:                                                                                                                                 
+sitewomen_container  |                                                                                                                                                                                                      
+sitewomen_container  | Traceback (most recent call last):
+sitewomen_container  |   File "/usr/local/lib/python3.12/threading.py", line 1075, in _bootstrap_inner                                                                                                                      
+sitewomen_container  |     self.run()                                                                                                                                                                                       
+sitewomen_container  |   File "/usr/local/lib/python3.12/threading.py", line 1012, in run                                                                                                                                   
+sitewomen_container  |     self._target(*self._args, **self._kwargs)                                                                                                                                                        
+sitewomen_container  |   File "/usr/local/lib/python3.12/site-packages/django/utils/autoreload.py", line 64, in wrapper                                                                                                     
+sitewomen_container  |     fn(*args, **kwargs)
+sitewomen_container  |   File "/usr/local/lib/python3.12/site-packages/django/core/management/commands/runserver.py", line 136, in inner_run                                                                                
+sitewomen_container  |     self.check_migrations()
+sitewomen_container  |   File "/usr/local/lib/python3.12/site-packages/django/core/management/base.py", line 574, in check_migrations                                                                                       
+sitewomen_container  |     executor = MigrationExecutor(connections[DEFAULT_DB_ALIAS])                                                                                                                                      
+sitewomen_container  |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                                                                                                                                      
+sitewomen_container  |   File "/usr/local/lib/python3.12/site-packages/django/db/migrations/executor.py", line 18, in __init__                                                                                              
+sitewomen_container  |     self.loader = MigrationLoader(self.connection)                                                                                                                                                   
+sitewomen_container  |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                                                                                                                                                   
+sitewomen_container  |   File "/usr/local/lib/python3.12/site-packages/django/db/migrations/loader.py", line 58, in __init__
+sitewomen_container  |     self.build_graph()                                                                                                                                                                               
+sitewomen_container  |   File "/usr/local/lib/python3.12/site-packages/django/db/migrations/loader.py", line 235, in build_graph                                                                                            
+sitewomen_container  |     self.applied_migrations = recorder.applied_migrations()                                                                                                                                          
+sitewomen_container  |                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                                                                                                                                          
+sitewomen_container  |   File "/usr/local/lib/python3.12/site-packages/django/db/migrations/recorder.py", line 81, in applied_migrations                                                                                    
+sitewomen_container  |     if self.has_table():
+sitewomen_container  |        ^^^^^^^^^^^^^^^^                                                                                                                                                                              
+sitewomen_container  |   File "/usr/local/lib/python3.12/site-packages/django/db/migrations/recorder.py", line 57, in has_table                                                                                             
+sitewomen_container  |     with self.connection.cursor() as cursor:                                                                                                                                                         
+sitewomen_container  |          ^^^^^^^^^^^^^^^^^^^^^^^^                                                                                                                                                                    
+sitewomen_container  |   File "/usr/local/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner                                                                                                          
+sitewomen_container  |     return func(*args, **kwargs)
+sitewomen_container  |            ^^^^^^^^^^^^^^^^^^^^^                                                                                                                                                                     
+sitewomen_container  |   File "/usr/local/lib/python3.12/site-packages/django/db/backends/base/base.py", line 330, in cursor                                                                                                
+sitewomen_container  |     return self._cursor()                                                                                                                                                                            
+sitewomen_container  |            ^^^^^^^^^^^^^^                                                                                                                                                                            
+sitewomen_container  |   File "/usr/local/lib/python3.12/site-packages/django/db/backends/base/base.py", line 306, in _cursor                                                                                               
+sitewomen_container  |     self.ensure_connection()                                                                                                                                                                         
+sitewomen_container  |   File "/usr/local/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+sitewomen_container  |     return func(*args, **kwargs)                                                                                                                                                                     
+sitewomen_container  |            ^^^^^^^^^^^^^^^^^^^^^                                                                                                                                                                     
+sitewomen_container  |   File "/usr/local/lib/python3.12/site-packages/django/db/backends/base/base.py", line 288, in ensure_connection                                                                                     
+sitewomen_container  |     with self.wrap_database_errors:
+sitewomen_container  |          ^^^^^^^^^^^^^^^^^^^^^^^^^                                                                                                                                                                   
+sitewomen_container  |   File "/usr/local/lib/python3.12/site-packages/django/db/utils.py", line 91, in __exit__                                                                                                            
+sitewomen_container  |     raise dj_exc_value.with_traceback(traceback) from exc_value                                                                                                                                      
+sitewomen_container  |   File "/usr/local/lib/python3.12/site-packages/django/db/backends/base/base.py", line 289, in ensure_connection                                                                                     
+sitewomen_container  |     self.connect()                                                                                                                                                                                   
+sitewomen_container  |   File "/usr/local/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner                                                                                                          
+sitewomen_container  |     return func(*args, **kwargs)                                                                                                                                                                     
+sitewomen_container  |            ^^^^^^^^^^^^^^^^^^^^^                                                                                                                                                                     
+sitewomen_container  |   File "/usr/local/lib/python3.12/site-packages/django/db/backends/base/base.py", line 270, in connect
+sitewomen_container  |     self.connection = self.get_new_connection(conn_params)                                                                                                                                           
+sitewomen_container  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                                                                                                                                           
+sitewomen_container  |   File "/usr/local/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner                                                                                                          
+sitewomen_container  |     return func(*args, **kwargs)                                                                                                                                                                     
+sitewomen_container  |            ^^^^^^^^^^^^^^^^^^^^^                                                                                                                                                                     
+sitewomen_container  |   File "/usr/local/lib/python3.12/site-packages/django/db/backends/postgresql/base.py", line 275, in get_new_connection
+sitewomen_container  |     connection = self.Database.connect(**conn_params)                                                                                                                                                
+sitewomen_container  |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                                                                                                                                                
+sitewomen_container  |   File "/usr/local/lib/python3.12/site-packages/psycopg2/__init__.py", line 122, in connect                                                                                                          
+sitewomen_container  |     conn = _connect(dsn, connection_factory=connection_factory, **kwasync)                                                                                                                           
+sitewomen_container  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                                                                                                                           
+sitewomen_container  | django.db.utils.OperationalError: connection to server at "localhost" (::1), port 5432 failed: Connection refused                                                                                    
+sitewomen_container  |  Is the server running on that host and accepting TCP/IP connections?
+sitewomen_container  | connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused                                                                                                                
+sitewomen_container  |  Is the server running on that host and accepting TCP/IP connections?                                                                                                                                
+sitewomen_container  |                                                           
+
+django.db.utils.OperationalError: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+Is the server running on that host and accepting TCP/IP connections?

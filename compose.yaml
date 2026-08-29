@@ -1,0 +1,77 @@
+# compose.yaml
+
+services:
+  service_load_db:
+    image: postgres:18-alpine
+    container_name: postgres_container
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=${DATABASE_NAME}
+      - POSTGRES_USER=${DATABASE_USERNAME}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+    networks:
+      - dbnet
+  service_adminer:
+    image: adminer
+    container_name: adminer_container
+    ports:
+      - "127.0.0.1:8080:8080"
+    links:
+      - "service_load_db:db"
+    networks:
+      - dbnet
+    depends_on:
+      - service_load_db
+  service_site:
+    build: ./sitewomen
+    image: sitewomen_image
+    container_name: sitewomen_container
+    restart: always
+    command: "python manage.py runserver"
+    env_file:
+      - .env
+    links:
+      - "service_load_db:dbps"
+    networks:
+      - dbnet
+    volumes:
+      - ./sitewomen:/app/www/sitewomen
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      - service_load_db
+#  service_nginx:
+#    image: nginx:latest
+#    container_name: nginx_server_container
+#    restart: always
+#    networks:
+#      - dbnet
+#    expose:
+#      - 8088
+#    ports:
+#      - "80:8088"
+#      - "443:443"
+#    volumes:
+#      - ./sitewomen/static:/app/www/sitewomen/static
+#      - ./sitewomen/media:/app/www/sitewomen/media
+#      - ./sitewomen/logs:/app/www/sitewomen/logs
+#      - ./nginx:/etc/nginx/conf.d
+#       - ./certbot/conf:/etc/letsencrypt
+#       - ./certbot/www:/var/www/certbot
+#    depends_on:
+#      - service_site
+#  service_certbot:
+#    image: certbot/certbot
+#    volumes:
+#      - ./certbot/conf:/etc/letsencrypt
+#      - ./certbot/www:/var/www/certbot
+#    command: certonly --webroot --webroot-path=/var/www/certbot/ --email почта --agree-tos --no-eff-email -d домен
+#    depends_on:
+#      - service_nginx
+networks:
+  dbnet:
+    driver: bridge
+
+volumes:
+  postgres_data:
