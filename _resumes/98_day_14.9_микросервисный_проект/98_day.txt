@@ -1,0 +1,123 @@
+98 day = 14.9 Создание микросервисных проектов
+
+Микросервисные приложения это контейнеры с отдельными компонентами сайта
+
+📥 Был установлен образ postgres
+docker pull postgres:18-alpine
+
+📊 Отображение списка всех сетей в docker
+docker network ls
+
+➕ Создание новой сети
+docker network create dbnet
+
+➕ Был создан новый контейнер в сети
+docker run --rm -d --name postgres_container --network dbnet -e POSTGRES_DB=mydb -e POSTGRES_PASSWORD=1234 -e POSTGRES_USER=postgres postgres:18-alpine
+
+📶 Был произведён вход через консоль СУБД postgres
+docker exec -it postgres_container psql -U postgres
+
+🔍 Проверочная команда
+(.djvenv) D:\...\docker>docker exec -it postgres_container psql -U postgres
+psql (18.6)
+Type "help" for help.
+postgres=# SELECT * FROM pg_user;
+ usename  | usesysid | usecreatedb | usesuper | userepl | usebypassrls |  passwd  | valuntil | useconfig
+----------+----------+-------------+----------+---------+--------------+----------+----------+-----------
+ postgres |       10 | t           | t        | t       | t            | ******** |          |
+(1 row)
+postgres=#
+
+Нужен образ для управления
+
+📥 Был установлен образ adminer
+docker pull adminer
+
+➕ Был создан и запущен одноразовый контейнер для управления
+docker run --rm -d --network dbnet --name adminer_container --link postgres_container:db -p 8080:8080 adminer
+
+🚀 После запуска был произведён вход по адресу
+http://127.0.0.1:8080/
+🗝 После входа было перенаправление на адрес
+http://127.0.0.1:8080/?pgsql=db&username=postgres
+
+При остановке контейнера все добавленные данные сразу удаляются
+Нужно сделать том для хранения данных
+
+📖 Было открыто описание образа
+https://hub.docker.com/_/postgres
+🔍 Был найден текст по поиску "-v"
+Users who wish to opt-in to this change on older releases can do so by setting PGDATA explicitly (--env PGDATA=/var/lib/postgresql/17/docker --volume some-postgres:/var/lib/postgresql). To migrate pre-existing data, adjust the volume's folder structure appropriately first (moving all database files into a PG_MAJOR/docker subdirectory).
+Important Note: (for PostgreSQL 17 and below) Mount the data volume at /var/lib/postgresql/data and not at /var/lib/postgresql because mounts at the latter path WILL NOT PERSIST database data when the container is re-created. The Dockerfile that builds the image declares a volume at /var/lib/postgresql/data and if no data volume is mounted at that path then the container runtime will automatically create an anonymous volume that is not reused across container re-creations. Data will be written to the anonymous volume rather than your intended data volume and won't persist when the container is deleted and re-created.
+💬 Перевод
+Пользователи, желающие принять это изменение в более старых выпусках, могут сделать это, явно задав PGDATA (--env PGDATA=/var/lib/postgresql/17/docker --volume some-postgres:/var/lib/postgresql). Чтобы перенести ранее существовавшие данные, сначала соответствующим образом настройте структуру папок тома (переместив все файлы базы данных в подкаталог PG_MAJOR/docker).
+Важное примечание: (для PostgreSQL 17 и более ранних версий) монтируйте том данных в /var/lib/postgresql/data, а не в /var/lib/postgresql, поскольку при монтировании по последнему пути НЕ СОХРАНЯЮТСЯ данные базы данных при повторном создании контейнера. Dockerfile, который создает образ, объявляет том в /var/lib/postgresql/data, и если по этому пути не смонтирован ни один том данных, среда выполнения контейнера автоматически создаст анонимный том, который не будет повторно использоваться при повторном создании контейнера. Данные будут записаны в анонимный том, а не в предполагаемый том данных, и не сохранятся при удалении и повторном создании контейнера.
+✅ Был получен нужный путь к данным
+/var/lib/postgresql/data
+
+Был остановлен прошлый контейнер
+docker stop postgres_container
+
+➕ Был создан новый контейнер с томом
+docker run --rm -d --name postgres_container --network dbnet -e POSTGRES_DB=mydb -e POSTGRES_PASSWORD=1234 -e POSTGRES_USER=postgres -v posgtres_tom:/var/lib/posgresql/data postgres:18-alpine
+
+🔍 Проверка
+docker volume ls
+
+Реализация плохой, но учебной практики обращения простого сайта к базе данных
+
+➕💾🛠📁 Был создан файл
+# docker\flask_db_image\Dockerfile
+FROM python:3.12-slim
+RUN groupadd -r newgroup && useradd -r -g newgroup kikidon
+
+RUN pip install flask psycopg2-binary
+
+EXPOSE 4000
+
+WORKDIR /app
+COPY ./flask_project/site.py .
+
+USER kikidon
+ENTRYPOINT ["python", "site.py"]
+
+
+➕💾🛠📁 Был создан файл
+# docker\flask_db_image\flask_project\site.py
+
+from flask import Flask
+import psycopg2
+
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    conn = psycopg2.connect(dbname='mydb', user='postgres',
+                            password='1234', host='dbps')
+    cursor = conn.cursor()
+
+    cursor.execute('SELECT * FROM women LIMIT 10')
+    records = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return '<h1>kikidon!</h1>' + f'{"<p>".join(map(str, records))}'
+
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0', port=4000)
+
+➕💾 Был создан образ
+docker build flask_db_image -t flask_db_image:flask_db_image
+
+➕📦 Был создан контейнер простого сайта
+powershell
+docker run --rm -d --network dbnet -p 8000:4000 --link postgres_container:dbps --name flask_site_container -v ${PWD}/flask_db_image/flask_project/:/app flask_db_image:flask_db_image
+dbps взят из файла
+# docker\flask_db_image\flask_project\site.py
+
+🚀 После запуска была открыта страница по адресу
+http://127.0.0.1:8000/
+✅ С записями из базы данных
+
+✅🚀📦➕💾📁🛠🗝🔍💬📖📥📶 Всё
