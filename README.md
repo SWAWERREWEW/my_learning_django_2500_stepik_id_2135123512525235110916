@@ -317,11 +317,13 @@ FLUSHDB
 # Прочее
     Удаление файлов и папки из отслеживаемых
     git rm --cached .idea/vcs.xml
-    <br>
+
     git rm --cached .idea/my_learning_django_2500_stepik_id_2135123512525235110916.iml
-    <br>
+
     git rm --cached .idea/misc.xml
-    <br>
+    
+    git rm --cached sitewomen\db.json
+
     git rm -r --cached .idea
 
     откатить коммит, сохранив изменения в индексе
@@ -329,6 +331,7 @@ FLUSHDB
 
     убрать файл из индекса
     git reset HEAD sitewomen\sitewomen\settings.py
+    git reset HEAD sitewomen\db.json
 
     создать новый коммит с тем же сообщением
     git commit -c ORIG_HEAD
